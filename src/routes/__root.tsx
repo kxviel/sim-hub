@@ -9,7 +9,7 @@ export const Route = createRootRoute({
 
 function RootComponent() {
 	return (
-		<main className="antialiased flex flex-col min-h-svh w-screen">
+		<main className="antialiased flex min-h-svh w-full flex-col">
 			<Toaster position="top-right" richColors theme="light" closeButton />
 
 			<Header />
