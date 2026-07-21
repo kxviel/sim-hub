@@ -9,11 +9,13 @@ export const Route = createRootRoute({
 
 function RootComponent() {
 	return (
-		<main className="antialiased flex min-h-svh w-full flex-col">
+		<main className="antialiased flex h-svh w-full flex-col overflow-hidden">
 			<Toaster position="top-right" richColors theme="light" closeButton />
 
 			<Header />
-			<Outlet />
+			<div className="min-h-0 flex-1 overflow-y-auto">
+				<Outlet />
+			</div>
 			<Footer />
 		</main>
 	);

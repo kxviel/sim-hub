@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 const Header = () => {
 	return (
-		<header className="mx-auto flex w-full max-w-page justify-between gap-3 px-8 py-4 border-b border-gray-200">
+		<header className="mx-auto flex w-full max-w-page shrink-0 justify-between gap-3 px-8 py-4 border-b border-gray-200">
 			<Link
 				to="/"
 				className="min-w-0 wrap-break-word text-lg font-bold text-primary uppercase md:text-4xl"

@@ -1,6 +1,6 @@
 const Home = () => {
 	return (
-		<div className="flex flex-1 flex-col items-center justify-center w-full bg-accent">
+		<div className="flex min-h-full w-full flex-col items-center justify-center bg-accent">
 			Home
 		</div>
 	);

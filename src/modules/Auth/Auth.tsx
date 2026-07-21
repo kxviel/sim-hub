@@ -26,8 +26,8 @@ const Login = () => {
 	const { form, handleSubmit, isRegistering, switchAuthMode } = useAuthForm();
 
 	return (
-		<section className="flex w-full flex-1 flex-col items-center justify-center bg-accent">
-			<Card className="w-full max-w-sm">
+		<section className="flex min-h-full w-full flex-col items-center bg-accent px-4 py-8">
+			<Card className="my-auto w-full max-w-lg">
 				<CardHeader>
 					<CardTitle className="font-semibold">
 						{isRegistering ? "Create an Account" : "Sign in to Simulation Hub"}
