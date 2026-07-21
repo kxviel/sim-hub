@@ -12,7 +12,7 @@ export type RegisterBody = SignInBody & {
 };
 
 export const signInAPI = async (body: SignInBody) => {
-	return http.post("/auth/admin_login", body);
+	return http.post("/login", body);
 };
 
 export const registerAPI = async (body: RegisterBody) => {

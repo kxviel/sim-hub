@@ -7,32 +7,26 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import {
+	Field,
+	FieldError,
+	FieldGroup,
+	FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+	InputGroup,
+	InputGroupAddon,
+	InputGroupInput,
+	InputGroupText,
+} from "@/components/ui/input-group";
 import { useAuthForm } from "@/modules/Auth/useAuthForm";
 
 const Login = () => {
-	const {
-		authMode,
-		email,
-		domain,
-		confirmPassword,
-		isLoading,
-		isRegistering,
-		username,
-		password,
-
-		handleSubmit,
-		setConfirmPassword,
-		setDomain,
-		setEmail,
-		setUsername,
-		setPassword,
-		switchAuthMode,
-	} = useAuthForm();
+	const { form, handleSubmit, isRegistering, switchAuthMode } = useAuthForm();
 
 	return (
-		<section className="flex flex-col items-center justify-center flex-1 w-screen bg-accent">
+		<section className="flex w-screen flex-1 flex-col items-center justify-center bg-accent">
 			<Card className="w-full max-w-sm">
 				<CardHeader>
 					<CardTitle className="font-semibold">
@@ -45,94 +39,211 @@ const Login = () => {
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<form className="space-y-4" onSubmit={handleSubmit}>
-						{authMode === "register" && (
-							<div className="space-y-2">
-								<Label htmlFor="name">Username</Label>
-								<Input
-									className=""
-									id="username"
-									type="text"
-									placeholder="lol_whatsup"
-									value={username}
-									onChange={(event) => setUsername(event.target.value)}
-									required
-									disabled={isLoading}
-								/>
-							</div>
-						)}
+					<form onSubmit={handleSubmit}>
+						<form.Subscribe selector={(state) => state.isSubmitting}>
+							{(isSubmitting) => (
+								<>
+									<FieldGroup className="gap-4">
+										{isRegistering ? (
+											<form.Field
+												name="username"
+												children={(field) => {
+													const isInvalid =
+														field.state.meta.isTouched &&
+														!field.state.meta.isValid;
 
-						{authMode === "register" && (
-							<div className="space-y-2">
-								<Label htmlFor="domain">SSH Domain</Label>
-								<Input
-									className=""
-									id="domain"
-									type="text"
-									placeholder="example.hpc.domain"
-									value={domain}
-									onChange={(event) => setDomain(event.target.value)}
-									required
-									disabled={isLoading}
-								/>
-							</div>
-						)}
+													return (
+														<Field data-invalid={isInvalid}>
+															<FieldLabel htmlFor={field.name}>
+																Username
+															</FieldLabel>
+															<Input
+																id={field.name}
+																name={field.name}
+																type="text"
+																placeholder="lol_whatsup"
+																autoComplete="username"
+																value={field.state.value}
+																onBlur={field.handleBlur}
+																onChange={(event) =>
+																	field.handleChange(event.target.value)
+																}
+																aria-invalid={isInvalid}
+																disabled={isSubmitting}
+															/>
+															{isInvalid ? (
+																<FieldError errors={field.state.meta.errors} />
+															) : null}
+														</Field>
+													);
+												}}
+											/>
+										) : null}
 
-						<div className="space-y-2">
-							<Label htmlFor="email">Email</Label>
-							<Input
-								className=""
-								id="email"
-								type="email"
-								placeholder="researcher@institute.org"
-								value={email}
-								onChange={(event) => setEmail(event.target.value)}
-								required
-								disabled={isLoading}
-							/>
-						</div>
+										{isRegistering ? (
+											<form.Field
+												name="domain"
+												children={(field) => {
+													const isInvalid =
+														field.state.meta.isTouched &&
+														!field.state.meta.isValid;
 
-						<div className="space-y-2">
-							<Label htmlFor="password">Password</Label>
-							<Input
-								className=""
-								id="password"
-								type="password"
-								placeholder="Password"
-								value={password}
-								onChange={(event) => setPassword(event.target.value)}
-								required
-								disabled={isLoading}
-								minLength={6}
-							/>
-						</div>
+													return (
+														<Field data-invalid={isInvalid}>
+															<FieldLabel htmlFor={field.name}>
+																SSH Domain
+															</FieldLabel>
+															<InputGroup data-disabled={isSubmitting}>
+																<InputGroupAddon>
+																	<InputGroupText>ssh://</InputGroupText>
+																</InputGroupAddon>
+																<InputGroupInput
+																	id={field.name}
+																	name={field.name}
+																	type="text"
+																	placeholder="example.hpc.domain"
+																	autoComplete="url"
+																	value={field.state.value}
+																	onBlur={field.handleBlur}
+																	onChange={(event) =>
+																		field.handleChange(event.target.value)
+																	}
+																	aria-invalid={isInvalid}
+																	disabled={isSubmitting}
+																/>
+															</InputGroup>
+															{isInvalid ? (
+																<FieldError errors={field.state.meta.errors} />
+															) : null}
+														</Field>
+													);
+												}}
+											/>
+										) : null}
 
-						{authMode === "register" && (
-							<div className="space-y-2">
-								<Label htmlFor="confirmPassword">Confirm Password</Label>
-								<Input
-									className=""
-									id="confirmPassword"
-									type="password"
-									placeholder="Password"
-									value={confirmPassword}
-									onChange={(event) => setConfirmPassword(event.target.value)}
-									required
-									disabled={isLoading}
-									minLength={6}
-								/>
-							</div>
-						)}
+										<form.Field
+											name="email"
+											children={(field) => {
+												const isInvalid =
+													field.state.meta.isTouched &&
+													!field.state.meta.isValid;
 
-						<Button type="submit" className="w-full" disabled={isLoading}>
-							{isLoading
-								? isRegistering
-									? "Creating account..."
-									: "Signing in..."
-								: isRegistering
-									? "Create Account"
-									: "Sign In"}
-						</Button>
+												return (
+													<Field data-invalid={isInvalid}>
+														<FieldLabel htmlFor={field.name}>Email</FieldLabel>
+														<Input
+															id={field.name}
+															name={field.name}
+															type="email"
+															placeholder="researcher@institute.org"
+															autoComplete="email"
+															value={field.state.value}
+															onBlur={field.handleBlur}
+															onChange={(event) =>
+																field.handleChange(event.target.value)
+															}
+															aria-invalid={isInvalid}
+															disabled={isSubmitting}
+														/>
+														{isInvalid ? (
+															<FieldError errors={field.state.meta.errors} />
+														) : null}
+													</Field>
+												);
+											}}
+										/>
+
+										<form.Field
+											name="password"
+											children={(field) => {
+												const isInvalid =
+													field.state.meta.isTouched &&
+													!field.state.meta.isValid;
+
+												return (
+													<Field data-invalid={isInvalid}>
+														<FieldLabel htmlFor={field.name}>
+															Password
+														</FieldLabel>
+														<Input
+															id={field.name}
+															name={field.name}
+															type="password"
+															placeholder="Password"
+															autoComplete={
+																isRegistering
+																	? "new-password"
+																	: "current-password"
+															}
+															value={field.state.value}
+															onBlur={field.handleBlur}
+															onChange={(event) =>
+																field.handleChange(event.target.value)
+															}
+															aria-invalid={isInvalid}
+															disabled={isSubmitting}
+														/>
+														{isInvalid ? (
+															<FieldError errors={field.state.meta.errors} />
+														) : null}
+													</Field>
+												);
+											}}
+										/>
+
+										{isRegistering ? (
+											<form.Field
+												name="confirmPassword"
+												children={(field) => {
+													const isInvalid =
+														field.state.meta.isTouched &&
+														!field.state.meta.isValid;
+
+													return (
+														<Field data-invalid={isInvalid}>
+															<FieldLabel htmlFor={field.name}>
+																Confirm Password
+															</FieldLabel>
+															<Input
+																id={field.name}
+																name={field.name}
+																type="password"
+																placeholder="Password"
+																autoComplete="new-password"
+																value={field.state.value}
+																onBlur={field.handleBlur}
+																onChange={(event) =>
+																	field.handleChange(event.target.value)
+																}
+																aria-invalid={isInvalid}
+																disabled={isSubmitting}
+															/>
+															{isInvalid ? (
+																<FieldError errors={field.state.meta.errors} />
+															) : null}
+														</Field>
+													);
+												}}
+											/>
+										) : null}
+									</FieldGroup>
+
+									<Button
+										type="submit"
+										className="mt-4 w-full"
+										disabled={isSubmitting}
+									>
+										{isSubmitting
+											? isRegistering
+												? "Creating account..."
+												: "Signing in..."
+											: isRegistering
+												? "Create Account"
+												: "Sign In"}
+									</Button>
+								</>
+							)}
+						</form.Subscribe>
 					</form>
 				</CardContent>
 				<CardFooter className="flex-col gap-2">
@@ -141,7 +252,7 @@ const Login = () => {
 						<Button
 							type="button"
 							variant="link"
-							className="h-auto p-0  underline-offset-4"
+							className="h-auto p-0 underline-offset-4"
 							onClick={switchAuthMode}
 						>
 							{isRegistering ? "Sign in" : "Register"}
