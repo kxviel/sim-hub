@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import http from "@/lib/http";
 
 export type SignInBody = {
 	email: string;
@@ -6,36 +7,16 @@ export type SignInBody = {
 };
 
 export type RegisterBody = SignInBody & {
-	name: string;
+	username: string;
+	domain: string;
 };
 
 export const signInAPI = async (body: SignInBody) => {
-	const { data, error } = { data: "", error: "" };
-
-	if (error) {
-		throw error;
-	}
-
-	return data;
+	return http.post("/auth/admin_login", body);
 };
 
-export const registerAPI = async ({ email, name, password }: RegisterBody) => {
-	const { data, error } = { data: "", error: "" };
-	// const { data, error } = await getBrowserSupabaseClient().auth.signUp({
-	// 	email,
-	// 	password,
-	// 	options: {
-	// 		data: {
-	// 			full_name: name,
-	// 		},
-	// 	},
-	// });
-
-	if (error) {
-		throw error;
-	}
-
-	return data;
+export const registerAPI = async (body: RegisterBody) => {
+	return http.post(`/register`, body);
 };
 
 export const useSignIn = () =>

@@ -13,14 +13,20 @@ import { useAuthForm } from "@/modules/Auth/useAuthForm";
 
 const Login = () => {
 	const {
+		authMode,
 		email,
-		handleSubmit,
+		domain,
+		confirmPassword,
 		isLoading,
 		isRegistering,
-		name,
+		username,
 		password,
+
+		handleSubmit,
+		setConfirmPassword,
+		setDomain,
 		setEmail,
-		setName,
+		setUsername,
 		setPassword,
 		switchAuthMode,
 	} = useAuthForm();
@@ -29,8 +35,8 @@ const Login = () => {
 		<section className="flex flex-col items-center justify-center flex-1 w-screen bg-accent">
 			<Card className="w-full max-w-sm">
 				<CardHeader>
-					<CardTitle>
-						{isRegistering ? "Create an account" : "Sign in to SimHub"}
+					<CardTitle className="font-semibold">
+						{isRegistering ? "Create an Account" : "Sign in to Simulation Hub"}
 					</CardTitle>
 					<CardDescription>
 						{isRegistering
@@ -40,21 +46,37 @@ const Login = () => {
 				</CardHeader>
 				<CardContent>
 					<form className="space-y-4" onSubmit={handleSubmit}>
-						{isRegistering ? (
+						{authMode === "register" && (
 							<div className="space-y-2">
-								<Label htmlFor="name">Name</Label>
+								<Label htmlFor="name">Username</Label>
 								<Input
 									className=""
-									id="name"
+									id="username"
 									type="text"
-									placeholder="Mr. Dr. Kevin"
-									value={name}
-									onChange={(event) => setName(event.target.value)}
+									placeholder="lol_whatsup"
+									value={username}
+									onChange={(event) => setUsername(event.target.value)}
 									required
 									disabled={isLoading}
 								/>
 							</div>
-						) : null}
+						)}
+
+						{authMode === "register" && (
+							<div className="space-y-2">
+								<Label htmlFor="domain">SSH Domain</Label>
+								<Input
+									className=""
+									id="domain"
+									type="text"
+									placeholder="example.hpc.domain"
+									value={domain}
+									onChange={(event) => setDomain(event.target.value)}
+									required
+									disabled={isLoading}
+								/>
+							</div>
+						)}
 
 						<div className="space-y-2">
 							<Label htmlFor="email">Email</Label>
@@ -84,6 +106,23 @@ const Login = () => {
 								minLength={6}
 							/>
 						</div>
+
+						{authMode === "register" && (
+							<div className="space-y-2">
+								<Label htmlFor="confirmPassword">Confirm Password</Label>
+								<Input
+									className=""
+									id="confirmPassword"
+									type="password"
+									placeholder="Password"
+									value={confirmPassword}
+									onChange={(event) => setConfirmPassword(event.target.value)}
+									required
+									disabled={isLoading}
+									minLength={6}
+								/>
+							</div>
+						)}
 
 						<Button type="submit" className="w-full" disabled={isLoading}>
 							{isLoading

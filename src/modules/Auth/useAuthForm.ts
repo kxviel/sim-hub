@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { type FormEvent, useState } from "react";
+import { type SubmitEvent, useState } from "react";
 import { toast } from "sonner";
 import { useRegister, useSignIn } from "./auth.api";
 
@@ -10,8 +10,10 @@ export const useAuthForm = () => {
 
 	const [authMode, setAuthMode] = useState<AuthMode>("login");
 	const [email, setEmail] = useState("");
-	const [name, setName] = useState("");
+	const [domain, setDomain] = useState("");
+	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
+	const [confirmPassword, setConfirmPassword] = useState("");
 
 	const signIn = useSignIn();
 	const register = useRegister();
@@ -38,7 +40,11 @@ export const useAuthForm = () => {
 		resetMutations();
 	};
 
-	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+	const handleConfirmPassword = () => {
+		return password === confirmPassword;
+	};
+
+	const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		resetMutations();
 
@@ -47,14 +53,15 @@ export const useAuthForm = () => {
 			password,
 		};
 
-		if (isRegistering) {
+		if (isRegistering && handleConfirmPassword()) {
 			register.mutate(
-				{ ...body, name },
+				{ ...body, username, domain },
 				{
 					onError: handleAuthError,
 					onSuccess: () => handleAuthSuccess("Account created."),
 				},
 			);
+
 			return;
 		}
 
@@ -67,14 +74,18 @@ export const useAuthForm = () => {
 	return {
 		authMode,
 		email,
+		domain,
+		confirmPassword,
 		isLoading,
 		isRegistering,
-		name,
+		username,
 		password,
 
 		handleSubmit,
+		setConfirmPassword,
+		setDomain,
 		setEmail,
-		setName,
+		setUsername,
 		setPassword,
 		switchAuthMode,
 	};
