@@ -27,8 +27,10 @@
 		"exactOptionalPropertyTypes": true,
 		"noUncheckedIndexedAccess": true,
 
+		/* Aliasing */
+		// "baseUrl": ".", //TS v6 deprecated
 		"paths": {
-			"@/*": ["./*"]
+			"@/*": ["./src/*"]
 		}
 	},
 	"include": ["src"],
