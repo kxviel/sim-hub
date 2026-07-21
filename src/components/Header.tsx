@@ -16,7 +16,7 @@ const Header = () => {
 					aria-label={"Simulation Hub"}
 					className="flex flex-wrap items-center gap-x-4 gap-y-2"
 				>
-					<Button className="w-fit rounded-full px-4 py-1">
+					<Button className="w-fit px-4 py-1">
 						<Link to="/">Login</Link>
 					</Button>
 				</nav>
