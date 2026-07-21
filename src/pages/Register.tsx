@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -13,7 +14,7 @@ import { Label } from "@/components/ui/label";
 
 const Register = () => {
 	return (
-		<div>
+		<div className="flex flex-col items-center justify-center flex-1 w-screen bg-accent">
 			<Card className="w-full max-w-sm">
 				<CardHeader>
 					<CardTitle>Login to your account</CardTitle>
@@ -21,7 +22,9 @@ const Register = () => {
 						Enter your email below to login to your account
 					</CardDescription>
 					<CardAction>
-						<Button variant="link">Sign Up</Button>
+						<Button variant="link">
+							<Link to="/">Login</Link>
+						</Button>
 					</CardAction>
 				</CardHeader>
 				<CardContent>
@@ -40,7 +43,7 @@ const Register = () => {
 								<div className="flex items-center">
 									<Label htmlFor="password">Password</Label>
 									<a
-										href="#"
+										href="/"
 										className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
 									>
 										Forgot your password?

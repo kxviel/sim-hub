@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -21,7 +22,9 @@ const Login = () => {
 						Enter your email below to login to your account
 					</CardDescription>
 					<CardAction>
-						<Button variant="link">Sign Up</Button>
+						<Button variant="link">
+							<Link to="/register">Register</Link>
+						</Button>
 					</CardAction>
 				</CardHeader>
 				<CardContent>
@@ -54,9 +57,6 @@ const Login = () => {
 				<CardFooter className="flex-col gap-2">
 					<Button type="submit" className="w-full">
 						Login
-					</Button>
-					<Button variant="outline" className="w-full">
-						Login with Google
 					</Button>
 				</CardFooter>
 			</Card>
