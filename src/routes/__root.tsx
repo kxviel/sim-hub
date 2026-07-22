@@ -1,5 +1,4 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
-import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -16,7 +15,7 @@ function RootComponent() {
 			<div className="min-h-0 flex-1 overflow-y-auto">
 				<Outlet />
 			</div>
-			<Footer />
+			{/* <Footer /> */}
 		</main>
 	);
 }

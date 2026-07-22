@@ -26,7 +26,7 @@ const Login = () => {
 	const { form, handleSubmit, isRegistering, switchAuthMode } = useAuthForm();
 
 	return (
-		<section className="flex min-h-full w-full flex-col items-center bg-accent px-4 py-8">
+		<section className="flex min-h-full w-full flex-col items-center bg-accent p-4">
 			<Card className="my-auto w-full max-w-lg">
 				<CardHeader>
 					<CardTitle className="font-semibold">
