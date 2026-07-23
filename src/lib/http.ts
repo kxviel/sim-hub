@@ -1,9 +1,9 @@
 import axios, { type AxiosError } from "axios";
 
-const apiUrl = import.meta.env.VITE_API_BASE_URI;
+const API_URI = import.meta.env.VITE_API_BASE_URI;
 
-if (!apiUrl) {
-	throw new Error("VITE_API_BASE_URI is missing.");
+if (!API_URI) {
+	throw new Error("API base URI is missing.");
 }
 
 export class ApiError extends Error {
@@ -16,8 +16,7 @@ export class ApiError extends Error {
 }
 
 const http = axios.create({
-	baseURL: apiUrl,
-	headers: { "ngrok-skip-browser-warning": "true" },
+	baseURL: API_URI,
 });
 
 http.interceptors.response.use(undefined, (error: AxiosError) => {

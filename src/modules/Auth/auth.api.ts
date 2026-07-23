@@ -24,7 +24,7 @@ export type AuthResult = {
 };
 
 export const signInAPI = async (body: SignInBody): Promise<AuthResult> => {
-	const { data } = await http.post<LoginResponse>("/login/", body);
+	const { data } = await http.post<LoginResponse>("/login", body);
 
 	return {
 		message: data.message ?? "Signed in.",
@@ -42,7 +42,7 @@ export const signInAPI = async (body: SignInBody): Promise<AuthResult> => {
 };
 
 export const registerAPI = async (body: RegisterBody): Promise<AuthResult> => {
-	const { data } = await http.post<string>("/sign-up/", {
+	const { data } = await http.post<string>("/sign-up", {
 		username: body.username,
 		email: body.email,
 		password: body.password,
