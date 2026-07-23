@@ -1,4 +1,4 @@
-import { type SubmitEvent, useState } from "react";
+import { useState } from "react";
 
 const SIMULATION_LIST = [
 	{
@@ -42,7 +42,20 @@ const getSimulationSubtypeList = (simulationType: string) =>
 		(subtype) => ({ label: subtype, value: subtype }),
 	) ?? [];
 
-export const useHome = () => {
+export type HomeState = {
+	simType: string;
+	simSubType: string;
+	setupComplete: boolean;
+	simulationSubtypeList: {
+		label: string;
+		value: string;
+	}[];
+	handleSimulationTypeChange: (value: string | null) => void;
+	handleSimulationSubtypeChange: (value: string | null) => void;
+	handleParamSubmit: () => void;
+};
+
+export const useHome = (): HomeState => {
 	const [simType, setSimType] = useState("");
 	const [simSubType, setSimSubType] = useState("");
 	const [setupComplete, setSetupComplete] = useState(false);
@@ -59,10 +72,7 @@ export const useHome = () => {
 		setSetupComplete(!!(simType && value));
 	};
 
-	const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		event.stopPropagation();
-	};
+	const handleParamSubmit = () => {};
 
 	return {
 		simType,
@@ -71,6 +81,6 @@ export const useHome = () => {
 		simulationSubtypeList,
 		handleSimulationTypeChange,
 		handleSimulationSubtypeChange,
-		handleSubmit,
+		handleParamSubmit,
 	};
 };

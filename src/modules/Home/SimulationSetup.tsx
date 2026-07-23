@@ -9,9 +9,13 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import SectionTitle from "@/modules/Home/SectionTitle";
-import { infoList, simulationTypeList, useHome } from "@/modules/Home/useHome";
+import {
+	type HomeState,
+	infoList,
+	simulationTypeList,
+} from "@/modules/Home/useHome";
 
-const SimulationSetup = () => {
+const SimulationSetup = (homeState: HomeState) => {
 	const {
 		simType,
 		simSubType,
@@ -19,14 +23,13 @@ const SimulationSetup = () => {
 		simulationSubtypeList,
 		handleSimulationTypeChange,
 		handleSimulationSubtypeChange,
-		handleSubmit,
-	} = useHome();
+	} = homeState;
 
 	return (
 		<div className="flex-1/4 rounded border border-gray-200 bg-white p-6 space-y-4">
 			<SectionTitle title="Simulation Setup" icon={<Settings />} />
 
-			<form onSubmit={handleSubmit} className="w-full">
+			<form className="w-full">
 				<FieldGroup className="gap-4 w-full">
 					<Field>
 						<FieldLabel htmlFor={"simType"} className="font-semibold text-lg">
