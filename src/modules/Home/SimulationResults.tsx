@@ -1,10 +1,28 @@
 import { ScrollText } from "lucide-react";
 import SectionTitle from "@/modules/Home/SectionTitle";
+import type { HomeState } from "@/modules/Home/useHome";
 
-const SimulationResults = () => {
+const SimulationResults = (homeState: HomeState) => {
+	const {
+		// simType,
+		results,
+		// simSubType,
+		// setupComplete,
+		// simulationSubtypeList,
+		// handleSimulationTypeChange,
+		// handleSimulationSubtypeChange,
+		// handleParamSubmit,
+	} = homeState;
+
 	return (
 		<div className="flex-1/4 rounded border border-gray-200 bg-white p-6 space-y-4">
 			<SectionTitle title="Simulation Results" icon={<ScrollText />} />
+
+			{results?.[0] ? (
+				<p>Results</p>
+			) : (
+				<p>Results will appear here after running the simulation</p>
+			)}
 		</div>
 	);
 };

@@ -50,6 +50,8 @@ export type HomeState = {
 		label: string;
 		value: string;
 	}[];
+	results: string[];
+	setResults: React.Dispatch<React.SetStateAction<string[]>>;
 	handleSimulationTypeChange: (value: string | null) => void;
 	handleSimulationSubtypeChange: (value: string | null) => void;
 	handleParamSubmit: () => void;
@@ -59,6 +61,7 @@ export const useHome = (): HomeState => {
 	const [simType, setSimType] = useState("");
 	const [simSubType, setSimSubType] = useState("");
 	const [setupComplete, setSetupComplete] = useState(false);
+	const [results, setResults] = useState([""]);
 
 	const simulationSubtypeList = getSimulationSubtypeList(simType);
 
@@ -79,6 +82,8 @@ export const useHome = (): HomeState => {
 		simSubType,
 		setupComplete,
 		simulationSubtypeList,
+		results,
+		setResults,
 		handleSimulationTypeChange,
 		handleSimulationSubtypeChange,
 		handleParamSubmit,
