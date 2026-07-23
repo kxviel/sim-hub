@@ -120,7 +120,7 @@ export const useAuthForm = () => {
 	const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		event.stopPropagation();
-		void form.handleSubmit();
+		form.handleSubmit();
 	};
 
 	const switchAuthMode = () => {
