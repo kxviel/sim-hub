@@ -1,12 +1,13 @@
-import { Ghost } from "lucide-react";
+type Props = {
+	title: string;
+	icon: React.ReactElement;
+};
 
-const SectionTitle = ({ title }: { title: string }) => {
+const SectionTitle = ({ title, icon }: Props) => {
 	return (
 		<div className="flex items-center gap-2">
-			<div className="p-2 bg-primary-foreground rounded">
-				<Ghost />
-			</div>
-			<p className="text-lg font-semibold text-primary">{title}</p>
+			<div className="p-2 bg-primary-foreground rounded">{icon}</div>
+			<p className="text-2xl font-bold text-primary">{title}</p>
 		</div>
 	);
 };

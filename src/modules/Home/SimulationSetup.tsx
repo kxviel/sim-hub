@@ -1,3 +1,4 @@
+import { Settings } from "lucide-react";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import {
 	Select,
@@ -22,13 +23,15 @@ const SimulationSetup = () => {
 	} = useHome();
 
 	return (
-		<div className="flex-1/4 rounded border border-gray-200 bg-white p-2">
-			<SectionTitle title="Simulation Setup" />
+		<div className="flex-1/4 rounded border border-gray-200 bg-white p-6 space-y-4">
+			<SectionTitle title="Simulation Setup" icon={<Settings />} />
 
-			<form onSubmit={handleSubmit}>
-				<FieldGroup className="gap-4">
+			<form onSubmit={handleSubmit} className="w-full">
+				<FieldGroup className="gap-4 w-full">
 					<Field>
-						<FieldLabel htmlFor={"simType"}>Simulation Type</FieldLabel>
+						<FieldLabel htmlFor={"simType"} className="font-semibold text-lg">
+							1. Simulation Type
+						</FieldLabel>
 						<Select
 							id="simType"
 							name="simulationType"
@@ -36,10 +39,10 @@ const SimulationSetup = () => {
 							value={simType || null}
 							onValueChange={handleSimulationTypeChange}
 						>
-							<SelectTrigger className="w-full max-w-48">
-								<SelectValue />
+							<SelectTrigger className="w-full">
+								<SelectValue placeholder="Select a simulation type..." />
 							</SelectTrigger>
-							<SelectContent>
+							<SelectContent alignItemWithTrigger>
 								<SelectGroup>
 									{simulationTypeList.map((item) => (
 										<SelectItem key={item.label} value={item.value}>
@@ -53,8 +56,11 @@ const SimulationSetup = () => {
 					</Field>
 
 					<Field>
-						<FieldLabel htmlFor={"simSubtype"}>
-							Simulation Subtype / Code
+						<FieldLabel
+							htmlFor={"simSubtype"}
+							className="font-semibold text-lg"
+						>
+							2. Simulation Subtype / Code
 						</FieldLabel>
 						<Select
 							id="simSubtype"
@@ -64,10 +70,16 @@ const SimulationSetup = () => {
 							onValueChange={handleSimulationSubtypeChange}
 							disabled={!simType}
 						>
-							<SelectTrigger className="w-full max-w-48">
-								<SelectValue />
+							<SelectTrigger className="w-full">
+								<SelectValue
+									placeholder={
+										simType
+											? "Select a simulation subtype..."
+											: "First Select a simulation type..."
+									}
+								/>
 							</SelectTrigger>
-							<SelectContent>
+							<SelectContent alignItemWithTrigger>
 								<SelectGroup>
 									{simulationSubtypeList.map((item) => (
 										<SelectItem key={item.label} value={item.value}>
