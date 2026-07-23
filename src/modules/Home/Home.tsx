@@ -10,7 +10,7 @@ const Home = () => {
 		<section className="flex h-full min-h-full w-full items-stretch gap-2 bg-accent p-4">
 			<SimulationSetup {...homeState} />
 			<SimulationParams {...homeState} />
-			<SimulationResults />
+			<SimulationResults {...homeState} />
 		</section>
 	);
 };

@@ -4,39 +4,41 @@ import { type SubmitEvent, useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod/mini";
 import { useRegister, useSignIn } from "./auth.api";
+import { saveAuthSession } from "./auth.session";
 
 export type AuthMode = "login" | "register";
 
-const authFields = {
-	username: z.string(),
-	domain: z.string(),
-	email: z.email({
-		error: ({ input }) =>
-			input === "" ? "Email is required." : "Enter a valid email address.",
-	}),
-	password: z
-		.string()
-		.check(
-			z.minLength(1, "Password is required."),
-			z.minLength(6, "Password must contain at least 6 characters."),
-		),
-	confirmPassword: z.string(),
-};
+const usernameField = z
+	.string()
+	.check(z.refine((value) => value.trim().length > 0, "Username is required."));
+const passwordField = z
+	.string()
+	.check(
+		z.minLength(1, "Password is required."),
+		z.minLength(6, "Password must contain at least 6 characters."),
+	);
 
-const loginSchema = z.object(authFields);
+const loginSchema = z.object({
+	username: usernameField,
+	domain: z.string(),
+	email: z.string(),
+	password: passwordField,
+	confirmPassword: z.string(),
+});
+
 const registerSchema = z
 	.object({
-		...authFields,
-		username: z
-			.string()
-			.check(
-				z.refine((value) => value.trim().length > 0, "Username is required."),
-			),
+		username: usernameField,
 		domain: z
 			.string()
 			.check(
 				z.refine((value) => value.trim().length > 0, "SSH domain is required."),
 			),
+		email: z.email({
+			error: ({ input }) =>
+				input === "" ? "Email is required." : "Enter a valid email address.",
+		}),
+		password: passwordField,
 		confirmPassword: z
 			.string()
 			.check(z.minLength(1, "Please confirm your password.")),
@@ -81,7 +83,11 @@ export const useAuthForm = () => {
 		toast.error(message);
 	};
 
-	const handleAuthSuccess = (message: string) => {
+	const handleAuthSuccess = (
+		result: Awaited<ReturnType<typeof signIn.mutateAsync>>,
+		message: string,
+	) => {
+		saveAuthSession(result.user);
 		toast.success(message);
 		void navigate({ to: "/home" });
 	};
@@ -96,21 +102,21 @@ export const useAuthForm = () => {
 
 			try {
 				if (isRegistering) {
-					await register.mutateAsync({
-						domain: value.domain.trim(),
+					const result = await register.mutateAsync({
 						email: value.email.trim(),
 						password: value.password,
+						sshDomain: value.domain.trim(),
 						username: value.username.trim(),
 					});
-					handleAuthSuccess("Account created.");
+					handleAuthSuccess(result, "Account created.");
 					return;
 				}
 
-				await signIn.mutateAsync({
-					email: value.email.trim(),
+				const result = await signIn.mutateAsync({
 					password: value.password,
+					username: value.username.trim(),
 				});
-				handleAuthSuccess("Signed in.");
+				handleAuthSuccess(result, "Signed in.");
 			} catch (error) {
 				handleAuthError(error);
 			}

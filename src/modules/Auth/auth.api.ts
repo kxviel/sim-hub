@@ -1,22 +1,64 @@
 import { useMutation } from "@tanstack/react-query";
 import http from "@/lib/http";
+import type { AuthSession } from "@/modules/Auth/auth.session";
 
 export type SignInBody = {
-	email: string;
+	username: string;
 	password: string;
 };
 
 export type RegisterBody = SignInBody & {
-	username: string;
-	domain: string;
+	email: string;
+	sshDomain: string;
 };
 
-export const signInAPI = async (body: SignInBody) => {
-	return http.post("/login", body);
+type LoginResponse = {
+	message?: string;
+	notifications?: unknown[];
+	download_links?: unknown[];
 };
 
-export const registerAPI = async (body: RegisterBody) => {
-	return http.post(`/register`, body);
+export type AuthResult = {
+	message: string;
+	user: AuthSession;
+};
+
+export const signInAPI = async (body: SignInBody): Promise<AuthResult> => {
+	const { data } = await http.post<LoginResponse>("/login/", body);
+
+	return {
+		message: data.message ?? "Signed in.",
+		user: {
+			username: body.username,
+			email: "",
+			sshDomain: "",
+			notifications: data.notifications ?? [],
+			downloadLinks: (data.download_links ?? []).filter(
+				(downloadLink): downloadLink is string =>
+					typeof downloadLink === "string",
+			),
+		},
+	};
+};
+
+export const registerAPI = async (body: RegisterBody): Promise<AuthResult> => {
+	const { data } = await http.post<string>("/sign-up/", {
+		username: body.username,
+		email: body.email,
+		password: body.password,
+		ssh_domain: body.sshDomain,
+	});
+
+	return {
+		message: typeof data === "string" ? data : "Account created.",
+		user: {
+			username: body.username,
+			email: body.email,
+			sshDomain: body.sshDomain,
+			notifications: [],
+			downloadLinks: [],
+		},
+	};
 };
 
 export const useSignIn = () =>

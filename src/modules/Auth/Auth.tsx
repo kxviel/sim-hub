@@ -44,41 +44,39 @@ const Login = () => {
 							{(isSubmitting) => (
 								<>
 									<FieldGroup className="gap-4">
-										{isRegistering ? (
-											<form.Field
-												name="username"
-												children={(field) => {
-													const isInvalid =
-														field.state.meta.isTouched &&
-														!field.state.meta.isValid;
+										<form.Field
+											name="username"
+											children={(field) => {
+												const isInvalid =
+													field.state.meta.isTouched &&
+													!field.state.meta.isValid;
 
-													return (
-														<Field data-invalid={isInvalid}>
-															<FieldLabel htmlFor={field.name}>
-																Username
-															</FieldLabel>
-															<Input
-																id={field.name}
-																name={field.name}
-																type="text"
-																placeholder="lol_whatsup"
-																autoComplete="username"
-																value={field.state.value}
-																onBlur={field.handleBlur}
-																onChange={(event) =>
-																	field.handleChange(event.target.value)
-																}
-																aria-invalid={isInvalid}
-																disabled={isSubmitting}
-															/>
-															{isInvalid ? (
-																<FieldError errors={field.state.meta.errors} />
-															) : null}
-														</Field>
-													);
-												}}
-											/>
-										) : null}
+												return (
+													<Field data-invalid={isInvalid}>
+														<FieldLabel htmlFor={field.name}>
+															Username
+														</FieldLabel>
+														<Input
+															id={field.name}
+															name={field.name}
+															type="text"
+															placeholder="researcher_name"
+															autoComplete="username"
+															value={field.state.value}
+															onBlur={field.handleBlur}
+															onChange={(event) =>
+																field.handleChange(event.target.value)
+															}
+															aria-invalid={isInvalid}
+															disabled={isSubmitting}
+														/>
+														{isInvalid ? (
+															<FieldError errors={field.state.meta.errors} />
+														) : null}
+													</Field>
+												);
+											}}
+										/>
 
 										{isRegistering ? (
 											<form.Field
@@ -121,37 +119,41 @@ const Login = () => {
 											/>
 										) : null}
 
-										<form.Field
-											name="email"
-											children={(field) => {
-												const isInvalid =
-													field.state.meta.isTouched &&
-													!field.state.meta.isValid;
+										{isRegistering ? (
+											<form.Field
+												name="email"
+												children={(field) => {
+													const isInvalid =
+														field.state.meta.isTouched &&
+														!field.state.meta.isValid;
 
-												return (
-													<Field data-invalid={isInvalid}>
-														<FieldLabel htmlFor={field.name}>Email</FieldLabel>
-														<Input
-															id={field.name}
-															name={field.name}
-															type="email"
-															placeholder="researcher@institute.org"
-															autoComplete="email"
-															value={field.state.value}
-															onBlur={field.handleBlur}
-															onChange={(event) =>
-																field.handleChange(event.target.value)
-															}
-															aria-invalid={isInvalid}
-															disabled={isSubmitting}
-														/>
-														{isInvalid ? (
-															<FieldError errors={field.state.meta.errors} />
-														) : null}
-													</Field>
-												);
-											}}
-										/>
+													return (
+														<Field data-invalid={isInvalid}>
+															<FieldLabel htmlFor={field.name}>
+																Email
+															</FieldLabel>
+															<Input
+																id={field.name}
+																name={field.name}
+																type="email"
+																placeholder="researcher@institute.org"
+																autoComplete="email"
+																value={field.state.value}
+																onBlur={field.handleBlur}
+																onChange={(event) =>
+																	field.handleChange(event.target.value)
+																}
+																aria-invalid={isInvalid}
+																disabled={isSubmitting}
+															/>
+															{isInvalid ? (
+																<FieldError errors={field.state.meta.errors} />
+															) : null}
+														</Field>
+													);
+												}}
+											/>
+										) : null}
 
 										<form.Field
 											name="password"

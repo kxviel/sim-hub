@@ -1,30 +1,36 @@
-import axios from "axios";
-import { toast } from "sonner";
-import { router } from "@/main";
+import axios, { type AxiosError } from "axios";
+
+const apiUrl = import.meta.env.VITE_API_BASE_URI;
+
+if (!apiUrl) {
+	throw new Error("VITE_API_BASE_URI is missing.");
+}
+
+export class ApiError extends Error {
+	constructor(
+		message: string,
+		readonly status?: number,
+	) {
+		super(message);
+	}
+}
 
 const http = axios.create({
-	baseURL: import.meta.env.VITE_API_BASE_URI,
+	baseURL: apiUrl,
+	headers: { "ngrok-skip-browser-warning": "true" },
 });
 
-http.interceptors.request.use((req) => {
-	// const token = getCookie("quizAdmin");
-	const token = "DJKHJKHKJ";
-	req.headers.Authorization = token ? `Bearer ${token}` : "";
+http.interceptors.response.use(undefined, (error: AxiosError) => {
+	const data = error.response?.data as
+		| { detail?: string; message?: string }
+		| undefined;
 
-	return req;
+	return Promise.reject(
+		new ApiError(
+			data?.detail ?? data?.message ?? error.message,
+			error.response?.status,
+		),
+	);
 });
-
-http.interceptors.response.use(
-	(response) => response,
-	(error) => {
-		if (401 === error.response.status) {
-			localStorage.clear();
-			toast.error("Unauthorized, logging out ...");
-			router.navigate({ to: "/" });
-		} else {
-			return Promise.reject(error?.response.data?.message[0]);
-		}
-	},
-);
 
 export default http;

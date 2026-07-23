@@ -1,8 +1,17 @@
-import { Link } from "@tanstack/react-router";
-import { Ghost } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Ghost, LogOut } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { clearAuthSession, useAuthSession } from "@/modules/Auth/auth.session";
 
 const Header = () => {
+	const navigate = useNavigate();
+	const session = useAuthSession();
+
+	const handleLogout = () => {
+		clearAuthSession();
+		navigate({ to: "/" });
+	};
+
 	return (
 		<header className="mx-auto flex w-full max-w-page shrink-0 justify-between gap-3 px-8 py-4 border-b border-gray-200">
 			<Link
@@ -15,14 +24,27 @@ const Header = () => {
 				<span>Simulation Hub</span>
 			</Link>
 
-			<div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+			<div className="flex flex-wrap items-center gap-x-3 gap-y-2">
 				<nav
 					aria-label={"Simulation Hub"}
-					className="flex flex-wrap items-center gap-x-4 gap-y-2"
+					className="flex flex-wrap items-center gap-x-3 gap-y-2"
 				>
-					<Button className="w-fit px-4 py-1">
-						<Link to="/">Login</Link>
-					</Button>
+					{session ? (
+						<>
+							<span className="text-sm text-muted-foreground">
+								Signed in as{" "}
+								<strong className="text-foreground">{session.username}</strong>
+							</span>
+							<Button variant="outline" onClick={handleLogout}>
+								<LogOut data-icon="inline-start" />
+								Logout
+							</Button>
+						</>
+					) : (
+						<Link to="/" className={buttonVariants()}>
+							Login
+						</Link>
+					)}
 				</nav>
 			</div>
 		</header>

@@ -1,0 +1,6 @@
+calculation,scf
+ecutwfc,50
+ecutrho,400
+occupations,smearing
+smearing,gaussian
+degauss,0.02
