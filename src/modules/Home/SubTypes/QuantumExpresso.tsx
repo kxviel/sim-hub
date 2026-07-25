@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { HomeState } from "@/modules/Home/useHome";
 
-const QuantumExpresso = () => {
+const QuantumExpresso = (homeState: HomeState) => {
+	const { handleFileChange } = homeState;
+
 	return (
 		<div className="w-full space-y-4 rounded border border-gray-200 p-2">
 			<p>
@@ -22,8 +25,9 @@ const QuantumExpresso = () => {
 					<Button className="w-[50%]">Download Template</Button>
 					<Input
 						className="w-[50%]"
-						// defaultValue={parameter.value}
-						type={"file"}
+						type="file"
+						multiple
+						onChange={handleFileChange}
 					/>
 				</div>
 			</div>

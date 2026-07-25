@@ -28,7 +28,7 @@ const SimulationParams = (homeState: HomeState) => {
 						{simulationTypeList.filter((x) => x.value === simType)[0]?.label}
 					</p>
 
-					<ParameterComponent />
+					<ParameterComponent {...homeState} />
 
 					<Button
 						className="my-4 py-4 w-full text-lg"

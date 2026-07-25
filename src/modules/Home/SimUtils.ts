@@ -1,4 +1,7 @@
 import QuantumExpresso from "@/modules/Home/SubTypes/QuantumExpresso";
+import type { HomeState } from "@/modules/Home/useHome";
+
+export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
 export type SimulationState = {
 	id: string;
@@ -34,7 +37,7 @@ export const SIMULATION_LIST: SimulationState[] = [
 	},
 ];
 
-type SubTypeConfig = Record<string, React.ComponentType>;
+type SubTypeConfig = Record<string, React.ComponentType<HomeState>>;
 
 export const simulationParameterComponents: SubTypeConfig = {
 	"Quantum ESPRESSO": QuantumExpresso,
