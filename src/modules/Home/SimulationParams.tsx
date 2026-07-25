@@ -1,19 +1,10 @@
 import { Terminal } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import SectionTitle from "@/modules/Home/SectionTitle";
 import { simulationParameterComponents } from "@/modules/Home/SimUtils";
-import { type HomeState, simulationTypeList } from "@/modules/Home/useHome";
+import type { HomeState } from "@/modules/Home/useHome";
 
 const SimulationParams = (homeState: HomeState) => {
-	const {
-		simType,
-		simSubType,
-		setupComplete,
-		// simulationSubtypeList,
-		// handleSimulationTypeChange,
-		// handleSimulationSubtypeChange,
-		handleParamSubmit,
-	} = homeState;
+	const { simType, simSubType, setupComplete, handleParamSubmit } = homeState;
 
 	const ParameterComponent = simulationParameterComponents[simSubType];
 
@@ -22,21 +13,7 @@ const SimulationParams = (homeState: HomeState) => {
 			<SectionTitle title="Simulation Parameters" icon={<Terminal />} />
 
 			{setupComplete && ParameterComponent ? (
-				<div className="w-full space-y-4">
-					<p>Set the required parameters or upload input files.</p>
-					<p className="font-semibold text-lg">
-						{simulationTypeList.filter((x) => x.value === simType)[0]?.label}
-					</p>
-
-					<ParameterComponent {...homeState} />
-
-					<Button
-						className="my-4 py-4 w-full text-lg"
-						onClick={handleParamSubmit}
-					>
-						Run Simulation
-					</Button>
-				</div>
+				<ParameterComponent {...homeState} />
 			) : (
 				<div className="w-full">
 					<p className="font-semibold text-lg">

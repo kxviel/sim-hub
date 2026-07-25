@@ -9,11 +9,8 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import SectionTitle from "@/modules/Home/SectionTitle";
-import {
-	type HomeState,
-	infoList,
-	simulationTypeList,
-} from "@/modules/Home/useHome";
+import { infoList, simulationTypeList } from "@/modules/Home/SimUtils";
+import type { HomeState } from "@/modules/Home/useHome";
 
 const SimulationSetup = (homeState: HomeState) => {
 	const {

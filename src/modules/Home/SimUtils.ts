@@ -1,3 +1,4 @@
+import ABINIT from "@/modules/Home/SubTypes/ABINIT";
 import QuantumExpresso from "@/modules/Home/SubTypes/QuantumExpresso";
 import type { HomeState } from "@/modules/Home/useHome";
 
@@ -37,11 +38,26 @@ export const SIMULATION_LIST: SimulationState[] = [
 	},
 ];
 
+export const infoList = SIMULATION_LIST.map((item) => ({
+	type: item.id,
+	subtype: item.subtypes[0],
+}));
+
+export const simulationTypeList = SIMULATION_LIST.map((sim) => ({
+	label: sim.label,
+	value: sim.id,
+}));
+
+export const getSimulationSubtypeList = (simulationType: string) =>
+	SIMULATION_LIST.find((sim) => sim.id === simulationType)?.subtypes.map(
+		(subtype) => ({ label: subtype, value: subtype }),
+	) ?? [];
+
 type SubTypeConfig = Record<string, React.ComponentType<HomeState>>;
 
 export const simulationParameterComponents: SubTypeConfig = {
 	"Quantum ESPRESSO": QuantumExpresso,
-	ABINIT: QuantumExpresso,
+	ABINIT: ABINIT,
 	CP2K: QuantumExpresso,
 	"BFE.NET - Cantilever Beam": QuantumExpresso,
 	MYSTRAN: QuantumExpresso,

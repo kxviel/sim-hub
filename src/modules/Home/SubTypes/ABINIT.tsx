@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { MAX_FILE_SIZE, simulationTypeList } from "@/modules/Home/SimUtils";
 import type { HomeState } from "@/modules/Home/useHome";
 
-const QuantumExpresso = (homeState: HomeState) => {
+const ABINIT = (homeState: HomeState) => {
 	const { simType, handleParamSubmit } = homeState;
 
 	const [files, setFiles] = useState<File[]>([]);
@@ -26,7 +26,7 @@ const QuantumExpresso = (homeState: HomeState) => {
 		}
 
 		const fileArray = Array.from(files);
-		setFiles(() => fileArray);
+		setFiles((prev) => [...prev, ...fileArray]);
 
 		fileArray.forEach((file) => {
 			console.log(file.name);
@@ -49,7 +49,7 @@ const QuantumExpresso = (homeState: HomeState) => {
 		}
 
 		const fileArray = Array.from(files);
-		setOptionalFiles(() => fileArray);
+		setOptionalFiles((prev) => [...prev, ...fileArray]);
 
 		fileArray.forEach((file) => {
 			console.log(file.name);
@@ -109,7 +109,7 @@ const QuantumExpresso = (homeState: HomeState) => {
 				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
 					<p className="font-semibold text-lg">Input Parameters</p>
 					<p>
-						Upload the Quantum ESPRESSO input parameters as a{" "}
+						Upload the ABINIT input parameters as a{" "}
 						<strong className="text-primary font-semibold">CSV</strong> file.
 					</p>
 
@@ -120,7 +120,7 @@ const QuantumExpresso = (homeState: HomeState) => {
 						<Input
 							className="w-[50%]"
 							type="file"
-							multiple={false}
+							multiple={true}
 							accept="*"
 							onChange={handleFileChange}
 						/>
@@ -165,7 +165,7 @@ const QuantumExpresso = (homeState: HomeState) => {
 						<Input
 							className="w-[50%]"
 							type="file"
-							multiple={false}
+							multiple={true}
 							accept="*"
 							onChange={handleOptionalFileChange}
 						/>
@@ -180,4 +180,4 @@ const QuantumExpresso = (homeState: HomeState) => {
 	);
 };
 
-export default QuantumExpresso;
+export default ABINIT;
