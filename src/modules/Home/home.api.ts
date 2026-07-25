@@ -1,30 +1,20 @@
 import { useMutation } from "@tanstack/react-query";
 import http from "@/lib/http";
 
-export type SignInBody = {
-	email: string;
-	password: string;
+export type SimulationBody = {
+	subtypeSlug: string;
+	usernameSlug: string;
+	formData: FormData;
 };
 
-export type RegisterBody = SignInBody & {
-	username: string;
-	domain: string;
+export const runSimulationAPI = async (body: SimulationBody) => {
+	return http.post(
+		`/run_exec/${body.subtypeSlug}/${body.usernameSlug}`,
+		body.formData,
+	);
 };
 
-export const signInAPI = async (body: SignInBody) => {
-	return http.post("/login", body);
-};
-
-export const registerAPI = async (body: RegisterBody) => {
-	return http.post(`/register`, body);
-};
-
-export const useSignIn = () =>
+export const useSimulation = () =>
 	useMutation({
-		mutationFn: signInAPI,
-	});
-
-export const useRegister = () =>
-	useMutation({
-		mutationFn: registerAPI,
+		mutationFn: runSimulationAPI,
 	});

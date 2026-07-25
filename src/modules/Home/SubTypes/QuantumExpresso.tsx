@@ -49,7 +49,7 @@ const QuantumExpresso = (homeState: HomeState) => {
 		}
 
 		const fileArray = Array.from(files);
-		setOptionalFiles(() => fileArray);
+		setOptionalFiles((prev) => [...prev, ...fileArray]);
 
 		fileArray.forEach((file) => {
 			console.log(file.name);
@@ -68,6 +68,10 @@ const QuantumExpresso = (homeState: HomeState) => {
 		setOptionalFiles((prevFiles) =>
 			prevFiles.filter((_, index) => index !== fileIndex),
 		);
+	};
+
+	const handleRunSimulation = () => {
+		handleParamSubmit(files, optionalfiles);
 	};
 
 	return (
@@ -165,7 +169,7 @@ const QuantumExpresso = (homeState: HomeState) => {
 						<Input
 							className="w-[50%]"
 							type="file"
-							multiple={false}
+							multiple={true}
 							accept="*"
 							onChange={handleOptionalFileChange}
 						/>
@@ -173,7 +177,10 @@ const QuantumExpresso = (homeState: HomeState) => {
 				</div>
 			</div>
 
-			<Button className="my-4 py-4 w-full text-lg" onClick={handleParamSubmit}>
+			<Button
+				className="my-4 py-4 w-full text-lg"
+				onClick={handleRunSimulation}
+			>
 				Run Simulation
 			</Button>
 		</div>

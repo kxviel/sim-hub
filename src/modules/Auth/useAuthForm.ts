@@ -89,7 +89,7 @@ export const useAuthForm = () => {
 	) => {
 		saveAuthSession(result.user);
 		toast.success(message);
-		void navigate({ to: "/home" });
+		navigate({ to: "/home" });
 	};
 
 	const form = useForm({

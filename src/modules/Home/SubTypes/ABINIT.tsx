@@ -173,9 +173,9 @@ const ABINIT = (homeState: HomeState) => {
 				</div>
 			</div>
 
-			<Button className="my-4 py-4 w-full text-lg" onClick={handleParamSubmit}>
+			{/* <Button className="my-4 py-4 w-full text-lg" onClick={handleParamSubmit}>
 				Run Simulation
-			</Button>
+			</Button> */}
 		</div>
 	);
 };

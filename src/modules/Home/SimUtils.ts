@@ -3,6 +3,31 @@ import QuantumExpresso from "@/modules/Home/SubTypes/QuantumExpresso";
 import type { HomeState } from "@/modules/Home/useHome";
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+export const QE_TEMPLATE_BASE = "/templates/DFT_quantum_espresso";
+
+export const QE_UPLOADS = [
+	{
+		id: "parameters",
+		label: "Input Parameters",
+		description: "Upload the Quantum ESPRESSO input parameters as a CSV file.",
+		accept: ".csv",
+		extension: ".csv",
+		multiple: false,
+		required: true,
+		template: `${QE_TEMPLATE_BASE}/input-parameters-template.csv`,
+		templateName: "input-parameters-template.csv",
+	},
+	{
+		id: "structure",
+		label: "Structure File",
+		description:
+			"Upload the mandatory material structure file in CIF format. Elements are detected from this file.",
+		accept: ".cif",
+		extension: ".cif",
+		multiple: false,
+		required: true,
+	},
+];
 
 export type SimulationState = {
 	id: string;

@@ -4,7 +4,7 @@ import { simulationParameterComponents } from "@/modules/Home/SimUtils";
 import type { HomeState } from "@/modules/Home/useHome";
 
 const SimulationParams = (homeState: HomeState) => {
-	const { simType, simSubType, setupComplete, handleParamSubmit } = homeState;
+	const { simSubType, setupComplete } = homeState;
 
 	const ParameterComponent = simulationParameterComponents[simSubType];
 
