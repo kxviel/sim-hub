@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import SectionTitle from "@/modules/Home/SectionTitle";
 import {
-	getSimulatorConfig,
+	getSimulationSubtypeHelp,
 	infoList,
 	simulationTypeList,
 } from "@/modules/Home/SimUtils";
@@ -25,10 +25,9 @@ const SimulationSetup = (homeState: HomeState) => {
 		handleSimulationTypeChange,
 		handleSimulationSubtypeChange,
 	} = homeState;
-	const simulatorConfig = getSimulatorConfig(simSubType);
 
 	return (
-		<div className="flex-1/4 rounded border border-gray-200 bg-white p-6 space-y-4">
+		<div className="h-full min-h-0 w-full space-y-4 overflow-y-auto rounded border border-gray-200 bg-white p-6">
 			<SectionTitle title="Simulation Setup" icon={<Settings />} />
 
 			<form className="w-full">
@@ -104,7 +103,7 @@ const SimulationSetup = (homeState: HomeState) => {
 					{setupComplete ? "About This Setup" : "Examples"}
 				</p>
 				{setupComplete ? (
-					<p>{simulatorConfig?.description ?? "Configure the selected simulator."}</p>
+					<p>{getSimulationSubtypeHelp(simSubType)}</p>
 				) : (
 					<ul className=" space-y-2">
 						{infoList.map((item) => (

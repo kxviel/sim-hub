@@ -9,7 +9,7 @@ const SimulationParams = (homeState: HomeState) => {
 	const ParameterComponent = simulationParameterComponents[simSubType];
 
 	return (
-		<div className="flex-1/4 rounded border border-gray-200 bg-white p-6 space-y-4">
+		<div className="h-full min-h-0 w-full space-y-4 overflow-y-auto overscroll-contain rounded border border-gray-200 bg-white p-6">
 			<SectionTitle title="Simulation Parameters" icon={<Terminal />} />
 
 			{setupComplete && ParameterComponent ? (
