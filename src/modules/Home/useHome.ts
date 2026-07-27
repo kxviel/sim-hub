@@ -2,17 +2,24 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { getAuthSession } from "@/modules/Auth/auth.session";
 import { useSimulation } from "@/modules/Home/home.api";
-import {
-	getSimulationSubtypeList,
-	getSimulatorConfig,
-	type SimulatorConfig,
-	type SimulatorParameterValue,
-} from "@/modules/Home/SimUtils";
+import { getSimulationSubtypeList } from "@/modules/Home/SimUtils";
+
+export type SimulationParameterValue = string | number | boolean | number[];
+
+export type ConfiguredSimulationSubmission = {
+	calculatorSlug: string;
+	projectPrefix: string;
+	simulatorLabel: string;
+	parameters?: Record<string, SimulationParameterValue>;
+	fileGroups?: {
+		fieldName: string;
+		files: File[];
+	}[];
+};
 
 export type HomeState = {
 	simType: string;
 	simSubType: string;
-	simulatorConfig?: SimulatorConfig;
 	setupComplete: boolean;
 	simulationSubtypeList: {
 		label: string;
@@ -23,14 +30,8 @@ export type HomeState = {
 	isSubmitting: boolean;
 	handleSimulationTypeChange: (value: string | null) => void;
 	handleSimulationSubtypeChange: (value: string | null) => void;
-	handleParamSubmit: (
-		files: File[],
-		optionalFiles: File[],
-	) => void;
-	handleConfiguredSubmit: (
-		config: SimulatorConfig,
-		parameters: Record<string, SimulatorParameterValue>,
-	) => void;
+	handleParamSubmit: (files: File[], optionalFiles: File[]) => void;
+	handleConfiguredSubmit: (submission: ConfiguredSimulationSubmission) => void;
 };
 
 export const useHome = (): HomeState => {
@@ -42,7 +43,6 @@ export const useHome = (): HomeState => {
 	const runSimulation = useSimulation();
 
 	const simulationSubtypeList = getSimulationSubtypeList(simType);
-	const simulatorConfig = getSimulatorConfig(simSubType);
 
 	const handleSimulationTypeChange = (value: string | null) => {
 		setSimType(value ?? "");
@@ -72,7 +72,10 @@ export const useHome = (): HomeState => {
 	};
 
 	const submitSimulation = async (
-		config: SimulatorConfig,
+		config: {
+			calculatorSlug: string;
+			simulatorLabel: string;
+		},
 		formData: FormData,
 	) => {
 		const username = getAuthSession()?.username ?? "";
@@ -89,7 +92,10 @@ export const useHome = (): HomeState => {
 				formData,
 			});
 
-			handleSimulationSuccess(result, `${config.label} simulation submitted.`);
+			handleSimulationSuccess(
+				result,
+				`${config.simulatorLabel} simulation submitted.`,
+			);
 			return;
 		} catch (error) {
 			handleAuthError(error);
@@ -97,30 +103,43 @@ export const useHome = (): HomeState => {
 	};
 
 	const handleParamSubmit = (files: File[], optionalFiles: File[]) => {
-		const config = getSimulatorConfig("Quantum ESPRESSO");
 		const formData = new FormData();
-		formData.append("proj_name", `${config.projectPrefix}_${Date.now()}`);
+		formData.append("proj_name", `DFT_quantum_espresso_${Date.now()}`);
 
 		for (const file of files) formData.append("input_file", file);
 		for (const file of optionalFiles) formData.append("pseudofiles", file);
 
-		submitSimulation(config, formData);
+		submitSimulation(
+			{
+				calculatorSlug: "Quantum-Espresso",
+				simulatorLabel: "Quantum ESPRESSO",
+			},
+			formData,
+		);
 	};
 
 	const handleConfiguredSubmit = (
-		config: SimulatorConfig,
-		parameters: Record<string, SimulatorParameterValue>,
+		submission: ConfiguredSimulationSubmission,
 	) => {
 		const formData = new FormData();
-		formData.append("proj_name", `${config.projectPrefix}_${Date.now()}`);
-		formData.append("parameters", JSON.stringify(parameters));
-		submitSimulation(config, formData);
+		formData.append("proj_name", `${submission.projectPrefix}_${Date.now()}`);
+
+		if (submission.parameters) {
+			formData.append("parameters", JSON.stringify(submission.parameters));
+		}
+
+		for (const group of submission.fileGroups ?? []) {
+			for (const file of group.files) {
+				formData.append(group.fieldName, file);
+			}
+		}
+
+		submitSimulation(submission, formData);
 	};
 
 	return {
 		simType,
 		simSubType,
-		simulatorConfig,
 		setupComplete,
 		simulationSubtypeList,
 		results,
