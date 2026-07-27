@@ -9,7 +9,11 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import SectionTitle from "@/modules/Home/SectionTitle";
-import { infoList, simulationTypeList } from "@/modules/Home/SimUtils";
+import {
+	getSimulatorConfig,
+	infoList,
+	simulationTypeList,
+} from "@/modules/Home/SimUtils";
 import type { HomeState } from "@/modules/Home/useHome";
 
 const SimulationSetup = (homeState: HomeState) => {
@@ -21,6 +25,7 @@ const SimulationSetup = (homeState: HomeState) => {
 		handleSimulationTypeChange,
 		handleSimulationSubtypeChange,
 	} = homeState;
+	const simulatorConfig = getSimulatorConfig(simSubType);
 
 	return (
 		<div className="flex-1/4 rounded border border-gray-200 bg-white p-6 space-y-4">
@@ -99,11 +104,7 @@ const SimulationSetup = (homeState: HomeState) => {
 					{setupComplete ? "About This Setup" : "Examples"}
 				</p>
 				{setupComplete ? (
-					<p>
-						{simSubType === "Quantum ESPRESSO"
-							? "Quantum ESPRESSO uses a CSV parameter file and one UPF file for each chemical element."
-							: "This prototype shows the same example parameter form for any selected simulator."}
-					</p>
+					<p>{simulatorConfig?.description ?? "Configure the selected simulator."}</p>
 				) : (
 					<ul className=" space-y-2">
 						{infoList.map((item) => (

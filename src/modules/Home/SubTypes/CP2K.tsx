@@ -1,7 +1,7 @@
 import SimulatorParameterForm from "@/modules/Home/SubTypes/SimulatorParameterForm";
 import type { HomeState } from "@/modules/Home/useHome";
 
-const ABINIT = (homeState: HomeState) => {
+const CP2K = (homeState: HomeState) => {
 	if (!homeState.simulatorConfig) return null;
 
 	return (
@@ -12,4 +12,4 @@ const ABINIT = (homeState: HomeState) => {
 	);
 };
 
-export default ABINIT;
+export default CP2K;
