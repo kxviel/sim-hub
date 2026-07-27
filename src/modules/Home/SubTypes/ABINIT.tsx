@@ -12,6 +12,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { MAX_FILE_SIZE, simulationTypeList } from "@/modules/Home/SimUtils";
+
 import type { HomeState } from "@/modules/Home/useHome";
 
 const CALCULATION_TYPES = [
@@ -270,7 +271,7 @@ const ABINIT = ({
 				disabled={isSubmitting}
 				onClick={handleRunSimulation}
 			>
-				{isSubmitting ? "Submitting ABINIT..." : "Run Simulation"}
+				{isSubmitting ? "Simulating" : "Run Simulation"}
 			</Button>
 		</div>
 	);

@@ -1,6 +1,7 @@
-calculation,scf
-ecutwfc,50
-ecutrho,400
-occupations,smearing
-smearing,gaussian
-degauss,0.02
+parameter,value,unit,description
+calculation,scf,,Calculation mode
+ecutwfc,50,Ry,Wavefunction cutoff
+ecutrho,400,Ry,Charge density cutoff
+k_points,6 6 6,,K-point grid
+occupations,smearing,,Occupation method
+smearing,0.02,Ry,Smearing value

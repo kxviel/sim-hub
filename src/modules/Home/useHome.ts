@@ -30,7 +30,11 @@ export type HomeState = {
 	isSubmitting: boolean;
 	handleSimulationTypeChange: (value: string | null) => void;
 	handleSimulationSubtypeChange: (value: string | null) => void;
-	handleParamSubmit: (files: File[], optionalFiles: File[]) => void;
+	handleParamSubmit: (
+		parameterFile: File,
+		structureFile: File,
+		pseudopotentialFiles: File[],
+	) => void;
 	handleConfiguredSubmit: (submission: ConfiguredSimulationSubmission) => void;
 };
 
@@ -102,12 +106,19 @@ export const useHome = (): HomeState => {
 		}
 	};
 
-	const handleParamSubmit = (files: File[], optionalFiles: File[]) => {
+	const handleParamSubmit = (
+		parameterFile: File,
+		structureFile: File,
+		pseudopotentialFiles: File[],
+	) => {
 		const formData = new FormData();
 		formData.append("proj_name", `DFT_quantum_espresso_${Date.now()}`);
+		formData.append("csv_file", parameterFile);
+		formData.append("structure_file", structureFile);
 
-		for (const file of files) formData.append("input_file", file);
-		for (const file of optionalFiles) formData.append("pseudofiles", file);
+		for (const file of pseudopotentialFiles) {
+			formData.append("pseudofiles", file);
+		}
 
 		submitSimulation(
 			{

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MAX_FILE_SIZE, simulationTypeList } from "@/modules/Home/SimUtils";
+
 import type { HomeState } from "@/modules/Home/useHome";
 
 // API template: update these values when the AiiDA backend contract is finalized.
@@ -196,7 +197,7 @@ const AiiDA_Workflow = (homeState: HomeState) => {
 				disabled={isSubmitting}
 				onClick={handleRunSimulation}
 			>
-				{isSubmitting ? "Submitting AiiDA workflow..." : "Run Simulation"}
+				{isSubmitting ? "Simulating" : "Run Simulation"}
 			</Button>
 		</div>
 	);

@@ -1,0 +1,6 @@
+<UPF version="2.0.1">
+  <PP_INFO>
+    Prototype Quantum ESPRESSO pseudopotential template.
+    Replace this file with a valid .upf pseudopotential before running a real simulation.
+  </PP_INFO>
+</UPF>

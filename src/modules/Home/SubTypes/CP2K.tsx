@@ -12,6 +12,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { MAX_FILE_SIZE, simulationTypeList } from "@/modules/Home/SimUtils";
+
 import type { HomeState } from "@/modules/Home/useHome";
 
 const RUN_TYPES = [
@@ -325,7 +326,7 @@ const CP2K = ({ simType, isSubmitting, handleConfiguredSubmit }: HomeState) => {
 				disabled={isSubmitting}
 				onClick={handleRunSimulation}
 			>
-				{isSubmitting ? "Submitting CP2K..." : "Run Simulation"}
+				{isSubmitting ? "Simulating" : "Run Simulation"}
 			</Button>
 		</div>
 	);

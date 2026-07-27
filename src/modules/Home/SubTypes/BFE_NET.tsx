@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MAX_FILE_SIZE, simulationTypeList } from "@/modules/Home/SimUtils";
+
 import type { HomeState } from "@/modules/Home/useHome";
 
 // API template: update these values when the BFE.NET backend contract is finalized.
@@ -192,7 +193,7 @@ const BFE_NET = (homeState: HomeState) => {
 				disabled={isSubmitting}
 				onClick={handleRunSimulation}
 			>
-				{isSubmitting ? "Submitting BFE.NET..." : "Run Simulation"}
+				{isSubmitting ? "Simulating" : "Run Simulation"}
 			</Button>
 		</div>
 	);
