@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "sim-hub",
+  "productName": "Simulation Hub",
   "version": "0.1.0",
   "identifier": "com.kxviel.sim-hub",
   "build": {
@@ -12,9 +12,14 @@
   "app": {
     "windows": [
       {
-        "title": "sim-hub",
-        "width": 800,
-        "height": 600
+        "title": "Simulation Hub",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 720,
+        "minHeight": 600,
+        "center": true,
+        "maximized": true,
+        "resizable": true
       }
     ],
     "security": {
