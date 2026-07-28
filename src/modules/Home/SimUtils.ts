@@ -12,6 +12,7 @@ import type { HomeState } from "@/modules/Home/useHome";
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 export const QE_TEMPLATE_BASE = "/templates/DFT_quantum_espresso";
+export const ABINIT_TEMPLATE_BASE = "/templates/DFT_abinit";
 
 export const QE_UPLOADS = [
 	{

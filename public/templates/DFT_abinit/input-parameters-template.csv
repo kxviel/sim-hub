@@ -1,0 +1,6 @@
+parameter,value,unit,description
+calculation,scf,,Calculation type
+ecut,20,Ha,Plane-wave cutoff
+ngkpt,4 4 4,,K-point grid
+tolvrs,1e-10,,Residual potential tolerance
+nstep,100,,Maximum SCF steps
