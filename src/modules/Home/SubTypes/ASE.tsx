@@ -3,7 +3,7 @@ import type React from "react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import FileUpload from "@/modules/Home/FileUpload";
 import { MAX_FILE_SIZE, simulationTypeList } from "@/modules/Home/SimUtils";
 
 import type { HomeState } from "@/modules/Home/useHome";
@@ -38,12 +38,6 @@ const ASE = (homeState: HomeState) => {
 
 		const fileArray = Array.from(files);
 		setFiles(() => fileArray);
-
-		fileArray.forEach((file) => {
-			console.log(file.name);
-			console.log(file.type);
-			console.log(file.size);
-		});
 	};
 
 	const handleOptionalFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,12 +55,6 @@ const ASE = (homeState: HomeState) => {
 
 		const fileArray = Array.from(files);
 		setOptionalFiles((prev) => [...prev, ...fileArray]);
-
-		fileArray.forEach((file) => {
-			console.log(file.name);
-			console.log(file.type);
-			console.log(file.size);
-		});
 	};
 
 	const handleRemoveFile = (fileIndex: number) => {
@@ -122,8 +110,12 @@ const ASE = (homeState: HomeState) => {
 								>
 									<p className="font-semibold text-sm truncate">{file.name}</p>
 
-									<Button variant={"ghost"} onClick={() => handleRemoveFile(i)}>
-										<XSquare color="red" />
+									<Button
+										aria-label={`Remove ${file.name}`}
+										onClick={() => handleRemoveFile(i)}
+										variant="ghost"
+									>
+										<XSquare aria-hidden="true" className="text-red-600" />
 									</Button>
 								</div>
 							))}
@@ -138,15 +130,14 @@ const ASE = (homeState: HomeState) => {
 						Atoms object.
 					</p>
 
-					<div>
-						<Input
-							className="w-full"
-							type="file"
-							multiple={false}
-							accept=".py,.cif,.xyz,.json"
-							onChange={handleFileChange}
-						/>
-					</div>
+					<FileUpload
+						accept=".py,.cif,.xyz,.json"
+						ariaLabel="ASE script or structure"
+						disabled={isSubmitting}
+						files={files}
+						hint="Python, CIF, XYZ, or JSON · Up to 5 MB"
+						onChange={handleFileChange}
+					/>
 				</div>
 
 				{optionalfiles.length > 0 && (
@@ -162,10 +153,11 @@ const ASE = (homeState: HomeState) => {
 									<p className="font-semibold text-sm truncate">{file.name}</p>
 
 									<Button
-										variant={"ghost"}
+										aria-label={`Remove ${file.name}`}
 										onClick={() => handleRemoveOptionalFile(i)}
+										variant="ghost"
 									>
-										<XSquare color="red" />
+										<XSquare aria-hidden="true" className="text-red-600" />
 									</Button>
 								</div>
 							))}
@@ -177,15 +169,14 @@ const ASE = (homeState: HomeState) => {
 					<p className="font-semibold text-lg">Calculator Input Files</p>
 					<p>Optional files required by the selected ASE calculator backend.</p>
 
-					<div>
-						<Input
-							className="w-full"
-							type="file"
-							multiple={true}
-							accept="*"
-							onChange={handleOptionalFileChange}
-						/>
-					</div>
+					<FileUpload
+						ariaLabel="ASE calculator input files"
+						disabled={isSubmitting}
+						files={optionalfiles}
+						hint="Additional calculator files · Up to 5 MB each"
+						multiple
+						onChange={handleOptionalFileChange}
+					/>
 				</div>
 			</div>
 

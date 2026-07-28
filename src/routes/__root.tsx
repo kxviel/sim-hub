@@ -8,14 +8,16 @@ export const Route = createRootRoute({
 
 function RootComponent() {
 	return (
-		<main className="antialiased flex h-svh w-full flex-col overflow-hidden">
+		<div className="flex min-h-svh w-full flex-col overflow-x-hidden antialiased xl:h-svh xl:overflow-hidden">
 			<Toaster position="top-right" richColors theme="light" closeButton />
-
 			<Header />
-			<div className="min-h-0 flex-1 overflow-y-auto">
+			<main
+				className="min-h-0 flex-1 overflow-y-auto"
+				id="main-content"
+				tabIndex={-1}
+			>
 				<Outlet />
-			</div>
-			{/* <Footer /> */}
-		</main>
+			</main>
+		</div>
 	);
 }

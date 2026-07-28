@@ -13,31 +13,32 @@ const Header = () => {
 	};
 
 	return (
-		<header className="mx-auto flex w-full max-w-page shrink-0 justify-between gap-3 px-8 py-4 border-b border-gray-200">
-			<Link
-				to="/"
-				className="min-w-0 wrap-break-word text-lg font-bold text-primary uppercase md:text-4xl flex gap-4 items-center"
-			>
-				<div className="p-3 bg-primary-foreground border border-primary rounded">
-					<Ghost />
-				</div>
-				<span>Simulation Hub</span>
-			</Link>
-
-			<div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-				<nav
-					aria-label={"Simulation Hub"}
-					className="flex flex-wrap items-center gap-x-3 gap-y-2"
+		<header className="shrink-0 border-gray-200 border-b bg-white">
+			<div className="mx-auto flex min-h-16 w-full max-w-[1600px] items-center justify-between gap-3 px-3 sm:px-5 lg:px-6">
+				<Link
+					className="flex min-w-0 items-center gap-3 font-bold text-primary text-xl"
+					to="/"
 				>
+					<span className="grid size-10 shrink-0 place-items-center rounded border border-primary bg-primary-foreground">
+						<Ghost aria-hidden="true" className="size-5" />
+					</span>
+					<span className="truncate">Simulation Hub</span>
+				</Link>
+
+				<nav aria-label="Account" className="flex min-w-0 items-center gap-3">
 					{session ? (
 						<>
-							<span className="text-sm text-muted-foreground">
+							<span className="hidden min-w-0 truncate text-muted-foreground text-sm md:inline">
 								Signed in as{" "}
 								<strong className="text-foreground">{session.username}</strong>
 							</span>
-							<Button variant="outline" onClick={handleLogout}>
-								<LogOut data-icon="inline-start" />
-								Logout
+							<Button
+								aria-label="Log out"
+								onClick={handleLogout}
+								variant="outline"
+							>
+								<LogOut aria-hidden="true" data-icon="inline-start" />
+								<span className="hidden sm:inline">Log Out</span>
 							</Button>
 						</>
 					) : (

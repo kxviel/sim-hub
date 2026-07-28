@@ -27,7 +27,7 @@ const SimulationSetup = (homeState: HomeState) => {
 	} = homeState;
 
 	return (
-		<div className="h-full min-h-0 w-full space-y-4 overflow-y-auto rounded border border-gray-200 bg-white p-6">
+		<div className="h-full min-h-0 w-full space-y-4 overflow-y-auto overscroll-contain rounded border border-gray-200 bg-white p-4 sm:p-6">
 			<SectionTitle title="Simulation Setup" icon={<Settings />} />
 
 			<form className="w-full">
@@ -105,10 +105,12 @@ const SimulationSetup = (homeState: HomeState) => {
 				{setupComplete ? (
 					<p>{getSimulationSubtypeHelp(simSubType)}</p>
 				) : (
-					<ul className=" space-y-2">
+					<ul className="space-y-2">
 						{infoList.map((item) => (
-							<li key={item.type}>
-								{item.type}&nbsp;<span className="text-primary">to</span>&nbsp;
+							<li className="text-sm" key={item.type}>
+								{item.type}&nbsp;
+								<span className="text-primary text-sm font-semibold">to</span>
+								&nbsp;
 								{item.subtype}
 							</li>
 						))}

@@ -2,7 +2,7 @@ import { XSquare } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import FileUpload from "@/modules/Home/FileUpload";
 import { MAX_FILE_SIZE, simulationTypeList } from "@/modules/Home/SimUtils";
 
 import type { HomeState } from "@/modules/Home/useHome";
@@ -37,12 +37,6 @@ const MonteCarlo = (homeState: HomeState) => {
 
 		const fileArray = Array.from(files);
 		setFiles(() => fileArray);
-
-		fileArray.forEach((file) => {
-			console.log(file.name);
-			console.log(file.type);
-			console.log(file.size);
-		});
 	};
 
 	const handleOptionalFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,12 +54,6 @@ const MonteCarlo = (homeState: HomeState) => {
 
 		const fileArray = Array.from(files);
 		setOptionalFiles((prev) => [...prev, ...fileArray]);
-
-		fileArray.forEach((file) => {
-			console.log(file.name);
-			console.log(file.type);
-			console.log(file.size);
-		});
 	};
 
 	const handleRemoveFile = (fileIndex: number) => {
@@ -121,8 +109,12 @@ const MonteCarlo = (homeState: HomeState) => {
 								>
 									<p className="font-semibold text-sm truncate">{file.name}</p>
 
-									<Button variant={"ghost"} onClick={() => handleRemoveFile(i)}>
-										<XSquare color="red" />
+									<Button
+										aria-label={`Remove ${file.name}`}
+										onClick={() => handleRemoveFile(i)}
+										variant="ghost"
+									>
+										<XSquare aria-hidden="true" className="text-red-600" />
 									</Button>
 								</div>
 							))}
@@ -137,15 +129,14 @@ const MonteCarlo = (homeState: HomeState) => {
 						expected by the future backend.
 					</p>
 
-					<div>
-						<Input
-							className="w-full"
-							type="file"
-							multiple={false}
-							accept=".json,.yaml,.yml,.csv"
-							onChange={handleFileChange}
-						/>
-					</div>
+					<FileUpload
+						accept=".json,.yaml,.yml,.csv"
+						ariaLabel="Monte Carlo configuration"
+						disabled={isSubmitting}
+						files={files}
+						hint="JSON, YAML, or CSV · Up to 5 MB"
+						onChange={handleFileChange}
+					/>
 				</div>
 
 				{optionalfiles.length > 0 && (
@@ -161,10 +152,11 @@ const MonteCarlo = (homeState: HomeState) => {
 									<p className="font-semibold text-sm truncate">{file.name}</p>
 
 									<Button
-										variant={"ghost"}
+										aria-label={`Remove ${file.name}`}
 										onClick={() => handleRemoveOptionalFile(i)}
+										variant="ghost"
 									>
-										<XSquare color="red" />
+										<XSquare aria-hidden="true" className="text-red-600" />
 									</Button>
 								</div>
 							))}
@@ -176,15 +168,15 @@ const MonteCarlo = (homeState: HomeState) => {
 					<p className="font-semibold text-lg">Input Datasets</p>
 					<p>Optional tabular, structure, or restart data used by the run.</p>
 
-					<div>
-						<Input
-							className="w-full"
-							type="file"
-							multiple={true}
-							accept=".csv,.json,.txt"
-							onChange={handleOptionalFileChange}
-						/>
-					</div>
+					<FileUpload
+						accept=".csv,.json,.txt"
+						ariaLabel="Monte Carlo supporting data"
+						disabled={isSubmitting}
+						files={optionalfiles}
+						hint="CSV, JSON, or text · Up to 5 MB each"
+						multiple
+						onChange={handleOptionalFileChange}
+					/>
 				</div>
 			</div>
 

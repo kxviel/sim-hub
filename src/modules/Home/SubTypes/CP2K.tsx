@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import FileUpload from "@/modules/Home/FileUpload";
 import {
 	Select,
 	SelectContent,
@@ -295,11 +296,13 @@ const CP2K = ({ simType, isSubmitting, handleConfiguredSubmit }: HomeState) => {
 				<legend className="px-1 text-base font-semibold">Input Files</legend>
 				<div className="space-y-2">
 					<Label htmlFor="cp2k-input-file">CP2K Input or Structure</Label>
-					<Input
+					<FileUpload
+						ariaLabel="CP2K input or structure"
 						id="cp2k-input-file"
-						type="file"
 						accept=".inp,.cif,.xyz,.pdb"
 						disabled={isSubmitting}
+						files={inputFiles}
+						hint="INP, CIF, XYZ, or PDB · Up to 5 MB"
 						onChange={handleInputFileChange}
 					/>
 					<p className="text-sm text-muted-foreground">
@@ -311,11 +314,13 @@ const CP2K = ({ simType, isSubmitting, handleConfiguredSubmit }: HomeState) => {
 					<Label htmlFor="cp2k-data-files">
 						Basis, Potential, or Topology Files (optional)
 					</Label>
-					<Input
+					<FileUpload
+						ariaLabel="CP2K basis, potential, or topology files"
 						id="cp2k-data-files"
-						type="file"
 						multiple
 						disabled={isSubmitting}
+						files={dataFiles}
+						hint="Optional basis, potential, or topology files"
 						onChange={handleDataFileChange}
 					/>
 				</div>

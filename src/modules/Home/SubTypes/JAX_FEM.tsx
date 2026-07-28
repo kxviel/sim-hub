@@ -2,7 +2,7 @@ import { XSquare } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import FileUpload from "@/modules/Home/FileUpload";
 import { MAX_FILE_SIZE, simulationTypeList } from "@/modules/Home/SimUtils";
 
 import type { HomeState } from "@/modules/Home/useHome";
@@ -37,12 +37,6 @@ const JAX_FEM = (homeState: HomeState) => {
 
 		const fileArray = Array.from(files);
 		setFiles(() => fileArray);
-
-		fileArray.forEach((file) => {
-			console.log(file.name);
-			console.log(file.type);
-			console.log(file.size);
-		});
 	};
 
 	const handleOptionalFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,12 +54,6 @@ const JAX_FEM = (homeState: HomeState) => {
 
 		const fileArray = Array.from(files);
 		setOptionalFiles((prev) => [...prev, ...fileArray]);
-
-		fileArray.forEach((file) => {
-			console.log(file.name);
-			console.log(file.type);
-			console.log(file.size);
-		});
 	};
 
 	const handleRemoveFile = (fileIndex: number) => {
@@ -121,8 +109,12 @@ const JAX_FEM = (homeState: HomeState) => {
 								>
 									<p className="font-semibold text-sm truncate">{file.name}</p>
 
-									<Button variant={"ghost"} onClick={() => handleRemoveFile(i)}>
-										<XSquare color="red" />
+									<Button
+										aria-label={`Remove ${file.name}`}
+										onClick={() => handleRemoveFile(i)}
+										variant="ghost"
+									>
+										<XSquare aria-hidden="true" className="text-red-600" />
 									</Button>
 								</div>
 							))}
@@ -137,15 +129,14 @@ const JAX_FEM = (homeState: HomeState) => {
 						boundary-condition configuration.
 					</p>
 
-					<div>
-						<Input
-							className="w-full"
-							type="file"
-							multiple={false}
-							accept=".py,.json,.yaml,.yml"
-							onChange={handleFileChange}
-						/>
-					</div>
+					<FileUpload
+						accept=".py,.json,.yaml,.yml"
+						ariaLabel="JAX-FEM model definition"
+						disabled={isSubmitting}
+						files={files}
+						hint="Python, JSON, or YAML · Up to 5 MB"
+						onChange={handleFileChange}
+					/>
 				</div>
 
 				{optionalfiles.length > 0 && (
@@ -161,10 +152,11 @@ const JAX_FEM = (homeState: HomeState) => {
 									<p className="font-semibold text-sm truncate">{file.name}</p>
 
 									<Button
-										variant={"ghost"}
+										aria-label={`Remove ${file.name}`}
 										onClick={() => handleRemoveOptionalFile(i)}
+										variant="ghost"
 									>
-										<XSquare color="red" />
+										<XSquare aria-hidden="true" className="text-red-600" />
 									</Button>
 								</div>
 							))}
@@ -176,15 +168,15 @@ const JAX_FEM = (homeState: HomeState) => {
 					<p className="font-semibold text-lg">Mesh Files</p>
 					<p>Optional meshes and field data consumed by the JAX-FEM model.</p>
 
-					<div>
-						<Input
-							className="w-full"
-							type="file"
-							multiple={true}
-							accept=".msh,.vtk,.vtu,.xdmf"
-							onChange={handleOptionalFileChange}
-						/>
-					</div>
+					<FileUpload
+						accept=".msh,.vtk,.vtu,.xdmf"
+						ariaLabel="JAX-FEM mesh and field files"
+						disabled={isSubmitting}
+						files={optionalfiles}
+						hint="MSH, VTK, VTU, or XDMF · Up to 5 MB each"
+						multiple
+						onChange={handleOptionalFileChange}
+					/>
 				</div>
 			</div>
 

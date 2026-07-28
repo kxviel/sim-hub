@@ -33,7 +33,7 @@ const SimulationResults = ({
 }: HomeState) => {
 	if (!setupComplete || submission.status === "idle") {
 		return (
-			<div className="h-full min-h-0 w-full space-y-4 overflow-y-auto rounded border border-gray-200 bg-white p-6">
+			<div className="h-full min-h-0 w-full space-y-4 overflow-y-auto overscroll-contain rounded border border-gray-200 bg-white p-4 sm:p-6">
 				<SectionTitle title="Simulation Results" icon={<ScrollText />} />
 				<p className="text-muted-foreground">
 					Results will appear here after running the simulation.
@@ -43,7 +43,7 @@ const SimulationResults = ({
 	}
 
 	return (
-		<div className="h-full min-h-0 w-full space-y-4 overflow-y-auto rounded border border-gray-200 bg-white p-6">
+		<div className="h-full min-h-0 w-full space-y-4 overflow-y-auto overscroll-contain rounded border border-gray-200 bg-white p-4 sm:p-6">
 			<SectionTitle title="Simulation Results" icon={<ScrollText />} />
 
 			<div

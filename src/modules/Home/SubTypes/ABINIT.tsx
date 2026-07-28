@@ -2,11 +2,11 @@ import { XSquare } from "lucide-react";
 import { type ChangeEvent, useState } from "react";
 import { toast } from "sonner";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
 	extractElementsFromCifFile,
 	normalizeCifFile,
 } from "@/modules/Home/cifParser";
+import FileUpload from "@/modules/Home/FileUpload";
 import {
 	ABINIT_TEMPLATE_BASE,
 	MAX_FILE_SIZE,
@@ -252,10 +252,9 @@ const ABINIT = ({
 				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
 					<p className="font-semibold text-lg">Input Parameters</p>
 					<p>Upload the ABINIT input parameters as a CSV file.</p>
-					<div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+					<div className="grid gap-4 sm:grid-cols-2">
 						<a
 							className={buttonVariants({
-								className: "sm:w-1/2",
 								variant: "outline",
 							})}
 							download="abinit-input-parameters-template.csv"
@@ -263,13 +262,13 @@ const ABINIT = ({
 						>
 							Download CSV Template
 						</a>
-						<Input
+						<FileUpload
 							accept=".csv,text/csv"
-							aria-label="ABINIT CSV parameter file"
-							className="sm:w-1/2"
+							ariaLabel="ABINIT CSV parameter file"
 							disabled={isSubmitting}
+							files={parameterFile ? [parameterFile] : []}
+							hint="CSV · Up to 5 MB"
 							onChange={handleParameterFileChange}
-							type="file"
 						/>
 					</div>
 					{parameterFile ? (
@@ -292,12 +291,13 @@ const ABINIT = ({
 						Upload the mandatory material structure in CIF format. Elements are
 						detected from this file.
 					</p>
-					<Input
+					<FileUpload
 						accept=".cif,chemical/x-cif"
-						aria-label="ABINIT CIF structure file"
+						ariaLabel="ABINIT CIF structure file"
 						disabled={isSubmitting}
+						files={structureFile ? [structureFile] : []}
+						hint="CIF · Up to 5 MB"
 						onChange={handleStructureFileChange}
-						type="file"
 					/>
 					{structureFile ? (
 						<div className="flex items-center justify-between gap-2 rounded border border-gray-200 p-2">
@@ -370,14 +370,14 @@ const ABINIT = ({
 													</Button>
 												</>
 											) : (
-												<Input
+												<FileUpload
 													accept={ABINIT_PSEUDOPOTENTIAL_EXTENSIONS.join(",")}
-													aria-label={`${element} ABINIT pseudopotential`}
+													ariaLabel={`${element} ABINIT pseudopotential`}
 													disabled={isSubmitting}
+													hint="XML, PAW, or PSP8 · Up to 5 MB"
 													onChange={(event) =>
 														handlePseudopotentialFileChange(element, event)
 													}
-													type="file"
 												/>
 											)}
 										</div>

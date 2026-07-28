@@ -2,11 +2,11 @@ import { XSquare } from "lucide-react";
 import { type ChangeEvent, useState } from "react";
 import { toast } from "sonner";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
 	extractElementsFromCifFile,
 	normalizeCifFile,
 } from "@/modules/Home/cifParser";
+import FileUpload from "@/modules/Home/FileUpload";
 import {
 	MAX_FILE_SIZE,
 	QE_TEMPLATE_BASE,
@@ -243,10 +243,9 @@ const QuantumExpresso = ({
 				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
 					<p className="font-semibold text-lg">Input Parameters</p>
 					<p>Upload the Quantum ESPRESSO input parameters as a CSV file.</p>
-					<div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+					<div className="grid gap-4 sm:grid-cols-2">
 						<a
 							className={buttonVariants({
-								className: "sm:w-1/2",
 								variant: "outline",
 							})}
 							download="input-parameters-template.csv"
@@ -254,13 +253,13 @@ const QuantumExpresso = ({
 						>
 							Download CSV Template
 						</a>
-						<Input
+						<FileUpload
 							accept=".csv,text/csv"
-							aria-label="CSV parameter file"
-							className="sm:w-1/2"
+							ariaLabel="Quantum ESPRESSO CSV parameter file"
 							disabled={isSubmitting}
+							files={parameterFile ? [parameterFile] : []}
+							hint="CSV · Up to 5 MB"
 							onChange={handleParameterFileChange}
-							type="file"
 						/>
 					</div>
 				</div>
@@ -271,12 +270,13 @@ const QuantumExpresso = ({
 						Upload the mandatory material structure in CIF format. Elements are
 						detected from this file.
 					</p>
-					<Input
+					<FileUpload
 						accept=".cif,chemical/x-cif"
-						aria-label="CIF structure file"
+						ariaLabel="Quantum ESPRESSO CIF structure file"
 						disabled={isSubmitting}
+						files={structureFile ? [structureFile] : []}
+						hint="CIF · Up to 5 MB"
 						onChange={handleStructureFileChange}
-						type="file"
 					/>
 				</div>
 
@@ -345,14 +345,14 @@ const QuantumExpresso = ({
 													</Button>
 												</>
 											) : (
-												<Input
+												<FileUpload
 													accept=".upf"
-													aria-label={`${element} UPF pseudopotential`}
+													ariaLabel={`${element} UPF pseudopotential`}
 													disabled={isSubmitting}
+													hint="UPF · Up to 5 MB"
 													onChange={(event) =>
 														handlePseudopotentialFileChange(element, event)
 													}
-													type="file"
 												/>
 											)}
 										</div>
