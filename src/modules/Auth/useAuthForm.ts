@@ -11,7 +11,10 @@ export type AuthMode = "login" | "register";
 const usernameField = z
 	.string()
 	.check(z.refine((value) => value.trim().length > 0, "Username is required."));
-const passwordField = z
+const loginPasswordField = z
+	.string()
+	.check(z.minLength(1, "Password is required."));
+const registrationPasswordField = z
 	.string()
 	.check(
 		z.minLength(1, "Password is required."),
@@ -22,7 +25,7 @@ const loginSchema = z.object({
 	username: usernameField,
 	domain: z.string(),
 	email: z.string(),
-	password: passwordField,
+	password: loginPasswordField,
 	confirmPassword: z.string(),
 });
 
@@ -38,7 +41,7 @@ const registerSchema = z
 			error: ({ input }) =>
 				input === "" ? "Email is required." : "Enter a valid email address.",
 		}),
-		password: passwordField,
+		password: registrationPasswordField,
 		confirmPassword: z
 			.string()
 			.check(z.minLength(1, "Please confirm your password.")),

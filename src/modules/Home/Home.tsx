@@ -17,6 +17,7 @@ const Home = () => {
 
 	return (
 		<section className="min-h-full w-full overflow-x-hidden bg-accent p-2 sm:p-3 xl:h-full xl:overflow-hidden xl:p-4">
+			<h1 className="sr-only">Simulation Workspace</h1>
 			<div
 				className={cn(
 					"grid min-h-0 w-full grid-cols-1 gap-3 lg:grid-cols-2 xl:h-full",

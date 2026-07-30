@@ -30,7 +30,11 @@ const Login = () => {
 			<Card className="my-auto w-full max-w-lg">
 				<CardHeader>
 					<CardTitle className="font-semibold">
-						{isRegistering ? "Create an Account" : "Sign in to Simulation Hub"}
+						<h1>
+							{isRegistering
+								? "Create an Account"
+								: "Sign in to Simulation Hub"}
+						</h1>
 					</CardTitle>
 					<CardDescription>
 						{isRegistering

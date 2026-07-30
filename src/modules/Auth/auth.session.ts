@@ -64,13 +64,21 @@ export const getAuthSession = () => currentSession;
 
 export const saveAuthSession = (session: AuthSession) => {
 	currentSession = session;
-	window.localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
+	try {
+		window.localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
+	} catch {
+		// Keep the session available in memory when browser storage is unavailable.
+	}
 	emitSessionChange();
 };
 
 export const clearAuthSession = () => {
 	currentSession = null;
-	window.localStorage.removeItem(AUTH_SESSION_KEY);
+	try {
+		window.localStorage.removeItem(AUTH_SESSION_KEY);
+	} catch {
+		// Clearing the in-memory session is sufficient for the current app run.
+	}
 	emitSessionChange();
 };
 
