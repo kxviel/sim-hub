@@ -1,14 +1,8 @@
 import { Download, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SectionTitle from "@/modules/Home/SectionTitle";
+import { getSimulationResultFields } from "@/modules/Home/SimUtils";
 import type { HomeState, SubmissionStatus } from "@/modules/Home/useHome";
-
-const RESULT_FIELDS = [
-	{ key: "energy", label: "Energy" },
-	{ key: "fermi_energy", label: "Fermi Energy" },
-	{ key: "volume", label: "Volume" },
-	{ key: "scf_iterations", label: "SCF Iterations" },
-];
 
 const STATUS_LABELS: Record<SubmissionStatus, string> = {
 	idle: "Not Started",
@@ -18,10 +12,20 @@ const STATUS_LABELS: Record<SubmissionStatus, string> = {
 	error: "Error",
 };
 
+const formatResultValue = (value: unknown) => {
+	if (typeof value === "number") {
+		return Number.isInteger(value) ? String(value) : value.toPrecision(8);
+	}
+
+	return String(value);
+};
+
 const ResultRow = ({ label, value }: { label: string; value: unknown }) => (
 	<div className="flex justify-between gap-4 border-gray-100 border-b py-2 last:border-0">
 		<p className="text-muted-foreground text-sm">{label}</p>
-		<p className="min-w-0 break-words text-right text-sm">{String(value)}</p>
+		<p className="min-w-0 wrap-break-word text-right text-sm">
+			{formatResultValue(value)}
+		</p>
 	</div>
 );
 
@@ -31,6 +35,8 @@ const SimulationResults = ({
 	isPolling,
 	handleDownloadResult,
 }: HomeState) => {
+	const resultFields = getSimulationResultFields(submission.simulatorLabel);
+
 	if (!setupComplete || submission.status === "idle") {
 		return (
 			<div className="h-full min-h-0 w-full space-y-4 overflow-y-auto overscroll-contain rounded border border-gray-200 bg-white p-4 sm:p-6">
@@ -70,7 +76,7 @@ const SimulationResults = ({
 				<ResultRow label="Project" value={submission.projectName} />
 				<ResultRow label="Submitted By" value={submission.username} />
 
-				{RESULT_FIELDS.map(({ key, label }) => {
+				{resultFields.map(({ key, label }) => {
 					const value = submission.resultData?.[key];
 
 					return value === undefined ||

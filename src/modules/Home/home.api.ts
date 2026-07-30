@@ -27,12 +27,22 @@ type ApiResponse = {
 	downloadUrl?: unknown;
 	download_link?: unknown;
 	downloadLink?: unknown;
+	result_url?: unknown;
+	resultUrl?: unknown;
+	result_download_url?: unknown;
+	resultDownloadUrl?: unknown;
 };
-
-const RESULT_FIELDS = ["energy", "fermi_energy", "volume", "scf_iterations"];
 
 const getString = (value: unknown) =>
 	typeof value === "string" && value.trim() ? value.trim() : "";
+
+const hasResultValues = (resultData: SimulationResultData | null) =>
+	Boolean(
+		resultData &&
+			Object.values(resultData).some(
+				(value) => value !== undefined && value !== null && value !== "",
+			),
+	);
 
 const parseResultData = (value: unknown): SimulationResultData | null => {
 	if (typeof value === "string") {
@@ -55,20 +65,35 @@ const parseSimulationResponse = (
 ): SimulationResponse => {
 	const response = (payload ?? {}) as ApiResponse;
 	const resultData = parseResultData(response.data);
-	const projectName = Array.isArray(response.project_name)
-		? getString(response.project_name[0])
-		: getString(response.project_name ?? response.projectName);
+	const nestedResponse =
+		typeof response.data === "object" && response.data !== null
+			? (response.data as ApiResponse)
+			: {};
+	const projectNameValue =
+		response.project_name ??
+		response.projectName ??
+		nestedResponse.project_name ??
+		nestedResponse.projectName;
+	const projectName = Array.isArray(projectNameValue)
+		? getString(projectNameValue[0])
+		: getString(projectNameValue);
 	const downloadUrl = getString(
 		response.download_url ??
 			response.downloadUrl ??
 			response.download_link ??
-			response.downloadLink,
+			response.downloadLink ??
+			response.result_url ??
+			response.resultUrl ??
+			response.result_download_url ??
+			response.resultDownloadUrl ??
+			nestedResponse.download_url ??
+			nestedResponse.downloadUrl ??
+			nestedResponse.download_link ??
+			nestedResponse.downloadLink,
 	);
 
 	return {
-		ready: Boolean(
-			resultData && RESULT_FIELDS.some((field) => resultData[field] != null),
-		),
+		ready: hasResultValues(resultData),
 		message: getString(response.message),
 		projectName: projectName || fallbackProjectName,
 		resultData,
