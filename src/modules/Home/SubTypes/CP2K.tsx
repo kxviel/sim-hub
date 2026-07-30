@@ -1,330 +1,439 @@
-import { useState } from "react";
+import { XSquare } from "lucide-react";
+import { type ChangeEvent, useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+	extractElementsFromCifFile,
+	normalizeCifFile,
+} from "@/modules/Home/cifParser";
 import FileUpload from "@/modules/Home/FileUpload";
 import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { MAX_FILE_SIZE, simulationTypeList } from "@/modules/Home/SimUtils";
-
+	CP2K_TEMPLATE_BASE,
+	MAX_FILE_SIZE,
+	simulationTypeList,
+} from "@/modules/Home/SimUtils";
 import type { HomeState } from "@/modules/Home/useHome";
 
-const RUN_TYPES = [
-	{ label: "Energy and forces", value: "ENERGY_FORCE" },
-	{ label: "Geometry optimization", value: "GEO_OPT" },
-	{ label: "Cell optimization", value: "CELL_OPT" },
-	{ label: "Molecular dynamics", value: "MD" },
-];
-
-const QUICKSTEP_METHODS = [
-	{ label: "GPW", value: "GPW" },
-	{ label: "GAPW", value: "GAPW" },
-];
-
-const XC_FUNCTIONALS = [
-	{ label: "PBE", value: "PBE" },
-	{ label: "PBEsol", value: "PBESOL" },
-	{ label: "BLYP", value: "BLYP" },
-];
-
-// API template: update the slug and multipart field names to match the backend.
 const API_TEMPLATE = {
 	calculatorSlug: "CP2K",
 	projectPrefix: "DFT_cp2k",
 	simulatorLabel: "CP2K",
-	primaryFileField: "input_file",
-	optionalFileField: "data_files",
+	parameterFileField: "csv_file",
+	structureFileField: "structure_file",
+	pseudopotentialFileField: "pseudofiles",
+	basisFileField: "basis_files",
 } as const;
 
+type ElementFiles = Record<string, File | undefined>;
+
+const validateRequiredFile = (
+	file: File,
+	label: string,
+	expectedExtension: ".csv" | ".cif",
+) => {
+	if (!file.name.toLowerCase().endsWith(expectedExtension)) {
+		return `${label} must be a ${expectedExtension.toUpperCase()} file.`;
+	}
+
+	if (file.size > MAX_FILE_SIZE) {
+		return `${label} must be 5 MB or smaller.`;
+	}
+
+	return "";
+};
+
+const validateSupportFile = (file: File, label: string) =>
+	file.size > MAX_FILE_SIZE ? `${label} must be 5 MB or smaller.` : "";
+
+type SelectedFileProps = {
+	file: File;
+	label: string;
+	onRemove: () => void;
+};
+
+const SelectedFile = ({ file, label, onRemove }: SelectedFileProps) => (
+	<div className="flex min-w-0 items-center justify-between gap-2 rounded border border-gray-200 p-2">
+		<p className="min-w-0 truncate text-sm">{file.name}</p>
+		<Button
+			aria-label={`Remove ${label} ${file.name}`}
+			onClick={onRemove}
+			variant="ghost"
+		>
+			<XSquare aria-hidden="true" className="text-red-600" />
+		</Button>
+	</div>
+);
+
+type SupportFileInputProps = {
+	ariaLabel: string;
+	disabled: boolean;
+	file: File | undefined;
+	hint: string;
+	onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+	onRemove: () => void;
+};
+
+const SupportFileInput = ({
+	ariaLabel,
+	disabled,
+	file,
+	hint,
+	onChange,
+	onRemove,
+}: SupportFileInputProps) =>
+	file ? (
+		<SelectedFile file={file} label={ariaLabel} onRemove={onRemove} />
+	) : (
+		<FileUpload
+			ariaLabel={ariaLabel}
+			disabled={disabled}
+			hint={hint}
+			onChange={onChange}
+		/>
+	);
+
 const CP2K = ({ simType, isSubmitting, handleConfiguredSubmit }: HomeState) => {
-	const [runType, setRunType] = useState("ENERGY_FORCE");
-	const [method, setMethod] = useState("GPW");
-	const [xcFunctional, setXcFunctional] = useState("PBE");
-	const [cutoff, setCutoff] = useState("400");
-	const [relativeCutoff, setRelativeCutoff] = useState("60");
-	const [epsScf, setEpsScf] = useState("1e-6");
-	const [maxScf, setMaxScf] = useState("50");
-	const [inputFiles, setInputFiles] = useState<File[]>([]);
-	const [dataFiles, setDataFiles] = useState<File[]>([]);
+	const [parameterFile, setParameterFile] = useState<File | null>(null);
+	const [structureFile, setStructureFile] = useState<File | null>(null);
+	const [structureElements, setStructureElements] = useState<string[]>([]);
+	const [structureWarning, setStructureWarning] = useState("");
+	const [pseudopotentialFiles, setPseudopotentialFiles] =
+		useState<ElementFiles>({});
+	const [basisFiles, setBasisFiles] = useState<ElementFiles>({});
 
-	const handleInputFileChange = (
-		event: React.ChangeEvent<HTMLInputElement>,
+	const handleParameterFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+
+		if (!file) {
+			return;
+		}
+
+		const error = validateRequiredFile(file, "CP2K parameter file", ".csv");
+
+		if (error) {
+			toast.error(error);
+			event.target.value = "";
+			return;
+		}
+
+		setParameterFile(file);
+		event.target.value = "";
+	};
+
+	const handleStructureFileChange = async (
+		event: ChangeEvent<HTMLInputElement>,
 	) => {
-		const selectedFiles = Array.from(event.target.files ?? []);
+		const file = event.target.files?.[0];
 
-		if (selectedFiles.some((file) => file.size > MAX_FILE_SIZE)) {
-			toast.error("CP2K input files must be 5 MB or smaller.");
+		if (!file) {
+			return;
+		}
+
+		const error = validateRequiredFile(file, "CP2K structure file", ".cif");
+
+		if (error) {
+			toast.error(error);
 			event.target.value = "";
 			return;
 		}
 
-		setInputFiles(selectedFiles);
+		setStructureFile(file);
+		setStructureElements([]);
+		setStructureWarning("");
+		setPseudopotentialFiles({});
+		setBasisFiles({});
+
+		try {
+			const parseResult = await extractElementsFromCifFile(file);
+			setStructureElements(parseResult.elements);
+			setStructureWarning(parseResult.warning);
+
+			if (parseResult.elements.length === 0) {
+				toast.error(parseResult.warning);
+			}
+		} catch {
+			const message =
+				"Could not read this CIF file. Upload a valid text CIF file.";
+			setStructureWarning(message);
+			toast.error(message);
+		}
+
+		event.target.value = "";
 	};
 
-	const handleDataFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const selectedFiles = Array.from(event.target.files ?? []);
+	const handleSupportFileChange = (
+		element: string,
+		kind: "pseudopotential" | "basis set",
+		event: ChangeEvent<HTMLInputElement>,
+	) => {
+		const file = event.target.files?.[0];
 
-		if (selectedFiles.some((file) => file.size > MAX_FILE_SIZE)) {
-			toast.error("CP2K data files must be 5 MB or smaller.");
+		if (!file) {
+			return;
+		}
+
+		const error = validateSupportFile(file, `${element} ${kind} file`);
+
+		if (error) {
+			toast.error(error);
 			event.target.value = "";
 			return;
 		}
 
-		setDataFiles(selectedFiles);
+		const setFiles =
+			kind === "pseudopotential" ? setPseudopotentialFiles : setBasisFiles;
+		setFiles((currentFiles) => ({
+			...currentFiles,
+			[element]: file,
+		}));
+		event.target.value = "";
 	};
 
-	const handleRunSimulation = () => {
-		const parsedCutoff = Number(cutoff);
-		const parsedRelativeCutoff = Number(relativeCutoff);
-		const parsedEpsScf = Number(epsScf);
-		const parsedMaxScf = Number(maxScf);
+	const removeSupportFile = (
+		element: string,
+		kind: "pseudopotential" | "basis set",
+	) => {
+		const setFiles =
+			kind === "pseudopotential" ? setPseudopotentialFiles : setBasisFiles;
+		setFiles((currentFiles) => {
+			const nextFiles = { ...currentFiles };
+			delete nextFiles[element];
+			return nextFiles;
+		});
+	};
 
-		if (!Number.isFinite(parsedCutoff) || parsedCutoff <= 0) {
-			toast.error("Plane-wave cutoff must be greater than zero.");
+	const removeStructureFile = () => {
+		setStructureFile(null);
+		setStructureElements([]);
+		setStructureWarning("");
+		setPseudopotentialFiles({});
+		setBasisFiles({});
+	};
+
+	const handleRunSimulation = async () => {
+		if (!parameterFile) {
+			toast.error("Upload the CP2K CSV parameter file.");
 			return;
 		}
 
-		if (!Number.isFinite(parsedRelativeCutoff) || parsedRelativeCutoff <= 0) {
-			toast.error("Relative cutoff must be greater than zero.");
+		if (!structureFile) {
+			toast.error("Upload the CP2K material structure as a CIF file.");
 			return;
 		}
 
-		if (!Number.isFinite(parsedEpsScf) || parsedEpsScf <= 0) {
-			toast.error("SCF accuracy must be greater than zero.");
+		if (structureElements.length === 0) {
+			toast.error(
+				structureWarning ||
+					"No chemical elements were detected in the CIF file.",
+			);
 			return;
 		}
 
-		if (
-			!Number.isInteger(parsedMaxScf) ||
-			parsedMaxScf < 1 ||
-			parsedMaxScf > 1000
-		) {
-			toast.error("Maximum SCF steps must be an integer from 1 to 1000.");
-			return;
+		const selectedPseudopotentials = structureElements
+			.map((element) => pseudopotentialFiles[element])
+			.filter((file): file is File => Boolean(file));
+		const selectedBasisFiles = structureElements
+			.map((element) => basisFiles[element])
+			.filter((file): file is File => Boolean(file));
+		const hasSupportFiles =
+			selectedPseudopotentials.length > 0 || selectedBasisFiles.length > 0;
+
+		if (hasSupportFiles) {
+			const missingFiles = structureElements.flatMap((element) => {
+				const missing: string[] = [];
+
+				if (!pseudopotentialFiles[element]) {
+					missing.push(`${element} pseudopotential`);
+				}
+
+				if (!basisFiles[element]) {
+					missing.push(`${element} basis set`);
+				}
+
+				return missing;
+			});
+
+			if (missingFiles.length > 0) {
+				toast.error(
+					`Complete every pseudo/basis pair or remove all support files. Missing: ${missingFiles.join(", ")}.`,
+				);
+				return;
+			}
 		}
 
-		if (inputFiles.length === 0) {
-			toast.error("Upload a CP2K input or structure file.");
-			return;
-		}
-
+		const normalizedStructureFile = await normalizeCifFile(structureFile);
 		handleConfiguredSubmit({
 			...API_TEMPLATE,
-			parameters: {
-				run_type: runType,
-				method,
-				xc_functional: xcFunctional,
-				cutoff: parsedCutoff,
-				rel_cutoff: parsedRelativeCutoff,
-				eps_scf: parsedEpsScf,
-				max_scf: parsedMaxScf,
-			},
 			fileGroups: [
-				{ fieldName: API_TEMPLATE.primaryFileField, files: inputFiles },
-				{ fieldName: API_TEMPLATE.optionalFileField, files: dataFiles },
+				{
+					fieldName: API_TEMPLATE.parameterFileField,
+					files: [parameterFile],
+				},
+				{
+					fieldName: API_TEMPLATE.structureFileField,
+					files: [normalizedStructureFile],
+				},
+				{
+					fieldName: API_TEMPLATE.pseudopotentialFileField,
+					files: selectedPseudopotentials,
+				},
+				{
+					fieldName: API_TEMPLATE.basisFileField,
+					files: selectedBasisFiles,
+				},
 			],
 		});
 	};
 
 	return (
-		<div className="w-full space-y-5">
-			<div className="space-y-1">
+		<div className="w-full space-y-4">
+			<p>Set the required parameters and upload the simulation files.</p>
+			<p className="font-semibold text-lg">
+				{simulationTypeList.find((item) => item.value === simType)?.label}
+			</p>
+
+			<div className="w-full space-y-4 rounded border border-gray-200 p-2">
 				<p>
-					Configure the CP2K workflow, Quickstep method, density grid, and SCF
-					convergence controls.
+					Upload one CSV parameter file and one CIF structure file. CP2K
+					pseudopotential and basis-set files are optional. Each file must be{" "}
+					<strong className="font-semibold text-primary">5 MB</strong> or less.
 				</p>
-				<p className="text-sm text-muted-foreground">
-					{simulationTypeList.find((item) => item.value === simType)?.label}
+				<p className="rounded border border-primary/20 bg-primary/5 p-3 text-sm">
+					Support-file rule: upload no support files, or upload both one
+					pseudopotential and one basis-set file for every detected element.
 				</p>
+
+				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
+					<p className="font-semibold text-lg">Input Parameters</p>
+					<p>Upload the CP2K input parameters as a CSV file.</p>
+					<div className="grid gap-4 sm:grid-cols-2">
+						<a
+							className={buttonVariants({ variant: "outline" })}
+							download="cp2k-input-parameters-template.csv"
+							href={`${CP2K_TEMPLATE_BASE}/input-parameters-template.csv`}
+						>
+							Download CSV Template
+						</a>
+						<FileUpload
+							accept=".csv,text/csv"
+							ariaLabel="CP2K CSV parameter file"
+							disabled={isSubmitting}
+							files={parameterFile ? [parameterFile] : []}
+							hint="CSV · Up to 5 MB"
+							onChange={handleParameterFileChange}
+						/>
+					</div>
+					{parameterFile ? (
+						<SelectedFile
+							file={parameterFile}
+							label="CP2K parameter file"
+							onRemove={() => setParameterFile(null)}
+						/>
+					) : null}
+				</div>
+
+				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
+					<p className="font-semibold text-lg">Structure File</p>
+					<p>
+						Upload the mandatory material structure in CIF format. Elements are
+						detected from this file.
+					</p>
+					<FileUpload
+						accept=".cif,chemical/x-cif"
+						ariaLabel="CP2K CIF structure file"
+						disabled={isSubmitting}
+						files={structureFile ? [structureFile] : []}
+						hint="CIF · Up to 5 MB"
+						onChange={handleStructureFileChange}
+					/>
+					{structureFile ? (
+						<SelectedFile
+							file={structureFile}
+							label="CP2K structure file"
+							onRemove={removeStructureFile}
+						/>
+					) : null}
+				</div>
+
+				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
+					<div>
+						<p className="font-semibold text-lg">Detected CIF Elements</p>
+						<p className="text-sm">
+							Upload the CIF to unlock an optional pseudo/basis pair for each
+							element.
+						</p>
+					</div>
+
+					{structureWarning ? (
+						<p className="rounded border border-amber-300 bg-amber-50 p-3 text-amber-900 text-sm">
+							{structureWarning}
+						</p>
+					) : null}
+
+					{structureElements.length > 0 ? (
+						<div className="space-y-3">
+							<p className="text-muted-foreground text-sm">
+								{structureElements.length} element
+								{structureElements.length === 1 ? "" : "s"} detected
+							</p>
+							{structureElements.map((element) => (
+								<div
+									className="space-y-3 rounded border border-gray-200 p-3"
+									key={element}
+								>
+									<div className="min-w-0">
+										<span className="inline-flex rounded-full bg-primary/10 px-3 py-1 font-semibold text-primary text-sm">
+											{element}
+										</span>
+										<p className="mt-1 text-muted-foreground text-xs">
+											Atomic element from CIF
+										</p>
+									</div>
+									<div className="grid min-w-0 gap-3 sm:grid-cols-2">
+										<div className="min-w-0 space-y-2">
+											<p className="font-medium text-sm">Pseudopotential</p>
+											<SupportFileInput
+												ariaLabel={`${element} CP2K pseudopotential`}
+												disabled={isSubmitting}
+												file={pseudopotentialFiles[element]}
+												hint="Pseudo file · Up to 5 MB"
+												onChange={(event) =>
+													handleSupportFileChange(
+														element,
+														"pseudopotential",
+														event,
+													)
+												}
+												onRemove={() =>
+													removeSupportFile(element, "pseudopotential")
+												}
+											/>
+										</div>
+										<div className="min-w-0 space-y-2">
+											<p className="font-medium text-sm">Basis Set</p>
+											<SupportFileInput
+												ariaLabel={`${element} CP2K basis set`}
+												disabled={isSubmitting}
+												file={basisFiles[element]}
+												hint="Basis file · Up to 5 MB"
+												onChange={(event) =>
+													handleSupportFileChange(element, "basis set", event)
+												}
+												onRemove={() => removeSupportFile(element, "basis set")}
+											/>
+										</div>
+									</div>
+								</div>
+							))}
+						</div>
+					) : (
+						<p className="rounded border border-dashed border-gray-300 p-4 text-muted-foreground text-sm">
+							Upload a CIF structure file to detect elements and unlock
+							per-element CP2K support-file uploads.
+						</p>
+					)}
+				</div>
 			</div>
-
-			<fieldset className="space-y-4 rounded border border-gray-200 p-4">
-				<legend className="px-1 text-base font-semibold">Calculation</legend>
-				<div className="space-y-2">
-					<Label htmlFor="cp2k-run-type">Run Type</Label>
-					<Select
-						id="cp2k-run-type"
-						name="cp2k-run-type"
-						items={RUN_TYPES}
-						value={runType}
-						disabled={isSubmitting}
-						onValueChange={(value) => setRunType(value ?? "ENERGY_FORCE")}
-					>
-						<SelectTrigger className="w-full">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent alignItemWithTrigger>
-							<SelectGroup>
-								{RUN_TYPES.map((option) => (
-									<SelectItem key={option.value} value={option.value}>
-										{option.label}
-									</SelectItem>
-								))}
-							</SelectGroup>
-						</SelectContent>
-					</Select>
-				</div>
-			</fieldset>
-
-			<fieldset className="space-y-4 rounded border border-gray-200 p-4">
-				<legend className="px-1 text-base font-semibold">
-					Electronic Structure
-				</legend>
-				<div className="space-y-2">
-					<Label htmlFor="cp2k-method">Quickstep Method</Label>
-					<Select
-						id="cp2k-method"
-						name="cp2k-method"
-						items={QUICKSTEP_METHODS}
-						value={method}
-						disabled={isSubmitting}
-						onValueChange={(value) => setMethod(value ?? "GPW")}
-					>
-						<SelectTrigger className="w-full">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent alignItemWithTrigger>
-							<SelectGroup>
-								{QUICKSTEP_METHODS.map((option) => (
-									<SelectItem key={option.value} value={option.value}>
-										{option.label}
-									</SelectItem>
-								))}
-							</SelectGroup>
-						</SelectContent>
-					</Select>
-					<p className="text-sm text-muted-foreground">
-						GPW is the standard choice; GAPW is used for all-electron-like
-						accuracy.
-					</p>
-				</div>
-				<div className="space-y-2">
-					<Label htmlFor="cp2k-xc-functional">
-						Exchange-correlation Functional
-					</Label>
-					<Select
-						id="cp2k-xc-functional"
-						name="cp2k-xc-functional"
-						items={XC_FUNCTIONALS}
-						value={xcFunctional}
-						disabled={isSubmitting}
-						onValueChange={(value) => setXcFunctional(value ?? "PBE")}
-					>
-						<SelectTrigger className="w-full">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent alignItemWithTrigger>
-							<SelectGroup>
-								{XC_FUNCTIONALS.map((option) => (
-									<SelectItem key={option.value} value={option.value}>
-										{option.label}
-									</SelectItem>
-								))}
-							</SelectGroup>
-						</SelectContent>
-					</Select>
-				</div>
-			</fieldset>
-
-			<fieldset className="space-y-4 rounded border border-gray-200 p-4">
-				<legend className="px-1 text-base font-semibold">Grid and Basis</legend>
-				<div className="space-y-2">
-					<Label htmlFor="cp2k-cutoff">Plane-wave Cutoff (Ry)</Label>
-					<Input
-						id="cp2k-cutoff"
-						type="number"
-						min={1}
-						step={10}
-						value={cutoff}
-						disabled={isSubmitting}
-						onChange={(event) => setCutoff(event.target.value)}
-					/>
-				</div>
-				<div className="space-y-2">
-					<Label htmlFor="cp2k-rel-cutoff">Relative Cutoff (Ry)</Label>
-					<Input
-						id="cp2k-rel-cutoff"
-						type="number"
-						min={1}
-						step={5}
-						value={relativeCutoff}
-						disabled={isSubmitting}
-						onChange={(event) => setRelativeCutoff(event.target.value)}
-					/>
-				</div>
-			</fieldset>
-
-			<fieldset className="space-y-4 rounded border border-gray-200 p-4">
-				<legend className="px-1 text-base font-semibold">
-					SCF Convergence
-				</legend>
-				<div className="space-y-2">
-					<Label htmlFor="cp2k-eps-scf">SCF Accuracy</Label>
-					<Input
-						id="cp2k-eps-scf"
-						type="number"
-						min={0}
-						step={1e-7}
-						value={epsScf}
-						disabled={isSubmitting}
-						onChange={(event) => setEpsScf(event.target.value)}
-					/>
-				</div>
-				<div className="space-y-2">
-					<Label htmlFor="cp2k-max-scf">Maximum SCF Steps</Label>
-					<Input
-						id="cp2k-max-scf"
-						type="number"
-						min={1}
-						max={1000}
-						step={1}
-						value={maxScf}
-						disabled={isSubmitting}
-						onChange={(event) => setMaxScf(event.target.value)}
-					/>
-				</div>
-			</fieldset>
-
-			<fieldset className="space-y-4 rounded border border-gray-200 p-4">
-				<legend className="px-1 text-base font-semibold">Input Files</legend>
-				<div className="space-y-2">
-					<Label htmlFor="cp2k-input-file">CP2K Input or Structure</Label>
-					<FileUpload
-						ariaLabel="CP2K input or structure"
-						id="cp2k-input-file"
-						accept=".inp,.cif,.xyz,.pdb"
-						disabled={isSubmitting}
-						files={inputFiles}
-						hint="INP, CIF, XYZ, or PDB · Up to 5 MB"
-						onChange={handleInputFileChange}
-					/>
-					<p className="text-sm text-muted-foreground">
-						Template field: {API_TEMPLATE.primaryFileField}. This covers the ODP
-						input-template and structure-file cases.
-					</p>
-				</div>
-				<div className="space-y-2">
-					<Label htmlFor="cp2k-data-files">
-						Basis, Potential, or Topology Files (optional)
-					</Label>
-					<FileUpload
-						ariaLabel="CP2K basis, potential, or topology files"
-						id="cp2k-data-files"
-						multiple
-						disabled={isSubmitting}
-						files={dataFiles}
-						hint="Optional basis, potential, or topology files"
-						onChange={handleDataFileChange}
-					/>
-				</div>
-			</fieldset>
 
 			<Button
 				className="my-4 w-full py-4 text-lg"

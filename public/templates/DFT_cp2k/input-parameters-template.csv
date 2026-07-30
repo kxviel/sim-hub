@@ -1,0 +1,8 @@
+calculation,energy
+basis_set,DZVP-MOLOPT-SR-GTH
+potential,GTH-PBE
+charge,0
+multiplicity,1
+cutoff,400
+rel_cutoff,40
+kpoints_mode,gamma
