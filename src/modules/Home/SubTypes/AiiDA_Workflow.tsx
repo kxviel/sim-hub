@@ -1,87 +1,22 @@
 import { XSquare } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import FileUpload from "@/modules/Home/FileUpload";
-import { MAX_FILE_SIZE, simulationTypeList } from "@/modules/Home/SimUtils";
-
+import { simulationTypeList } from "@/modules/Home/SimUtils";
+import { useAiiDA_Workflow } from "@/modules/Home/SubTypes/useAiiDA_Workflow";
 import type { HomeState } from "@/modules/Home/useHome";
-
-// API template: update these values when the AiiDA backend contract is finalized.
-const API_TEMPLATE = {
-	calculatorSlug: "AiiDA",
-	projectPrefix: "HT_aiida",
-	simulatorLabel: "AiiDA Workflow",
-	primaryFileField: "workflow_file",
-	optionalFileField: "input_files",
-} as const;
 
 const AiiDA_Workflow = (homeState: HomeState) => {
 	const { simType, isSubmitting, handleConfiguredSubmit } = homeState;
 
-	const [files, setFiles] = useState<File[]>([]);
-	const [optionalfiles, setOptionalFiles] = useState<File[]>([]);
-
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const files = e.target.files;
-
-		if (!files) return;
-
-		for (const file of Array.from(files)) {
-			if (file.size > MAX_FILE_SIZE) {
-				toast(`${file.name} must be 5 MB or smaller.`);
-				e.target.value = "";
-				return;
-			}
-		}
-
-		const fileArray = Array.from(files);
-		setFiles(() => fileArray);
-	};
-
-	const handleOptionalFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const files = e.target.files;
-
-		if (!files) return;
-
-		for (const file of Array.from(files)) {
-			if (file.size > MAX_FILE_SIZE) {
-				toast(`${file.name} must be 5 MB or smaller.`);
-				e.target.value = "";
-				return;
-			}
-		}
-
-		const fileArray = Array.from(files);
-		setOptionalFiles((prev) => [...prev, ...fileArray]);
-	};
-
-	const handleRemoveFile = (fileIndex: number) => {
-		setFiles((prevFiles) =>
-			prevFiles.filter((_, index) => index !== fileIndex),
-		);
-	};
-
-	const handleRemoveOptionalFile = (fileIndex: number) => {
-		setOptionalFiles((prevFiles) =>
-			prevFiles.filter((_, index) => index !== fileIndex),
-		);
-	};
-
-	const handleRunSimulation = () => {
-		if (files.length === 0) {
-			toast.error("Upload an AiiDA workflow configuration file.");
-			return;
-		}
-
-		handleConfiguredSubmit({
-			...API_TEMPLATE,
-			fileGroups: [
-				{ fieldName: API_TEMPLATE.primaryFileField, files },
-				{ fieldName: API_TEMPLATE.optionalFileField, files: optionalfiles },
-			],
-		});
-	};
+	const {
+		files,
+		handleFileChange,
+		handleOptionalFileChange,
+		handleRemoveFile,
+		handleRemoveOptionalFile,
+		handleRunSimulation,
+		optionalfiles,
+	} = useAiiDA_Workflow(handleConfiguredSubmit);
 
 	return (
 		<div className="w-full space-y-4">

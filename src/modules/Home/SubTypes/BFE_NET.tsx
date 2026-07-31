@@ -1,87 +1,22 @@
 import { XSquare } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import FileUpload from "@/modules/Home/FileUpload";
-import { MAX_FILE_SIZE, simulationTypeList } from "@/modules/Home/SimUtils";
-
+import { simulationTypeList } from "@/modules/Home/SimUtils";
+import { useBFE_NET } from "@/modules/Home/SubTypes/useBFE_NET";
 import type { HomeState } from "@/modules/Home/useHome";
-
-// API template: update these values when the BFE.NET backend contract is finalized.
-const API_TEMPLATE = {
-	calculatorSlug: "BFE.NET",
-	projectPrefix: "FEM_bfe_net",
-	simulatorLabel: "BFE.NET - Cantilever Beam",
-	primaryFileField: "model_file",
-	optionalFileField: "additional_files",
-} as const;
 
 const BFE_NET = (homeState: HomeState) => {
 	const { simType, isSubmitting, handleConfiguredSubmit } = homeState;
 
-	const [files, setFiles] = useState<File[]>([]);
-	const [optionalfiles, setOptionalFiles] = useState<File[]>([]);
-
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const files = e.target.files;
-
-		if (!files) return;
-
-		for (const file of Array.from(files)) {
-			if (file.size > MAX_FILE_SIZE) {
-				toast(`${file.name} must be 5 MB or smaller.`);
-				e.target.value = "";
-				return;
-			}
-		}
-
-		const fileArray = Array.from(files);
-		setFiles(() => fileArray);
-	};
-
-	const handleOptionalFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const files = e.target.files;
-
-		if (!files) return;
-
-		for (const file of Array.from(files)) {
-			if (file.size > MAX_FILE_SIZE) {
-				toast(`${file.name} must be 5 MB or smaller.`);
-				e.target.value = "";
-				return;
-			}
-		}
-
-		const fileArray = Array.from(files);
-		setOptionalFiles((prev) => [...prev, ...fileArray]);
-	};
-
-	const handleRemoveFile = (fileIndex: number) => {
-		setFiles((prevFiles) =>
-			prevFiles.filter((_, index) => index !== fileIndex),
-		);
-	};
-
-	const handleRemoveOptionalFile = (fileIndex: number) => {
-		setOptionalFiles((prevFiles) =>
-			prevFiles.filter((_, index) => index !== fileIndex),
-		);
-	};
-
-	const handleRunSimulation = () => {
-		if (files.length === 0) {
-			toast.error("Upload a BFE.NET model definition.");
-			return;
-		}
-
-		handleConfiguredSubmit({
-			...API_TEMPLATE,
-			fileGroups: [
-				{ fieldName: API_TEMPLATE.primaryFileField, files },
-				{ fieldName: API_TEMPLATE.optionalFileField, files: optionalfiles },
-			],
-		});
-	};
+	const {
+		files,
+		handleFileChange,
+		handleOptionalFileChange,
+		handleRemoveFile,
+		handleRemoveOptionalFile,
+		handleRunSimulation,
+		optionalfiles,
+	} = useBFE_NET(handleConfiguredSubmit);
 
 	return (
 		<div className="w-full space-y-4">

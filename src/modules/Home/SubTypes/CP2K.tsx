@@ -1,49 +1,13 @@
 import { XSquare } from "lucide-react";
-import { type ChangeEvent, useState } from "react";
-import { toast } from "sonner";
+import type { ChangeEvent } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import {
-	extractElementsFromCifFile,
-	normalizeCifFile,
-} from "@/modules/Home/cifParser";
 import FileUpload from "@/modules/Home/FileUpload";
 import {
 	CP2K_TEMPLATE_BASE,
-	MAX_FILE_SIZE,
 	simulationTypeList,
 } from "@/modules/Home/SimUtils";
+import { useCP2K } from "@/modules/Home/SubTypes/useCP2K";
 import type { HomeState } from "@/modules/Home/useHome";
-
-const API_TEMPLATE = {
-	calculatorSlug: "CP2K",
-	projectPrefix: "DFT_cp2k",
-	simulatorLabel: "CP2K",
-	parameterFileField: "csv_file",
-	structureFileField: "structure_file",
-	pseudopotentialFileField: "pseudofiles",
-	basisFileField: "basis_files",
-} as const;
-
-type ElementFiles = Record<string, File | undefined>;
-
-const validateRequiredFile = (
-	file: File,
-	label: string,
-	expectedExtension: ".csv" | ".cif",
-) => {
-	if (!file.name.toLowerCase().endsWith(expectedExtension)) {
-		return `${label} must be a ${expectedExtension.toUpperCase()} file.`;
-	}
-
-	if (file.size > MAX_FILE_SIZE) {
-		return `${label} must be 5 MB or smaller.`;
-	}
-
-	return "";
-};
-
-const validateSupportFile = (file: File, label: string) =>
-	file.size > MAX_FILE_SIZE ? `${label} must be 5 MB or smaller.` : "";
 
 type SelectedFileProps = {
 	file: File;
@@ -93,197 +57,23 @@ const SupportFileInput = ({
 	);
 
 const CP2K = ({ simType, isSubmitting, handleConfiguredSubmit }: HomeState) => {
-	const [parameterFile, setParameterFile] = useState<File | null>(null);
-	const [structureFile, setStructureFile] = useState<File | null>(null);
-	const [structureElements, setStructureElements] = useState<string[]>([]);
-	const [structureWarning, setStructureWarning] = useState("");
-	const [pseudopotentialFiles, setPseudopotentialFiles] =
-		useState<ElementFiles>({});
-	const [basisFiles, setBasisFiles] = useState<ElementFiles>({});
-
-	const handleParameterFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-		const file = event.target.files?.[0];
-
-		if (!file) {
-			return;
-		}
-
-		const error = validateRequiredFile(file, "CP2K parameter file", ".csv");
-
-		if (error) {
-			toast.error(error);
-			event.target.value = "";
-			return;
-		}
-
-		setParameterFile(file);
-		event.target.value = "";
-	};
-
-	const handleStructureFileChange = async (
-		event: ChangeEvent<HTMLInputElement>,
-	) => {
-		const file = event.target.files?.[0];
-
-		if (!file) {
-			return;
-		}
-
-		const error = validateRequiredFile(file, "CP2K structure file", ".cif");
-
-		if (error) {
-			toast.error(error);
-			event.target.value = "";
-			return;
-		}
-
-		setStructureFile(file);
-		setStructureElements([]);
-		setStructureWarning("");
-		setPseudopotentialFiles({});
-		setBasisFiles({});
-
-		try {
-			const parseResult = await extractElementsFromCifFile(file);
-			setStructureElements(parseResult.elements);
-			setStructureWarning(parseResult.warning);
-
-			if (parseResult.elements.length === 0) {
-				toast.error(parseResult.warning);
-			}
-		} catch {
-			const message =
-				"Could not read this CIF file. Upload a valid text CIF file.";
-			setStructureWarning(message);
-			toast.error(message);
-		}
-
-		event.target.value = "";
-	};
-
-	const handleSupportFileChange = (
-		element: string,
-		kind: "pseudopotential" | "basis set",
-		event: ChangeEvent<HTMLInputElement>,
-	) => {
-		const file = event.target.files?.[0];
-
-		if (!file) {
-			return;
-		}
-
-		const error = validateSupportFile(file, `${element} ${kind} file`);
-
-		if (error) {
-			toast.error(error);
-			event.target.value = "";
-			return;
-		}
-
-		const setFiles =
-			kind === "pseudopotential" ? setPseudopotentialFiles : setBasisFiles;
-		setFiles((currentFiles) => ({
-			...currentFiles,
-			[element]: file,
-		}));
-		event.target.value = "";
-	};
-
-	const removeSupportFile = (
-		element: string,
-		kind: "pseudopotential" | "basis set",
-	) => {
-		const setFiles =
-			kind === "pseudopotential" ? setPseudopotentialFiles : setBasisFiles;
-		setFiles((currentFiles) => {
-			const nextFiles = { ...currentFiles };
-			delete nextFiles[element];
-			return nextFiles;
-		});
-	};
-
-	const removeStructureFile = () => {
-		setStructureFile(null);
-		setStructureElements([]);
-		setStructureWarning("");
-		setPseudopotentialFiles({});
-		setBasisFiles({});
-	};
-
-	const handleRunSimulation = async () => {
-		if (!parameterFile) {
-			toast.error("Upload the CP2K CSV parameter file.");
-			return;
-		}
-
-		if (!structureFile) {
-			toast.error("Upload the CP2K material structure as a CIF file.");
-			return;
-		}
-
-		if (structureElements.length === 0) {
-			toast.error(
-				structureWarning ||
-					"No chemical elements were detected in the CIF file.",
-			);
-			return;
-		}
-
-		const selectedPseudopotentials = structureElements
-			.map((element) => pseudopotentialFiles[element])
-			.filter((file): file is File => Boolean(file));
-		const selectedBasisFiles = structureElements
-			.map((element) => basisFiles[element])
-			.filter((file): file is File => Boolean(file));
-		const hasSupportFiles =
-			selectedPseudopotentials.length > 0 || selectedBasisFiles.length > 0;
-
-		if (hasSupportFiles) {
-			const missingFiles = structureElements.flatMap((element) => {
-				const missing: string[] = [];
-
-				if (!pseudopotentialFiles[element]) {
-					missing.push(`${element} pseudopotential`);
-				}
-
-				if (!basisFiles[element]) {
-					missing.push(`${element} basis set`);
-				}
-
-				return missing;
-			});
-
-			if (missingFiles.length > 0) {
-				toast.error(
-					`Complete every pseudo/basis pair or remove all support files. Missing: ${missingFiles.join(", ")}.`,
-				);
-				return;
-			}
-		}
-
-		const normalizedStructureFile = await normalizeCifFile(structureFile);
-		handleConfiguredSubmit({
-			...API_TEMPLATE,
-			fileGroups: [
-				{
-					fieldName: API_TEMPLATE.parameterFileField,
-					files: [parameterFile],
-				},
-				{
-					fieldName: API_TEMPLATE.structureFileField,
-					files: [normalizedStructureFile],
-				},
-				{
-					fieldName: API_TEMPLATE.pseudopotentialFileField,
-					files: selectedPseudopotentials,
-				},
-				{
-					fieldName: API_TEMPLATE.basisFileField,
-					files: selectedBasisFiles,
-				},
-			],
-		});
-	};
+	const {
+		basisFiles,
+		handleBasisFileChange,
+		handleParameterFileChange,
+		handlePseudopotentialFileChange,
+		handleRunSimulation,
+		handleStructureFileChange,
+		parameterFile,
+		pseudopotentialFiles,
+		removeBasisFile,
+		removeParameterFile,
+		removePseudopotentialFile,
+		removeStructureFile,
+		structureElements,
+		structureFile,
+		structureWarning,
+	} = useCP2K(handleConfiguredSubmit);
 
 	return (
 		<div className="w-full space-y-4">
@@ -327,7 +117,7 @@ const CP2K = ({ simType, isSubmitting, handleConfiguredSubmit }: HomeState) => {
 						<SelectedFile
 							file={parameterFile}
 							label="CP2K parameter file"
-							onRemove={() => setParameterFile(null)}
+							onRemove={removeParameterFile}
 						/>
 					) : null}
 				</div>
@@ -398,15 +188,9 @@ const CP2K = ({ simType, isSubmitting, handleConfiguredSubmit }: HomeState) => {
 												file={pseudopotentialFiles[element]}
 												hint="Pseudo file · Up to 5 MB"
 												onChange={(event) =>
-													handleSupportFileChange(
-														element,
-														"pseudopotential",
-														event,
-													)
+													handlePseudopotentialFileChange(element, event)
 												}
-												onRemove={() =>
-													removeSupportFile(element, "pseudopotential")
-												}
+												onRemove={() => removePseudopotentialFile(element)}
 											/>
 										</div>
 										<div className="min-w-0 space-y-2">
@@ -417,9 +201,9 @@ const CP2K = ({ simType, isSubmitting, handleConfiguredSubmit }: HomeState) => {
 												file={basisFiles[element]}
 												hint="Basis file · Up to 5 MB"
 												onChange={(event) =>
-													handleSupportFileChange(element, "basis set", event)
+													handleBasisFileChange(element, event)
 												}
-												onRemove={() => removeSupportFile(element, "basis set")}
+												onRemove={() => removeBasisFile(element)}
 											/>
 										</div>
 									</div>
