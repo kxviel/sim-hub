@@ -2,6 +2,7 @@ import ABINIT from "@/modules/Home/SubTypes/ABINIT";
 import AiiDA_Workflow from "@/modules/Home/SubTypes/AiiDA_Workflow";
 import ASE from "@/modules/Home/SubTypes/ASE";
 import BFE_NET from "@/modules/Home/SubTypes/BFE_NET";
+import BigDFT from "@/modules/Home/SubTypes/BigDFT";
 import CP2K from "@/modules/Home/SubTypes/CP2K";
 import JAX_FEM from "@/modules/Home/SubTypes/JAX_FEM";
 import MEEP_FDTD from "@/modules/Home/SubTypes/MEEP_FDTD";
@@ -75,7 +76,7 @@ export const SIMULATION_LIST: SimulationState[] = [
 		id: "DFT",
 		label: "DFT (Density Functional Theory)",
 		help: "Quantum-level material simulation for crystalline and atomistic systems.",
-		subtypes: ["Quantum ESPRESSO", "ABINIT", "CP2K"],
+		subtypes: ["Quantum ESPRESSO", "ABINIT", "CP2K", "BigDFT"],
 	},
 	{
 		id: "FEM",
@@ -118,6 +119,8 @@ const SIMULATION_SUBTYPE_HELP: Record<string, string> = {
 	ABINIT:
 		"Configure the ABINIT workflow, plane-wave basis, Brillouin-zone sampling, and convergence controls.",
 	CP2K: "Configure the CP2K workflow, Quickstep method, density grid, and SCF convergence controls.",
+	BigDFT:
+		"Configure a BigDFT calculation with its parameter, structure, and optional per-element pseudopotential files.",
 	"BFE.NET - Cantilever Beam":
 		"Upload a cantilever model definition containing geometry, material, loads, and boundary conditions.",
 	MYSTRAN:
@@ -143,6 +146,7 @@ export const simulationParameterComponents: SubTypeConfig = {
 	"Quantum ESPRESSO": QuantumExpresso,
 	ABINIT: ABINIT,
 	CP2K: CP2K,
+	BigDFT: BigDFT,
 	"BFE.NET - Cantilever Beam": BFE_NET,
 	MYSTRAN: MYSTRAN,
 	"JAX-FEM": JAX_FEM,
