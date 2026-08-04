@@ -15,10 +15,12 @@ const API_TEMPLATE = {
 	structureFileField: "structure_file",
 	pseudopotentialFileField: "pseudofiles",
 	basisFileField: "basis_files",
+	pseudopotentialNamesField: "pseudo_names",
+	basisNamesField: "basis_names",
 } as const;
 
-type ElementFiles = Record<string, File | undefined>;
-type SupportFileKind = "pseudopotential" | "basis set";
+type ElementNames = Record<string, string | undefined>;
+type AdvancedErrors = Record<string, string | undefined>;
 
 const validateRequiredFile = (
 	file: File,
@@ -39,6 +41,17 @@ const validateRequiredFile = (
 const validateSupportFile = (file: File, label: string) =>
 	file.size > MAX_FILE_SIZE ? `${label} must be 5 MB or smaller.` : "";
 
+const cleanElementNames = (names: ElementNames, elements: string[]) =>
+	elements.reduce<Record<string, string>>((cleanNames, element) => {
+		const name = names[element]?.trim();
+
+		if (name) {
+			cleanNames[element] = name;
+		}
+
+		return cleanNames;
+	}, {});
+
 export const useCP2K = (
 	handleConfiguredSubmit: HomeState["handleConfiguredSubmit"],
 ) => {
@@ -46,9 +59,15 @@ export const useCP2K = (
 	const [structureFile, setStructureFile] = useState<File | null>(null);
 	const [structureElements, setStructureElements] = useState<string[]>([]);
 	const [structureWarning, setStructureWarning] = useState("");
-	const [pseudopotentialFiles, setPseudopotentialFiles] =
-		useState<ElementFiles>({});
-	const [basisFiles, setBasisFiles] = useState<ElementFiles>({});
+	const [advancedOpen, setAdvancedOpen] = useState(false);
+	const [pseudopotentialFile, setPseudopotentialFile] = useState<File | null>(
+		null,
+	);
+	const [basisFile, setBasisFile] = useState<File | null>(null);
+	const [pseudopotentialNames, setPseudopotentialNames] =
+		useState<ElementNames>({});
+	const [basisNames, setBasisNames] = useState<ElementNames>({});
+	const [advancedErrors, setAdvancedErrors] = useState<AdvancedErrors>({});
 
 	const handleParameterFileChange = (event: ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
@@ -89,8 +108,11 @@ export const useCP2K = (
 		setStructureFile(file);
 		setStructureElements([]);
 		setStructureWarning("");
-		setPseudopotentialFiles({});
-		setBasisFiles({});
+		setPseudopotentialFile(null);
+		setBasisFile(null);
+		setPseudopotentialNames({});
+		setBasisNames({});
+		setAdvancedErrors({});
 
 		try {
 			const parseResult = await extractElementsFromCifFile(file);
@@ -111,8 +133,7 @@ export const useCP2K = (
 	};
 
 	const handleSupportFileChange = (
-		element: string,
-		kind: SupportFileKind,
+		kind: "pseudopotential" | "basis set",
 		event: ChangeEvent<HTMLInputElement>,
 	) => {
 		const file = event.target.files?.[0];
@@ -121,53 +142,82 @@ export const useCP2K = (
 			return;
 		}
 
-		const error = validateSupportFile(file, `${element} ${kind} file`);
+		const errorKey =
+			kind === "pseudopotential" ? "pseudopotentialFile" : "basisFile";
+		const error = validateSupportFile(file, `CP2K ${kind} file`);
 
 		if (error) {
+			setAdvancedErrors((currentErrors) => ({
+				...currentErrors,
+				[errorKey]: error,
+			}));
 			toast.error(error);
 			event.target.value = "";
 			return;
 		}
 
-		const setFiles =
-			kind === "pseudopotential" ? setPseudopotentialFiles : setBasisFiles;
-		setFiles((currentFiles) => ({
-			...currentFiles,
-			[element]: file,
+		if (kind === "pseudopotential") {
+			setPseudopotentialFile(file);
+		} else {
+			setBasisFile(file);
+		}
+
+		setAdvancedErrors((currentErrors) => ({
+			...currentErrors,
+			[errorKey]: undefined,
+			summary: undefined,
 		}));
 		event.target.value = "";
 	};
 
-	const removeSupportFile = (element: string, kind: SupportFileKind) => {
-		const setFiles =
-			kind === "pseudopotential" ? setPseudopotentialFiles : setBasisFiles;
-		setFiles((currentFiles) => {
-			const nextFiles = { ...currentFiles };
-			delete nextFiles[element];
-			return nextFiles;
-		});
-	};
-
 	const handlePseudopotentialFileChange = (
+		event: ChangeEvent<HTMLInputElement>,
+	) => {
+		handleSupportFileChange("pseudopotential", event);
+	};
+
+	const handleBasisFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+		handleSupportFileChange("basis set", event);
+	};
+
+	const handleElementNameChange = (
+		kind: "pseudo" | "basis",
 		element: string,
 		event: ChangeEvent<HTMLInputElement>,
 	) => {
-		handleSupportFileChange(element, "pseudopotential", event);
+		const setNames =
+			kind === "pseudo" ? setPseudopotentialNames : setBasisNames;
+		setNames((currentNames) => ({
+			...currentNames,
+			[element]: event.target.value,
+		}));
+		setAdvancedErrors((currentErrors) => ({
+			...currentErrors,
+			[`${kind}:${element}`]: undefined,
+			summary: undefined,
+		}));
 	};
 
-	const handleBasisFileChange = (
+	const handlePseudopotentialNameChange = (
 		element: string,
 		event: ChangeEvent<HTMLInputElement>,
 	) => {
-		handleSupportFileChange(element, "basis set", event);
+		handleElementNameChange("pseudo", element, event);
 	};
 
-	const removePseudopotentialFile = (element: string) => {
-		removeSupportFile(element, "pseudopotential");
+	const handleBasisNameChange = (
+		element: string,
+		event: ChangeEvent<HTMLInputElement>,
+	) => {
+		handleElementNameChange("basis", element, event);
 	};
 
-	const removeBasisFile = (element: string) => {
-		removeSupportFile(element, "basis set");
+	const removePseudopotentialFile = () => {
+		setPseudopotentialFile(null);
+	};
+
+	const removeBasisFile = () => {
+		setBasisFile(null);
 	};
 
 	const removeParameterFile = () => {
@@ -178,8 +228,15 @@ export const useCP2K = (
 		setStructureFile(null);
 		setStructureElements([]);
 		setStructureWarning("");
-		setPseudopotentialFiles({});
-		setBasisFiles({});
+		setPseudopotentialFile(null);
+		setBasisFile(null);
+		setPseudopotentialNames({});
+		setBasisNames({});
+		setAdvancedErrors({});
+	};
+
+	const toggleAdvanced = () => {
+		setAdvancedOpen((isOpen) => !isOpen);
 	};
 
 	const handleRunSimulation = async () => {
@@ -201,41 +258,62 @@ export const useCP2K = (
 			return;
 		}
 
-		const selectedPseudopotentials = structureElements
-			.map((element) => pseudopotentialFiles[element])
-			.filter((file): file is File => Boolean(file));
-		const selectedBasisFiles = structureElements
-			.map((element) => basisFiles[element])
-			.filter((file): file is File => Boolean(file));
-		const hasSupportFiles =
-			selectedPseudopotentials.length > 0 || selectedBasisFiles.length > 0;
+		const hasAdvancedInput =
+			Boolean(pseudopotentialFile || basisFile) ||
+			structureElements.some(
+				(element) =>
+					Boolean(pseudopotentialNames[element]?.trim()) ||
+					Boolean(basisNames[element]?.trim()),
+			);
+		const nextAdvancedErrors: AdvancedErrors = {};
 
-		if (hasSupportFiles) {
-			const missingFiles = structureElements.flatMap((element) => {
-				const missing: string[] = [];
-
-				if (!pseudopotentialFiles[element]) {
-					missing.push(`${element} pseudopotential`);
-				}
-
-				if (!basisFiles[element]) {
-					missing.push(`${element} basis set`);
-				}
-
-				return missing;
-			});
-
-			if (missingFiles.length > 0) {
-				toast.error(
-					`Complete every pseudo/basis pair or remove all support files. Missing: ${missingFiles.join(", ")}.`,
-				);
-				return;
+		if (hasAdvancedInput) {
+			if (!pseudopotentialFile) {
+				nextAdvancedErrors.pseudopotentialFile =
+					"Upload the shared CP2K pseudopotential file.";
 			}
+
+			if (!basisFile) {
+				nextAdvancedErrors.basisFile = "Upload the shared CP2K basis-set file.";
+			}
+
+			for (const element of structureElements) {
+				if (!pseudopotentialNames[element]?.trim()) {
+					nextAdvancedErrors[`pseudo:${element}`] =
+						`Enter the pseudopotential entry for ${element}.`;
+				}
+
+				if (!basisNames[element]?.trim()) {
+					nextAdvancedErrors[`basis:${element}`] =
+						`Enter the basis-set entry for ${element}.`;
+				}
+			}
+
+			if (Object.keys(nextAdvancedErrors).length > 0) {
+				nextAdvancedErrors.summary =
+					"Complete every advanced CP2K field, or remove all advanced inputs.";
+			}
+		}
+
+		setAdvancedErrors(nextAdvancedErrors);
+
+		if (Object.keys(nextAdvancedErrors).length > 0) {
+			setAdvancedOpen(true);
+			toast.error(nextAdvancedErrors.summary);
+			return;
 		}
 
 		const normalizedStructureFile = await normalizeCifFile(structureFile);
 		handleConfiguredSubmit({
 			...API_TEMPLATE,
+			formFields: {
+				[API_TEMPLATE.pseudopotentialNamesField]: JSON.stringify(
+					cleanElementNames(pseudopotentialNames, structureElements),
+				),
+				[API_TEMPLATE.basisNamesField]: JSON.stringify(
+					cleanElementNames(basisNames, structureElements),
+				),
+			},
 			fileGroups: [
 				{
 					fieldName: API_TEMPLATE.parameterFileField,
@@ -247,25 +325,31 @@ export const useCP2K = (
 				},
 				{
 					fieldName: API_TEMPLATE.pseudopotentialFileField,
-					files: selectedPseudopotentials,
+					files: pseudopotentialFile ? [pseudopotentialFile] : [],
 				},
 				{
 					fieldName: API_TEMPLATE.basisFileField,
-					files: selectedBasisFiles,
+					files: basisFile ? [basisFile] : [],
 				},
 			],
 		});
 	};
 
 	return {
-		basisFiles,
+		advancedErrors,
+		advancedOpen,
+		basisFile,
+		basisNames,
 		handleBasisFileChange,
+		handleBasisNameChange,
 		handleParameterFileChange,
 		handlePseudopotentialFileChange,
+		handlePseudopotentialNameChange,
 		handleRunSimulation,
 		handleStructureFileChange,
 		parameterFile,
-		pseudopotentialFiles,
+		pseudopotentialFile,
+		pseudopotentialNames,
 		removeBasisFile,
 		removeParameterFile,
 		removePseudopotentialFile,
@@ -273,5 +357,6 @@ export const useCP2K = (
 		structureElements,
 		structureFile,
 		structureWarning,
+		toggleAdvanced,
 	};
 };

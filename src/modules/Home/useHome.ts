@@ -21,6 +21,7 @@ export type ConfiguredSimulationSubmission = {
 	projectPrefix: string;
 	simulatorLabel: string;
 	parameters?: Record<string, SimulationParameterValue>;
+	formFields?: Record<string, string>;
 	fileGroups?: {
 		fieldName: string;
 		files: File[];
@@ -271,6 +272,12 @@ export const useHome = (): HomeState => {
 				"parameters",
 				JSON.stringify(configuredSubmission.parameters),
 			);
+		}
+
+		for (const [fieldName, value] of Object.entries(
+			configuredSubmission.formFields ?? {},
+		)) {
+			formData.append(fieldName, value);
 		}
 
 		for (const group of configuredSubmission.fileGroups ?? []) {
