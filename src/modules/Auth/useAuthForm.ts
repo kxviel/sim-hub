@@ -4,7 +4,7 @@ import { type SubmitEvent, useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod/mini";
 import { useRegister, useSignIn } from "./auth.api";
-import { saveAuthSession } from "./auth.session";
+import { saveAuthSession, saveTemporaryAuthSession } from "./auth.session";
 
 export type AuthMode = "login" | "register";
 
@@ -132,6 +132,20 @@ export const useAuthForm = () => {
 		form.handleSubmit();
 	};
 
+	const handleTemporaryAccess = () => {
+		resetMutations();
+		form.reset();
+		saveTemporaryAuthSession({
+			username: "demo_user",
+			email: "demo@prototype.local",
+			sshDomain: "",
+			notifications: [],
+			downloadLinks: [],
+		});
+		toast.success("Temporary demo access enabled.");
+		navigate({ to: "/home" });
+	};
+
 	const switchAuthMode = () => {
 		setAuthMode((currentMode) =>
 			currentMode === "register" ? "login" : "register",
@@ -144,6 +158,7 @@ export const useAuthForm = () => {
 		authMode,
 		form,
 		handleSubmit,
+		handleTemporaryAccess,
 		isRegistering,
 		switchAuthMode,
 	};

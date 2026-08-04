@@ -72,6 +72,16 @@ export const saveAuthSession = (session: AuthSession) => {
 	emitSessionChange();
 };
 
+export const saveTemporaryAuthSession = (session: AuthSession) => {
+	currentSession = session;
+	try {
+		window.localStorage.removeItem(AUTH_SESSION_KEY);
+	} catch {
+		// Temporary access remains available in memory for the current app run.
+	}
+	setTimeout(emitSessionChange, 0);
+};
+
 export const clearAuthSession = () => {
 	currentSession = null;
 	try {

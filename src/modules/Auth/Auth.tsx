@@ -23,7 +23,13 @@ import {
 import { useAuthForm } from "@/modules/Auth/useAuthForm";
 
 const Login = () => {
-	const { form, handleSubmit, isRegistering, switchAuthMode } = useAuthForm();
+	const {
+		form,
+		handleSubmit,
+		handleTemporaryAccess,
+		isRegistering,
+		switchAuthMode,
+	} = useAuthForm();
 
 	return (
 		<section className="flex min-h-full w-full flex-col items-center bg-accent p-4">
@@ -247,6 +253,18 @@ const Login = () => {
 												? "Create Account"
 												: "Sign In"}
 									</Button>
+
+									{!isRegistering ? (
+										<Button
+											type="button"
+											className="mt-2 w-full"
+											disabled={isSubmitting}
+											onClick={handleTemporaryAccess}
+											variant="outline"
+										>
+											Continue without login
+										</Button>
+									) : null}
 								</>
 							)}
 						</form.Subscribe>
