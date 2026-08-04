@@ -15,12 +15,60 @@ const API_TEMPLATE = {
 	structureFileField: "structure_file",
 	pseudopotentialFileField: "pseudofiles",
 	basisFileField: "basis_files",
+	modeField: "cp2k_mode",
+	xcFunctionalField: "xc_functional",
 	pseudopotentialNamesField: "pseudo_names",
 	basisNamesField: "basis_names",
 } as const;
 
+export const CP2K_PSEUDOPOTENTIAL_OPTIONS = [
+	{ value: "GTH-PBE", label: "PBE (GTH-PBE)" },
+	{ value: "GTH-BLYP", label: "BLYP (GTH-BLYP)" },
+	{ value: "GTH-BP", label: "BP (GTH-BP)" },
+	{ value: "GTH-PADE", label: "PADE (GTH-PADE)" },
+];
+
+export const CP2K_BASIS_SET_OPTIONS = [
+	{ value: "SZV-GTH", label: "SZV-GTH — Single-Zeta Valence" },
+	{
+		value: "DZVP-GTH",
+		label: "DZVP-GTH — Double-Zeta Valence with Polarization",
+	},
+	{
+		value: "TZVP-GTH",
+		label: "TZVP-GTH — Triple-Zeta Valence with Polarization",
+	},
+	{
+		value: "TZV2P-GTH",
+		label: "TZV2P-GTH — Triple-Zeta Valence with Double Polarization",
+	},
+	{
+		value: "aug-DZVP-GTH",
+		label: "aug-DZVP-GTH — Augmented Double-Zeta",
+	},
+	{
+		value: "aug-TZVP-GTH",
+		label: "aug-TZVP-GTH — Augmented Triple-Zeta",
+	},
+];
+
+export const CP2K_XC_FUNCTIONAL_OPTIONS = [
+	{ value: "PBE", label: "PBE" },
+	{ value: "BLYP", label: "BLYP" },
+	{ value: "BP", label: "BP" },
+	{ value: "PADE", label: "PADE" },
+	{ value: "LDA", label: "LDA" },
+	{ value: "OLYP", label: "OLYP" },
+	{ value: "HCTH120", label: "HCTH120" },
+];
+
+export type Cp2kMode = "basic" | "advanced";
+
 type ElementNames = Record<string, string | undefined>;
-type AdvancedErrors = Record<string, string | undefined>;
+type Cp2kErrors = Record<string, string | undefined>;
+
+const DEFAULT_BASIC_PSEUDOPOTENTIAL = "GTH-PBE";
+const DEFAULT_BASIC_BASIS_SET = "DZVP-GTH";
 
 const validateRequiredFile = (
 	file: File,
@@ -52,6 +100,12 @@ const cleanElementNames = (names: ElementNames, elements: string[]) =>
 		return cleanNames;
 	}, {});
 
+const createElementValueMap = (elements: string[], value: string) =>
+	elements.reduce<Record<string, string>>((values, element) => {
+		values[element] = value;
+		return values;
+	}, {});
+
 export const useCP2K = (
 	handleConfiguredSubmit: HomeState["handleConfiguredSubmit"],
 ) => {
@@ -59,15 +113,30 @@ export const useCP2K = (
 	const [structureFile, setStructureFile] = useState<File | null>(null);
 	const [structureElements, setStructureElements] = useState<string[]>([]);
 	const [structureWarning, setStructureWarning] = useState("");
-	const [advancedOpen, setAdvancedOpen] = useState(false);
+	const [mode, setMode] = useState<Cp2kMode>("basic");
+	const [basicPseudopotential, setBasicPseudopotential] = useState<string>(
+		DEFAULT_BASIC_PSEUDOPOTENTIAL,
+	);
+	const [basicBasisSet, setBasicBasisSet] = useState<string>(
+		DEFAULT_BASIC_BASIS_SET,
+	);
 	const [pseudopotentialFile, setPseudopotentialFile] = useState<File | null>(
 		null,
 	);
 	const [basisFile, setBasisFile] = useState<File | null>(null);
+	const [xcFunctional, setXcFunctional] = useState("");
 	const [pseudopotentialNames, setPseudopotentialNames] =
 		useState<ElementNames>({});
 	const [basisNames, setBasisNames] = useState<ElementNames>({});
-	const [advancedErrors, setAdvancedErrors] = useState<AdvancedErrors>({});
+	const [errors, setErrors] = useState<Cp2kErrors>({});
+
+	const clearError = (key: string) => {
+		setErrors((currentErrors) => ({
+			...currentErrors,
+			[key]: undefined,
+			summary: undefined,
+		}));
+	};
 
 	const handleParameterFileChange = (event: ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
@@ -110,9 +179,10 @@ export const useCP2K = (
 		setStructureWarning("");
 		setPseudopotentialFile(null);
 		setBasisFile(null);
+		setXcFunctional("");
 		setPseudopotentialNames({});
 		setBasisNames({});
-		setAdvancedErrors({});
+		setErrors({});
 
 		try {
 			const parseResult = await extractElementsFromCifFile(file);
@@ -147,7 +217,7 @@ export const useCP2K = (
 		const error = validateSupportFile(file, `CP2K ${kind} file`);
 
 		if (error) {
-			setAdvancedErrors((currentErrors) => ({
+			setErrors((currentErrors) => ({
 				...currentErrors,
 				[errorKey]: error,
 			}));
@@ -162,11 +232,7 @@ export const useCP2K = (
 			setBasisFile(file);
 		}
 
-		setAdvancedErrors((currentErrors) => ({
-			...currentErrors,
-			[errorKey]: undefined,
-			summary: undefined,
-		}));
+		clearError(errorKey);
 		event.target.value = "";
 	};
 
@@ -191,11 +257,7 @@ export const useCP2K = (
 			...currentNames,
 			[element]: event.target.value,
 		}));
-		setAdvancedErrors((currentErrors) => ({
-			...currentErrors,
-			[`${kind}:${element}`]: undefined,
-			summary: undefined,
-		}));
+		clearError(`${kind}:${element}`);
 	};
 
 	const handlePseudopotentialNameChange = (
@@ -212,12 +274,34 @@ export const useCP2K = (
 		handleElementNameChange("basis", element, event);
 	};
 
+	const handleModeChange = (nextMode: Cp2kMode) => {
+		setMode(nextMode);
+		setErrors({});
+	};
+
+	const handleBasicPseudopotentialChange = (value: string | null) => {
+		setBasicPseudopotential(value ?? "");
+		clearError("basicPseudopotential");
+	};
+
+	const handleBasicBasisSetChange = (value: string | null) => {
+		setBasicBasisSet(value ?? "");
+		clearError("basicBasisSet");
+	};
+
+	const handleXcFunctionalChange = (value: string | null) => {
+		setXcFunctional(value ?? "");
+		clearError("xcFunctional");
+	};
+
 	const removePseudopotentialFile = () => {
 		setPseudopotentialFile(null);
+		clearError("pseudopotentialFile");
 	};
 
 	const removeBasisFile = () => {
 		setBasisFile(null);
+		clearError("basisFile");
 	};
 
 	const removeParameterFile = () => {
@@ -230,13 +314,10 @@ export const useCP2K = (
 		setStructureWarning("");
 		setPseudopotentialFile(null);
 		setBasisFile(null);
+		setXcFunctional("");
 		setPseudopotentialNames({});
 		setBasisNames({});
-		setAdvancedErrors({});
-	};
-
-	const toggleAdvanced = () => {
-		setAdvancedOpen((isOpen) => !isOpen);
+		setErrors({});
 	};
 
 	const handleRunSimulation = async () => {
@@ -258,61 +339,70 @@ export const useCP2K = (
 			return;
 		}
 
-		const hasAdvancedInput =
-			Boolean(pseudopotentialFile || basisFile) ||
-			structureElements.some(
-				(element) =>
-					Boolean(pseudopotentialNames[element]?.trim()) ||
-					Boolean(basisNames[element]?.trim()),
-			);
-		const nextAdvancedErrors: AdvancedErrors = {};
+		const nextErrors: Cp2kErrors = {};
 
-		if (hasAdvancedInput) {
+		if (mode === "basic") {
+			if (!basicPseudopotential) {
+				nextErrors.basicPseudopotential = "Choose a CP2K pseudopotential.";
+			}
+
+			if (!basicBasisSet) {
+				nextErrors.basicBasisSet = "Choose a CP2K basis set.";
+			}
+		} else {
 			if (!pseudopotentialFile) {
-				nextAdvancedErrors.pseudopotentialFile =
+				nextErrors.pseudopotentialFile =
 					"Upload the shared CP2K pseudopotential file.";
 			}
 
 			if (!basisFile) {
-				nextAdvancedErrors.basisFile = "Upload the shared CP2K basis-set file.";
+				nextErrors.basisFile = "Upload the shared CP2K basis-set file.";
+			}
+
+			if (!xcFunctional) {
+				nextErrors.xcFunctional = "Choose an XC functional.";
 			}
 
 			for (const element of structureElements) {
 				if (!pseudopotentialNames[element]?.trim()) {
-					nextAdvancedErrors[`pseudo:${element}`] =
+					nextErrors[`pseudo:${element}`] =
 						`Enter the pseudopotential entry for ${element}.`;
 				}
 
 				if (!basisNames[element]?.trim()) {
-					nextAdvancedErrors[`basis:${element}`] =
+					nextErrors[`basis:${element}`] =
 						`Enter the basis-set entry for ${element}.`;
 				}
 			}
-
-			if (Object.keys(nextAdvancedErrors).length > 0) {
-				nextAdvancedErrors.summary =
-					"Complete every advanced CP2K field, or remove all advanced inputs.";
-			}
 		}
 
-		setAdvancedErrors(nextAdvancedErrors);
-
-		if (Object.keys(nextAdvancedErrors).length > 0) {
-			setAdvancedOpen(true);
-			toast.error(nextAdvancedErrors.summary);
+		if (Object.keys(nextErrors).length > 0) {
+			nextErrors.summary = `Complete every ${mode} CP2K field before running the simulation.`;
+			setErrors(nextErrors);
+			toast.error(nextErrors.summary);
 			return;
 		}
 
+		setErrors({});
 		const normalizedStructureFile = await normalizeCifFile(structureFile);
+		const isAdvanced = mode === "advanced";
+		const pseudopotentialMap = isAdvanced
+			? cleanElementNames(pseudopotentialNames, structureElements)
+			: createElementValueMap(structureElements, basicPseudopotential);
+		const basisMap = isAdvanced
+			? cleanElementNames(basisNames, structureElements)
+			: createElementValueMap(structureElements, basicBasisSet);
+
 		handleConfiguredSubmit({
 			...API_TEMPLATE,
 			formFields: {
-				[API_TEMPLATE.pseudopotentialNamesField]: JSON.stringify(
-					cleanElementNames(pseudopotentialNames, structureElements),
-				),
-				[API_TEMPLATE.basisNamesField]: JSON.stringify(
-					cleanElementNames(basisNames, structureElements),
-				),
+				[API_TEMPLATE.modeField]: mode,
+				...(isAdvanced
+					? { [API_TEMPLATE.xcFunctionalField]: xcFunctional }
+					: {}),
+				[API_TEMPLATE.pseudopotentialNamesField]:
+					JSON.stringify(pseudopotentialMap),
+				[API_TEMPLATE.basisNamesField]: JSON.stringify(basisMap),
 			},
 			fileGroups: [
 				{
@@ -325,28 +415,34 @@ export const useCP2K = (
 				},
 				{
 					fieldName: API_TEMPLATE.pseudopotentialFileField,
-					files: pseudopotentialFile ? [pseudopotentialFile] : [],
+					files: isAdvanced && pseudopotentialFile ? [pseudopotentialFile] : [],
 				},
 				{
 					fieldName: API_TEMPLATE.basisFileField,
-					files: basisFile ? [basisFile] : [],
+					files: isAdvanced && basisFile ? [basisFile] : [],
 				},
 			],
 		});
 	};
 
 	return {
-		advancedErrors,
-		advancedOpen,
+		basicBasisSet,
+		basicPseudopotential,
 		basisFile,
 		basisNames,
+		errors,
+		handleBasicBasisSetChange,
+		handleBasicPseudopotentialChange,
 		handleBasisFileChange,
 		handleBasisNameChange,
+		handleModeChange,
 		handleParameterFileChange,
 		handlePseudopotentialFileChange,
 		handlePseudopotentialNameChange,
 		handleRunSimulation,
 		handleStructureFileChange,
+		handleXcFunctionalChange,
+		mode,
 		parameterFile,
 		pseudopotentialFile,
 		pseudopotentialNames,
@@ -357,6 +453,6 @@ export const useCP2K = (
 		structureElements,
 		structureFile,
 		structureWarning,
-		toggleAdvanced,
+		xcFunctional,
 	};
 };
