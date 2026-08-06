@@ -31,6 +31,7 @@ type ApiResponse = {
 	resultUrl?: unknown;
 	result_download_url?: unknown;
 	resultDownloadUrl?: unknown;
+	submitted?: unknown;
 };
 
 const getString = (value: unknown) =>
@@ -107,6 +108,13 @@ export const runSimulationAPI = async (body: SimulationBody) => {
 		body.formData,
 		{ params: { proj_name: body.projectName } },
 	);
+	const response = (data ?? {}) as ApiResponse;
+
+	if (response.submitted === false) {
+		throw new Error(
+			getString(response.message) || "The simulation could not be queued.",
+		);
+	}
 
 	return parseSimulationResponse(data, body.projectName);
 };

@@ -83,6 +83,113 @@ const SupportFileInput = ({
 	</div>
 );
 
+type SelectOption = {
+	label: string;
+	value: string;
+};
+
+type SelectFieldProps = {
+	disabled: boolean;
+	error: string | undefined;
+	id: string;
+	label: string;
+	onChange: (value: string | null) => void;
+	options: SelectOption[];
+	placeholder: string;
+	value: string;
+};
+
+const SelectField = ({
+	disabled,
+	error,
+	id,
+	label,
+	onChange,
+	options,
+	placeholder,
+	value,
+}: SelectFieldProps) => (
+	<div className="space-y-2">
+		<Label htmlFor={id}>{label}</Label>
+		<Select
+			disabled={disabled}
+			id={id}
+			items={options}
+			onValueChange={onChange}
+			value={value || null}
+		>
+			<SelectTrigger aria-invalid={Boolean(error)}>
+				<SelectValue placeholder={placeholder} />
+			</SelectTrigger>
+			<SelectContent alignItemWithTrigger>
+				<SelectGroup>
+					{options.map((option) => (
+						<SelectItem key={option.value} value={option.value}>
+							{option.label}
+						</SelectItem>
+					))}
+				</SelectGroup>
+			</SelectContent>
+		</Select>
+		{error ? (
+			<p className="text-destructive text-sm" role="alert">
+				{error}
+			</p>
+		) : null}
+	</div>
+);
+
+type SupportFileCardProps = SupportFileInputProps & {
+	title: string;
+};
+
+const SupportFileCard = ({ title, ...inputProps }: SupportFileCardProps) => (
+	<div className="min-w-0 space-y-2 rounded border border-gray-200 p-3">
+		<p className="font-medium text-sm">{title}</p>
+		<p className="text-muted-foreground text-xs">
+			One file shared by all detected elements.
+		</p>
+		<SupportFileInput {...inputProps} />
+	</div>
+);
+
+type ElementMappingFieldProps = {
+	disabled: boolean;
+	error: string | undefined;
+	id: string;
+	label: string;
+	onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+	placeholder: string;
+	value: string;
+};
+
+const ElementMappingField = ({
+	disabled,
+	error,
+	id,
+	label,
+	onChange,
+	placeholder,
+	value,
+}: ElementMappingFieldProps) => (
+	<div className="min-w-0 space-y-2">
+		<Label htmlFor={id}>{label}</Label>
+		<Input
+			aria-invalid={Boolean(error)}
+			disabled={disabled}
+			id={id}
+			onChange={onChange}
+			placeholder={placeholder}
+			value={value}
+		/>
+		{error ? (
+			<p className="text-destructive text-sm" role="alert">
+				{error}
+			</p>
+		) : null}
+	</div>
+);
+
 type Cp2kBasicSettingsProps = {
 	basicBasisSet: string;
 	basicPseudopotential: string;
@@ -111,63 +218,26 @@ const Cp2kBasicSettings = ({
 		</p>
 
 		<div className="grid gap-4 sm:grid-cols-2">
-			<div className="space-y-2">
-				<Label htmlFor="cp2k-basic-pseudopotential">Pseudopotential</Label>
-				<Select
-					disabled={disabled}
-					id="cp2k-basic-pseudopotential"
-					items={CP2K_PSEUDOPOTENTIAL_OPTIONS}
-					onValueChange={onBasicPseudopotentialChange}
-					value={basicPseudopotential || null}
-				>
-					<SelectTrigger aria-invalid={Boolean(errors.basicPseudopotential)}>
-						<SelectValue placeholder="Select a pseudopotential" />
-					</SelectTrigger>
-					<SelectContent alignItemWithTrigger>
-						<SelectGroup>
-							{CP2K_PSEUDOPOTENTIAL_OPTIONS.map((option) => (
-								<SelectItem key={option.value} value={option.value}>
-									{option.label}
-								</SelectItem>
-							))}
-						</SelectGroup>
-					</SelectContent>
-				</Select>
-				{errors.basicPseudopotential ? (
-					<p className="text-destructive text-sm" role="alert">
-						{errors.basicPseudopotential}
-					</p>
-				) : null}
-			</div>
-
-			<div className="space-y-2">
-				<Label htmlFor="cp2k-basic-basis-set">Basis Set</Label>
-				<Select
-					disabled={disabled}
-					id="cp2k-basic-basis-set"
-					items={CP2K_BASIS_SET_OPTIONS}
-					onValueChange={onBasicBasisSetChange}
-					value={basicBasisSet || null}
-				>
-					<SelectTrigger aria-invalid={Boolean(errors.basicBasisSet)}>
-						<SelectValue placeholder="Select a basis set" />
-					</SelectTrigger>
-					<SelectContent alignItemWithTrigger>
-						<SelectGroup>
-							{CP2K_BASIS_SET_OPTIONS.map((option) => (
-								<SelectItem key={option.value} value={option.value}>
-									{option.label}
-								</SelectItem>
-							))}
-						</SelectGroup>
-					</SelectContent>
-				</Select>
-				{errors.basicBasisSet ? (
-					<p className="text-destructive text-sm" role="alert">
-						{errors.basicBasisSet}
-					</p>
-				) : null}
-			</div>
+			<SelectField
+				disabled={disabled}
+				error={errors.basicPseudopotential}
+				id="cp2k-basic-pseudopotential"
+				label="Pseudopotential"
+				onChange={onBasicPseudopotentialChange}
+				options={CP2K_PSEUDOPOTENTIAL_OPTIONS}
+				placeholder="Select a pseudopotential"
+				value={basicPseudopotential}
+			/>
+			<SelectField
+				disabled={disabled}
+				error={errors.basicBasisSet}
+				id="cp2k-basic-basis-set"
+				label="Basis Set"
+				onChange={onBasicBasisSetChange}
+				options={CP2K_BASIS_SET_OPTIONS}
+				placeholder="Select a basis set"
+				value={basicBasisSet}
+			/>
 		</div>
 
 		<div className="space-y-3">
@@ -252,66 +322,38 @@ const Cp2kAdvancedSettings = ({
 		</p>
 
 		<div className="grid gap-3 sm:grid-cols-2">
-			<div className="min-w-0 space-y-2 rounded border border-gray-200 p-3">
-				<p className="font-medium text-sm">Pseudopotential File</p>
-				<p className="text-muted-foreground text-xs">
-					One file shared by all detected elements.
-				</p>
-				<SupportFileInput
-					ariaLabel="CP2K shared pseudopotential file"
-					disabled={disabled}
-					error={errors.pseudopotentialFile}
-					file={pseudopotentialFile ?? undefined}
-					hint="Pseudo file · Up to 5 MB"
-					onChange={onPseudopotentialFileChange}
-					onRemove={onRemovePseudopotentialFile}
-				/>
-			</div>
-			<div className="min-w-0 space-y-2 rounded border border-gray-200 p-3">
-				<p className="font-medium text-sm">Basis-Set File</p>
-				<p className="text-muted-foreground text-xs">
-					One file shared by all detected elements.
-				</p>
-				<SupportFileInput
-					ariaLabel="CP2K shared basis-set file"
-					disabled={disabled}
-					error={errors.basisFile}
-					file={basisFile ?? undefined}
-					hint="Basis file · Up to 5 MB"
-					onChange={onBasisFileChange}
-					onRemove={onRemoveBasisFile}
-				/>
-			</div>
+			<SupportFileCard
+				ariaLabel="CP2K shared pseudopotential file"
+				disabled={disabled}
+				error={errors.pseudopotentialFile}
+				file={pseudopotentialFile ?? undefined}
+				hint="Pseudo file · Up to 5 MB"
+				onChange={onPseudopotentialFileChange}
+				onRemove={onRemovePseudopotentialFile}
+				title="Pseudopotential File"
+			/>
+			<SupportFileCard
+				ariaLabel="CP2K shared basis-set file"
+				disabled={disabled}
+				error={errors.basisFile}
+				file={basisFile ?? undefined}
+				hint="Basis file · Up to 5 MB"
+				onChange={onBasisFileChange}
+				onRemove={onRemoveBasisFile}
+				title="Basis-Set File"
+			/>
 		</div>
 
-		<div className="space-y-2">
-			<Label htmlFor="cp2k-xc-functional">XC Functional</Label>
-			<Select
-				disabled={disabled}
-				id="cp2k-xc-functional"
-				items={CP2K_XC_FUNCTIONAL_OPTIONS}
-				onValueChange={onXcFunctionalChange}
-				value={xcFunctional || null}
-			>
-				<SelectTrigger aria-invalid={Boolean(errors.xcFunctional)}>
-					<SelectValue placeholder="Select an XC functional" />
-				</SelectTrigger>
-				<SelectContent alignItemWithTrigger>
-					<SelectGroup>
-						{CP2K_XC_FUNCTIONAL_OPTIONS.map((option) => (
-							<SelectItem key={option.value} value={option.value}>
-								{option.label}
-							</SelectItem>
-						))}
-					</SelectGroup>
-				</SelectContent>
-			</Select>
-			{errors.xcFunctional ? (
-				<p className="text-destructive text-sm" role="alert">
-					{errors.xcFunctional}
-				</p>
-			) : null}
-		</div>
+		<SelectField
+			disabled={disabled}
+			error={errors.xcFunctional}
+			id="cp2k-xc-functional"
+			label="XC Functional"
+			onChange={onXcFunctionalChange}
+			options={CP2K_XC_FUNCTIONAL_OPTIONS}
+			placeholder="Select an XC functional"
+			value={xcFunctional}
+		/>
 
 		<div className="space-y-3">
 			<div>
@@ -346,42 +388,26 @@ const Cp2kAdvancedSettings = ({
 									Atomic element from CIF
 								</p>
 							</div>
-							<div className="min-w-0 space-y-2">
-								<Label htmlFor={`cp2k-pseudo-${element}`}>
-									Pseudopotential entry
-								</Label>
-								<Input
-									aria-invalid={Boolean(errors[`pseudo:${element}`])}
-									disabled={disabled}
-									id={`cp2k-pseudo-${element}`}
-									onChange={(event) =>
-										onPseudopotentialNameChange(element, event)
-									}
-									placeholder={`${element} pseudo name`}
-									value={pseudopotentialNames[element] ?? ""}
-								/>
-								{errors[`pseudo:${element}`] ? (
-									<p className="text-destructive text-sm" role="alert">
-										{errors[`pseudo:${element}`]}
-									</p>
-								) : null}
-							</div>
-							<div className="min-w-0 space-y-2">
-								<Label htmlFor={`cp2k-basis-${element}`}>Basis-set entry</Label>
-								<Input
-									aria-invalid={Boolean(errors[`basis:${element}`])}
-									disabled={disabled}
-									id={`cp2k-basis-${element}`}
-									onChange={(event) => onBasisNameChange(element, event)}
-									placeholder={`${element} basis name`}
-									value={basisNames[element] ?? ""}
-								/>
-								{errors[`basis:${element}`] ? (
-									<p className="text-destructive text-sm" role="alert">
-										{errors[`basis:${element}`]}
-									</p>
-								) : null}
-							</div>
+							<ElementMappingField
+								disabled={disabled}
+								error={errors[`pseudo:${element}`]}
+								id={`cp2k-pseudo-${element}`}
+								label="Pseudopotential entry"
+								onChange={(event) =>
+									onPseudopotentialNameChange(element, event)
+								}
+								placeholder={`${element} pseudo name`}
+								value={pseudopotentialNames[element] ?? ""}
+							/>
+							<ElementMappingField
+								disabled={disabled}
+								error={errors[`basis:${element}`]}
+								id={`cp2k-basis-${element}`}
+								label="Basis-set entry"
+								onChange={(event) => onBasisNameChange(element, event)}
+								placeholder={`${element} basis name`}
+								value={basisNames[element] ?? ""}
+							/>
 						</div>
 					))}
 				</div>

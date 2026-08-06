@@ -1,130 +1,47 @@
-import { XSquare } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import FileUpload from "@/modules/Home/FileUpload";
-import { simulationTypeList } from "@/modules/Home/SimUtils";
+import {
+	ConfiguredSubtype,
+	type ConfiguredSubtypeCopy,
+} from "@/modules/Home/SubTypes/ConfiguredSubtype";
 import { useMEEP_FDTD } from "@/modules/Home/SubTypes/useMEEP_FDTD";
 import type { HomeState } from "@/modules/Home/useHome";
 
-const MEEP_FDTD = (homeState: HomeState) => {
-	const { simType, isSubmitting, handleConfiguredSubmit } = homeState;
+const COPY: ConfiguredSubtypeCopy = {
+	intro: "Upload a MEEP simulation definition and optional material data.",
+	summary:
+		"This template sends the FDTD simulation definition plus optional geometry or material datasets.",
+	primary: {
+		title: "Simulation Definition",
+		description:
+			"Upload a Python, Scheme control, JSON, or YAML simulation definition.",
+		accept: ".py,.ctl,.json,.yaml,.yml",
+		ariaLabel: "MEEP simulation definition",
+		hint: "Python, CTL, JSON, or YAML · Up to 5 MB",
+	},
+	optional: {
+		title: "Material and Geometry Files",
+		description:
+			"Optional HDF5, JSON, or tabular data referenced by the simulation.",
+		accept: ".h5,.hdf5,.json,.csv",
+		ariaLabel: "MEEP material and field files",
+		hint: "HDF5, JSON, or CSV · Up to 5 MB each",
+	},
+};
 
-	const {
-		files,
-		handleFileChange,
-		handleOptionalFileChange,
-		handleRemoveFile,
-		handleRemoveOptionalFile,
-		handleRunSimulation,
-		optionalfiles,
-	} = useMEEP_FDTD(handleConfiguredSubmit);
+const MEEP_FDTD = ({
+	simType,
+	isSubmitting,
+	handleConfiguredSubmit,
+}: HomeState) => {
+	const subtypeState = useMEEP_FDTD(handleConfiguredSubmit);
 
 	return (
-		<div className="w-full space-y-4">
-			<p>Upload a MEEP simulation definition and optional material data.</p>
-			<p className="font-semibold text-lg">
-				{simulationTypeList.filter((x) => x.value === simType)[0]?.label}
-			</p>
-
-			<div className="w-full space-y-4 rounded border border-gray-200 p-2">
-				<p>
-					This template sends the FDTD simulation definition plus optional
-					geometry or material datasets. Each file must be{" "}
-					<strong className="text-primary font-semibold">5 MB</strong> or less.
-				</p>
-
-				{files.length > 0 && (
-					<div className="w-full space-y-4 rounded border border-gray-200 p-2">
-						<p className="font-semibold text-lg">Uploaded Files: </p>
-
-						<div className="w-full p-2 flex items-center gap-2 flex-wrap">
-							{files.map((file, i) => (
-								<div
-									className="w-full rounded border border-gray-200 p-2 flex gap-1 items-center justify-between"
-									key={file.name}
-								>
-									<p className="font-semibold text-sm truncate">{file.name}</p>
-
-									<Button
-										aria-label={`Remove ${file.name}`}
-										onClick={() => handleRemoveFile(i)}
-										variant="ghost"
-									>
-										<XSquare aria-hidden="true" className="text-red-600" />
-									</Button>
-								</div>
-							))}
-						</div>
-					</div>
-				)}
-
-				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
-					<p className="font-semibold text-lg">Simulation Definition</p>
-					<p>
-						Upload a Python, Scheme control, JSON, or YAML simulation
-						definition.
-					</p>
-
-					<FileUpload
-						accept=".py,.ctl,.json,.yaml,.yml"
-						ariaLabel="MEEP simulation definition"
-						disabled={isSubmitting}
-						files={files}
-						hint="Python, CTL, JSON, or YAML · Up to 5 MB"
-						onChange={handleFileChange}
-					/>
-				</div>
-
-				{optionalfiles.length > 0 && (
-					<div className="w-full space-y-4 rounded border border-gray-200 p-2">
-						<p className="font-semibold text-lg">Optional Uploaded Files: </p>
-
-						<div className="w-full p-2 flex items-center gap-2 flex-wrap">
-							{optionalfiles.map((file, i) => (
-								<div
-									className="w-full rounded border border-gray-200 p-2 flex gap-1 items-center justify-between"
-									key={file.name}
-								>
-									<p className="font-semibold text-sm truncate">{file.name}</p>
-
-									<Button
-										aria-label={`Remove ${file.name}`}
-										onClick={() => handleRemoveOptionalFile(i)}
-										variant="ghost"
-									>
-										<XSquare aria-hidden="true" className="text-red-600" />
-									</Button>
-								</div>
-							))}
-						</div>
-					</div>
-				)}
-
-				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
-					<p className="font-semibold text-lg">Material and Geometry Files</p>
-					<p>
-						Optional HDF5, JSON, or tabular data referenced by the simulation.
-					</p>
-
-					<FileUpload
-						accept=".h5,.hdf5,.json,.csv"
-						ariaLabel="MEEP material and field files"
-						disabled={isSubmitting}
-						files={optionalfiles}
-						hint="HDF5, JSON, or CSV · Up to 5 MB each"
-						multiple
-						onChange={handleOptionalFileChange}
-					/>
-				</div>
-			</div>
-
-			<Button
-				className="my-4 py-4 w-full text-lg"
-				disabled={isSubmitting}
-				onClick={handleRunSimulation}
-			>
-				{isSubmitting ? "Simulating" : "Run Simulation"}
-			</Button>
-		</div>
+		<ConfiguredSubtype
+			{...subtypeState}
+			copy={COPY}
+			isSubmitting={isSubmitting}
+			simType={simType}
+		/>
 	);
 };
+
 export default MEEP_FDTD;

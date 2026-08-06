@@ -17,6 +17,7 @@ const API_TEMPLATE = {
 } as const;
 
 type PseudopotentialFilesByElement = Record<string, File | undefined>;
+export type BigDftMode = "basic" | "advanced";
 
 const validateRequiredFile = (
 	file: File,
@@ -41,6 +42,7 @@ export const useBigDFT = (
 	const [structureFile, setStructureFile] = useState<File | null>(null);
 	const [structureElements, setStructureElements] = useState<string[]>([]);
 	const [structureWarning, setStructureWarning] = useState("");
+	const [mode, setMode] = useState<BigDftMode>("basic");
 	const [pseudopotentialFiles, setPseudopotentialFiles] =
 		useState<PseudopotentialFilesByElement>({});
 
@@ -145,6 +147,10 @@ export const useBigDFT = (
 		});
 	};
 
+	const handleModeChange = (nextMode: BigDftMode) => {
+		setMode(nextMode);
+	};
+
 	const handleRunSimulation = async () => {
 		if (!parameterFile) {
 			toast.error("Upload the BigDFT CSV parameter file.");
@@ -164,26 +170,54 @@ export const useBigDFT = (
 			return;
 		}
 
-		const uploadedPseudopotentials = structureElements
-			.map((element) => pseudopotentialFiles[element])
-			.filter((file): file is File => Boolean(file));
+		const isAdvanced = mode === "advanced";
+		const uploadedPseudopotentials = isAdvanced
+			? structureElements
+					.map((element) => pseudopotentialFiles[element])
+					.filter((file): file is File => Boolean(file))
+			: [];
 
 		if (
-			uploadedPseudopotentials.length > 0 &&
+			isAdvanced &&
 			uploadedPseudopotentials.length < structureElements.length
 		) {
 			const missingElements = structureElements.filter(
 				(element) => !pseudopotentialFiles[element],
 			);
 			toast.error(
-				`Upload a pseudopotential for ${missingElements.join(", ")}, or remove all pseudopotentials.`,
+				`Upload a pseudopotential for every detected element. Missing: ${missingElements.join(", ")}.`,
 			);
 			return;
 		}
 
 		const normalizedStructureFile = await normalizeCifFile(structureFile);
+		const pseudopotentialMapping = isAdvanced
+			? structureElements.reduce<Record<string, string>>((mapping, element) => {
+					const filename = pseudopotentialFiles[element]?.name;
+
+					if (filename) {
+						mapping[element] = filename;
+					}
+
+					return mapping;
+				}, {})
+			: {};
+		const serializedMapping = JSON.stringify(pseudopotentialMapping);
+
 		handleConfiguredSubmit({
 			...API_TEMPLATE,
+			extraInputs: {
+				is_advanced: isAdvanced,
+				pseudo_file_mapping: pseudopotentialMapping,
+			},
+			...(isAdvanced
+				? {
+						formFields: {
+							pseudo_file_mapping: serializedMapping,
+							pseudo_mapping: serializedMapping,
+						},
+					}
+				: {}),
 			fileGroups: [
 				{
 					fieldName: API_TEMPLATE.parameterFileField,
@@ -202,10 +236,12 @@ export const useBigDFT = (
 	};
 
 	return {
+		handleModeChange,
 		handleParameterFileChange,
 		handlePseudopotentialFileChange,
 		handleRunSimulation,
 		handleStructureFileChange,
+		mode,
 		parameterFile,
 		pseudopotentialFiles,
 		removeParameterFile,

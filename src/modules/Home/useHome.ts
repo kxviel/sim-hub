@@ -18,6 +18,7 @@ export type SimulationParameterValue = string | number | boolean | number[];
 
 export type ConfiguredSimulationSubmission = {
 	calculatorSlug: string;
+	extraInputs?: Record<string, unknown>;
 	projectPrefix: string;
 	simulatorLabel: string;
 	parameters?: Record<string, SimulationParameterValue>;
@@ -75,6 +76,17 @@ const EMPTY_SUBMISSION: SimulationSubmission = {
 	username: "",
 	resultData: null,
 	downloadUrl: "",
+};
+
+const appendExtraInputs = (
+	formData: FormData,
+	extraInputs: Record<string, unknown>,
+) => {
+	formData.append("extra_inputs", JSON.stringify(extraInputs));
+
+	if (typeof extraInputs.is_advanced === "boolean") {
+		formData.append("is_advanced", String(extraInputs.is_advanced));
+	}
 };
 
 export const useHome = (): HomeState => {
@@ -250,6 +262,10 @@ export const useHome = (): HomeState => {
 			formData.append("pseudofiles", file);
 		}
 
+		appendExtraInputs(formData, {
+			is_advanced: pseudopotentialFiles.length > 0,
+		});
+
 		void submitSimulation(
 			{
 				calculatorSlug: "Quantum-Espresso",
@@ -273,6 +289,8 @@ export const useHome = (): HomeState => {
 				JSON.stringify(configuredSubmission.parameters),
 			);
 		}
+
+		appendExtraInputs(formData, configuredSubmission.extraInputs ?? {});
 
 		for (const [fieldName, value] of Object.entries(
 			configuredSubmission.formFields ?? {},

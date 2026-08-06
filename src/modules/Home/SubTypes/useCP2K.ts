@@ -14,7 +14,8 @@ const API_TEMPLATE = {
 	parameterFileField: "csv_file",
 	structureFileField: "structure_file",
 	pseudopotentialFileField: "pseudofiles",
-	basisFileField: "basis_files",
+	basisFileField: "basis_file",
+	legacyBasisFileField: "basis_files",
 	modeField: "cp2k_mode",
 	xcFunctionalField: "xc_functional",
 	pseudopotentialNamesField: "pseudo_names",
@@ -395,10 +396,16 @@ export const useCP2K = (
 
 		handleConfiguredSubmit({
 			...API_TEMPLATE,
+			extraInputs: {
+				is_advanced: isAdvanced,
+				pseudo_names: pseudopotentialMap,
+				basis_names: basisMap,
+				...(isAdvanced ? { xc_functional: xcFunctional.trim() } : {}),
+			},
 			formFields: {
 				[API_TEMPLATE.modeField]: mode,
 				...(isAdvanced
-					? { [API_TEMPLATE.xcFunctionalField]: xcFunctional }
+					? { [API_TEMPLATE.xcFunctionalField]: xcFunctional.trim() }
 					: {}),
 				[API_TEMPLATE.pseudopotentialNamesField]:
 					JSON.stringify(pseudopotentialMap),
@@ -419,6 +426,10 @@ export const useCP2K = (
 				},
 				{
 					fieldName: API_TEMPLATE.basisFileField,
+					files: isAdvanced && basisFile ? [basisFile] : [],
+				},
+				{
+					fieldName: API_TEMPLATE.legacyBasisFileField,
 					files: isAdvanced && basisFile ? [basisFile] : [],
 				},
 			],

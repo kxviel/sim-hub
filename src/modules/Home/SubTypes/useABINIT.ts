@@ -204,6 +204,9 @@ export const useABINIT = (
 		const normalizedStructureFile = await normalizeCifFile(structureFile);
 		handleConfiguredSubmit({
 			...API_TEMPLATE,
+			extraInputs: {
+				is_advanced: uploadedPseudopotentials.length > 0,
+			},
 			fileGroups: [
 				{
 					fieldName: API_TEMPLATE.parameterFileField,

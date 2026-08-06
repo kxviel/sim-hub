@@ -2,6 +2,7 @@ import { XSquare } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import FileUpload from "@/modules/Home/FileUpload";
 import { QE_TEMPLATE_BASE, simulationTypeList } from "@/modules/Home/SimUtils";
+import { ElementPseudopotentialUploads } from "@/modules/Home/SubTypes/DftFields";
 import { useQuantumExpresso } from "@/modules/Home/SubTypes/useQuantumExpresso";
 import type { HomeState } from "@/modules/Home/useHome";
 
@@ -106,93 +107,27 @@ const QuantumExpresso = ({
 					/>
 				</div>
 
-				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
-					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-						<div>
-							<p className="font-semibold text-lg">Detected CIF Elements</p>
-							<p className="text-sm">
-								Upload the CIF to unlock one optional UPF input per element.
-							</p>
-						</div>
-						<a
-							className={buttonVariants({ variant: "outline" })}
-							download="pseudopotential-template.upf"
-							href={`${QE_TEMPLATE_BASE}/pseudopotential-template.upf`}
-						>
-							Download UPF Template
-						</a>
-					</div>
-
-					{structureWarning ? (
-						<p className="rounded border border-amber-300 bg-amber-50 p-3 text-amber-900 text-sm">
-							{structureWarning}
-						</p>
-					) : null}
-
-					{structureElements.length > 0 ? (
-						<div className="space-y-3">
-							<p className="text-muted-foreground text-sm">
-								{structureElements.length} element
-								{structureElements.length === 1 ? "" : "s"} detected
-							</p>
-							{structureElements.map((element) => {
-								const file = pseudopotentialFiles[element];
-
-								return (
-									<div
-										className="grid gap-3 rounded border border-gray-200 p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] sm:items-center"
-										key={element}
-									>
-										<div className="min-w-0">
-											<span className="inline-flex rounded-full bg-primary/10 px-3 py-1 font-semibold text-primary text-sm">
-												{element}
-											</span>
-											<p className="mt-1 text-muted-foreground text-xs">
-												Atomic element from CIF
-											</p>
-										</div>
-										<div className="flex min-w-0 items-center gap-2">
-											{file ? (
-												<>
-													<p className="min-w-0 flex-1 truncate text-sm">
-														{file.name}
-													</p>
-													<Button
-														aria-label={`Remove ${element} pseudopotential`}
-														onClick={() =>
-															handleRemovePseudopotentialFile(element)
-														}
-														variant="ghost"
-													>
-														<XSquare
-															aria-hidden="true"
-															className="text-red-600"
-														/>
-													</Button>
-												</>
-											) : (
-												<FileUpload
-													accept=".upf"
-													ariaLabel={`${element} UPF pseudopotential`}
-													disabled={isSubmitting}
-													hint="UPF · Up to 5 MB"
-													onChange={(event) =>
-														handlePseudopotentialFileChange(element, event)
-													}
-												/>
-											)}
-										</div>
-									</div>
-								);
-							})}
-						</div>
-					) : (
-						<p className="rounded border border-dashed border-gray-300 p-4 text-muted-foreground text-sm">
-							Upload a CIF structure file to detect elements and unlock
-							per-element UPF uploads.
-						</p>
-					)}
-				</div>
+				<ElementPseudopotentialUploads
+					accept=".upf"
+					ariaLabelSuffix="UPF pseudopotential"
+					description="Upload the CIF to unlock one optional UPF input per element."
+					disabled={isSubmitting}
+					elements={structureElements}
+					emptyMessage="Upload a CIF structure file to detect elements and unlock per-element UPF uploads."
+					files={pseudopotentialFiles}
+					hint="UPF · Up to 5 MB"
+					onChange={handlePseudopotentialFileChange}
+					onRemove={handleRemovePseudopotentialFile}
+					warning={structureWarning}
+				>
+					<a
+						className={buttonVariants({ variant: "outline" })}
+						download="pseudopotential-template.upf"
+						href={`${QE_TEMPLATE_BASE}/pseudopotential-template.upf`}
+					>
+						Download UPF Template
+					</a>
+				</ElementPseudopotentialUploads>
 			</div>
 
 			<Button

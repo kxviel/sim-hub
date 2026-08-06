@@ -1,131 +1,45 @@
-import { XSquare } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import FileUpload from "@/modules/Home/FileUpload";
-import { simulationTypeList } from "@/modules/Home/SimUtils";
+import {
+	ConfiguredSubtype,
+	type ConfiguredSubtypeCopy,
+} from "@/modules/Home/SubTypes/ConfiguredSubtype";
 import { useAiiDA_Workflow } from "@/modules/Home/SubTypes/useAiiDA_Workflow";
 import type { HomeState } from "@/modules/Home/useHome";
 
-const AiiDA_Workflow = (homeState: HomeState) => {
-	const { simType, isSubmitting, handleConfiguredSubmit } = homeState;
+const COPY: ConfiguredSubtypeCopy = {
+	intro: "Upload an AiiDA workflow definition and its calculator inputs.",
+	summary:
+		"This template sends a workflow configuration plus any supporting AiiDA input files.",
+	primary: {
+		title: "Workflow Configuration",
+		description:
+			"Upload a YAML or JSON workflow definition. Change the accepted formats and multipart field in this component when the backend is finalized.",
+		accept: ".yaml,.yml,.json",
+		ariaLabel: "AiiDA workflow configuration",
+		hint: "YAML or JSON · Up to 5 MB",
+	},
+	optional: {
+		title: "Workflow Input Files",
+		description:
+			"Optional structures, pseudopotentials, metadata, or calculator files.",
+		ariaLabel: "AiiDA workflow input files",
+		hint: "Structures, pseudopotentials, or metadata · Up to 5 MB each",
+	},
+};
 
-	const {
-		files,
-		handleFileChange,
-		handleOptionalFileChange,
-		handleRemoveFile,
-		handleRemoveOptionalFile,
-		handleRunSimulation,
-		optionalfiles,
-	} = useAiiDA_Workflow(handleConfiguredSubmit);
+const AiiDA_Workflow = ({
+	simType,
+	isSubmitting,
+	handleConfiguredSubmit,
+}: HomeState) => {
+	const subtypeState = useAiiDA_Workflow(handleConfiguredSubmit);
 
 	return (
-		<div className="w-full space-y-4">
-			<p>Upload an AiiDA workflow definition and its calculator inputs.</p>
-			<p className="font-semibold text-lg">
-				{simulationTypeList.filter((x) => x.value === simType)[0]?.label}
-			</p>
-
-			<div className="w-full space-y-4 rounded border border-gray-200 p-2">
-				<p>
-					This template sends a workflow configuration plus any supporting AiiDA
-					input files. Each file must be{" "}
-					<strong className="text-primary font-semibold">5 MB</strong> or less.
-				</p>
-
-				{files.length > 0 && (
-					<div className="w-full space-y-4 rounded border border-gray-200 p-2">
-						<p className="font-semibold text-lg">Uploaded Files: </p>
-
-						<div className="w-full p-2 flex items-center gap-2 flex-wrap">
-							{files.map((file, i) => (
-								<div
-									className="w-full rounded border border-gray-200 p-2 flex gap-1 items-center justify-between"
-									key={file.name}
-								>
-									<p className="font-semibold text-sm truncate">{file.name}</p>
-
-									<Button
-										aria-label={`Remove ${file.name}`}
-										onClick={() => handleRemoveFile(i)}
-										variant="ghost"
-									>
-										<XSquare aria-hidden="true" className="text-red-600" />
-									</Button>
-								</div>
-							))}
-						</div>
-					</div>
-				)}
-
-				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
-					<p className="font-semibold text-lg">Workflow Configuration</p>
-					<p>
-						Upload a YAML or JSON workflow definition. Change the accepted
-						formats and multipart field in this component when the backend is
-						finalized.
-					</p>
-
-					<FileUpload
-						accept=".yaml,.yml,.json"
-						ariaLabel="AiiDA workflow configuration"
-						disabled={isSubmitting}
-						files={files}
-						hint="YAML or JSON · Up to 5 MB"
-						onChange={handleFileChange}
-					/>
-				</div>
-
-				{optionalfiles.length > 0 && (
-					<div className="w-full space-y-4 rounded border border-gray-200 p-2">
-						<p className="font-semibold text-lg">Optional Uploaded Files: </p>
-
-						<div className="w-full p-2 flex items-center gap-2 flex-wrap">
-							{optionalfiles.map((file, i) => (
-								<div
-									className="w-full rounded border border-gray-200 p-2 flex gap-1 items-center justify-between"
-									key={file.name}
-								>
-									<p className="font-semibold text-sm truncate">{file.name}</p>
-
-									<Button
-										aria-label={`Remove ${file.name}`}
-										onClick={() => handleRemoveOptionalFile(i)}
-										variant="ghost"
-									>
-										<XSquare aria-hidden="true" className="text-red-600" />
-									</Button>
-								</div>
-							))}
-						</div>
-					</div>
-				)}
-
-				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
-					<p className="font-semibold text-lg">Workflow Input Files</p>
-					<p>
-						Optional structures, pseudopotentials, metadata, or calculator
-						files.
-					</p>
-
-					<FileUpload
-						ariaLabel="AiiDA workflow input files"
-						disabled={isSubmitting}
-						files={optionalfiles}
-						hint="Structures, pseudopotentials, or metadata · Up to 5 MB each"
-						multiple
-						onChange={handleOptionalFileChange}
-					/>
-				</div>
-			</div>
-
-			<Button
-				className="my-4 py-4 w-full text-lg"
-				disabled={isSubmitting}
-				onClick={handleRunSimulation}
-			>
-				{isSubmitting ? "Simulating" : "Run Simulation"}
-			</Button>
-		</div>
+		<ConfiguredSubtype
+			{...subtypeState}
+			copy={COPY}
+			isSubmitting={isSubmitting}
+			simType={simType}
+		/>
 	);
 };
 

@@ -120,7 +120,7 @@ const SIMULATION_SUBTYPE_HELP: Record<string, string> = {
 		"Configure the ABINIT workflow, plane-wave basis, Brillouin-zone sampling, and convergence controls.",
 	CP2K: "Configure the CP2K workflow, Quickstep method, density grid, and SCF convergence controls.",
 	BigDFT:
-		"Configure a BigDFT calculation with its parameter, structure, and optional per-element pseudopotential files.",
+		"Configure BigDFT with internal pseudopotentials or Advanced per-element uploads.",
 	"BFE.NET - Cantilever Beam":
 		"Upload a cantilever model definition containing geometry, material, loads, and boundary conditions.",
 	MYSTRAN:
