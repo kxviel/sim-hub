@@ -1,8 +1,8 @@
 import { Download, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SectionTitle from "@/modules/Home/SectionTitle";
-import { getSimulationResultFields } from "@/modules/Home/SimUtils";
 import type { HomeState, SubmissionStatus } from "@/modules/Home/useHome";
+import { getSimulationResultRows } from "@/modules/Home/useSimulationResults";
 
 const STATUS_LABELS: Record<SubmissionStatus, string> = {
 	idle: "Not Started",
@@ -12,20 +12,10 @@ const STATUS_LABELS: Record<SubmissionStatus, string> = {
 	error: "Error",
 };
 
-const formatResultValue = (value: unknown) => {
-	if (typeof value === "number") {
-		return Number.isInteger(value) ? String(value) : value.toPrecision(8);
-	}
-
-	return String(value);
-};
-
-const ResultRow = ({ label, value }: { label: string; value: unknown }) => (
+const ResultRow = ({ label, value }: { label: string; value: string }) => (
 	<div className="flex justify-between gap-4 border-gray-100 border-b py-2 last:border-0">
 		<p className="text-muted-foreground text-sm">{label}</p>
-		<p className="min-w-0 wrap-break-word text-right text-sm">
-			{formatResultValue(value)}
-		</p>
+		<p className="min-w-0 wrap-break-word text-right text-sm">{value}</p>
 	</div>
 );
 
@@ -35,7 +25,7 @@ const SimulationResults = ({
 	isPolling,
 	handleDownloadResult,
 }: HomeState) => {
-	const resultFields = getSimulationResultFields(submission.simulatorLabel);
+	const resultRows = getSimulationResultRows(submission);
 
 	if (!setupComplete || submission.status === "idle") {
 		return (
@@ -76,15 +66,9 @@ const SimulationResults = ({
 				<ResultRow label="Project" value={submission.projectName} />
 				<ResultRow label="Submitted By" value={submission.username} />
 
-				{resultFields.map(({ key, label }) => {
-					const value = submission.resultData?.[key];
-
-					return value === undefined ||
-						value === null ||
-						value === "" ? null : (
-						<ResultRow key={key} label={label} value={value} />
-					);
-				})}
+				{resultRows.map(({ key, label, value }) => (
+					<ResultRow key={key} label={label} value={value} />
+				))}
 			</div>
 
 			{submission.status === "completed" ? (

@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import http, { ApiError } from "@/lib/http";
+import http, { ApiError, getApiBaseUrl } from "@/lib/http";
 
 export type SimulationBody = {
 	subtypeSlug: string;
@@ -12,6 +12,7 @@ export type SimulationResultData = Record<string, unknown>;
 
 export type SimulationResponse = {
 	ready: boolean;
+	failed: boolean;
 	message: string;
 	projectName: string;
 	resultData: SimulationResultData | null;
@@ -20,6 +21,8 @@ export type SimulationResponse = {
 
 type ApiResponse = {
 	message?: unknown;
+	status?: unknown;
+	state?: unknown;
 	project_name?: unknown;
 	projectName?: unknown;
 	data?: unknown;
@@ -34,6 +37,24 @@ type ApiResponse = {
 	submitted?: unknown;
 };
 
+const WAITING_STATUSES = new Set([
+	"ongoing",
+	"pending",
+	"queue",
+	"queued",
+	"running",
+	"started",
+	"submitted",
+	"waiting",
+]);
+const FAILURE_STATUSES = new Set([
+	"canceled",
+	"cancelled",
+	"error",
+	"errored",
+	"failed",
+	"failure",
+]);
 const getString = (value: unknown) =>
 	typeof value === "string" && value.trim() ? value.trim() : "";
 
@@ -49,7 +70,9 @@ const parseResultData = (value: unknown): SimulationResultData | null => {
 	if (typeof value === "string") {
 		try {
 			const parsed = JSON.parse(value);
-			return typeof parsed === "object" && parsed !== null ? parsed : null;
+			return typeof parsed === "object" && parsed !== null
+				? (parsed as SimulationResultData)
+				: null;
 		} catch {
 			return null;
 		}
@@ -60,16 +83,40 @@ const parseResultData = (value: unknown): SimulationResultData | null => {
 		: null;
 };
 
+const getResponseStatus = (
+	response: ApiResponse,
+	nestedResponse: ApiResponse,
+	resultData: SimulationResultData | null,
+) => {
+	const status =
+		response.status ??
+		response.state ??
+		nestedResponse.status ??
+		nestedResponse.state ??
+		resultData?.status;
+
+	if (typeof status === "string") {
+		return status.trim().toLowerCase();
+	}
+
+	return "";
+};
+
 const parseSimulationResponse = (
 	payload: unknown,
 	fallbackProjectName: string,
 ): SimulationResponse => {
 	const response = (payload ?? {}) as ApiResponse;
-	const resultData = parseResultData(response.data);
-	const nestedResponse =
-		typeof response.data === "object" && response.data !== null
-			? (response.data as ApiResponse)
-			: {};
+	const parsedResponseData = parseResultData(response.data);
+	const nestedResponse = (parsedResponseData ?? {}) as ApiResponse;
+	const resultData = parsedResponseData;
+	const responseStatus = getResponseStatus(
+		response,
+		nestedResponse,
+		resultData,
+	);
+	const failed = FAILURE_STATUSES.has(responseStatus);
+	const waiting = WAITING_STATUSES.has(responseStatus);
 	const projectNameValue =
 		response.project_name ??
 		response.projectName ??
@@ -94,8 +141,11 @@ const parseSimulationResponse = (
 	);
 
 	return {
-		ready: hasResultValues(resultData),
-		message: getString(response.message),
+		ready: !failed && !waiting && hasResultValues(resultData),
+		failed,
+		message:
+			getString(response.message) ||
+			(failed ? getString(resultData?.error) : ""),
 		projectName: projectName || fallbackProjectName,
 		resultData,
 		downloadUrl,
@@ -139,6 +189,7 @@ export const getProjectResultAPI = async (
 		if (error instanceof ApiError && error.status === 404) {
 			return {
 				ready: false,
+				failed: false,
 				message: "Simulation is queued. Waiting for results...",
 				projectName,
 				resultData: null,
@@ -159,10 +210,10 @@ export const resolveDownloadUrl = (downloadUrl: string) => {
 		return downloadUrl;
 	}
 
-	const baseUrl = String(http.defaults.baseURL ?? "").replace(/\/$/, "");
+	const baseUrl = getApiBaseUrl().replace(/\/$/, "");
 	const path = downloadUrl.startsWith("/") ? downloadUrl : `/${downloadUrl}`;
 
-	return path.startsWith(baseUrl) ? path : `${baseUrl}${path}`;
+	return `${baseUrl}${path}`;
 };
 
 export const useSimulation = () =>

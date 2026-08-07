@@ -4,11 +4,16 @@ import ASE from "@/modules/Home/SubTypes/ASE";
 import BFE_NET from "@/modules/Home/SubTypes/BFE_NET";
 import BigDFT from "@/modules/Home/SubTypes/BigDFT";
 import CP2K from "@/modules/Home/SubTypes/CP2K";
+import Exciting from "@/modules/Home/SubTypes/Exciting";
+import Fleur from "@/modules/Home/SubTypes/Fleur";
+import GPAW from "@/modules/Home/SubTypes/GPAW";
 import JAX_FEM from "@/modules/Home/SubTypes/JAX_FEM";
 import MEEP_FDTD from "@/modules/Home/SubTypes/MEEP_FDTD";
 import MonteCarlo from "@/modules/Home/SubTypes/MonteCarlo";
 import MYSTRAN from "@/modules/Home/SubTypes/MYSTRAN";
+import Octopus from "@/modules/Home/SubTypes/Octopus";
 import QuantumExpresso from "@/modules/Home/SubTypes/QuantumExpresso";
+import Siesta from "@/modules/Home/SubTypes/Siesta";
 import type { HomeState } from "@/modules/Home/useHome";
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -76,7 +81,17 @@ export const SIMULATION_LIST: SimulationState[] = [
 		id: "DFT",
 		label: "DFT (Density Functional Theory)",
 		help: "Quantum-level material simulation for crystalline and atomistic systems.",
-		subtypes: ["Quantum ESPRESSO", "ABINIT", "CP2K", "BigDFT"],
+		subtypes: [
+			"Quantum ESPRESSO",
+			"ABINIT",
+			"CP2K",
+			"BigDFT",
+			"Siesta",
+			"Octopus",
+			"GPAW",
+			"Exciting",
+			"Fleur",
+		],
 	},
 	{
 		id: "FEM",
@@ -121,6 +136,15 @@ const SIMULATION_SUBTYPE_HELP: Record<string, string> = {
 	CP2K: "Configure the CP2K workflow, Quickstep method, density grid, and SCF convergence controls.",
 	BigDFT:
 		"Configure BigDFT with internal pseudopotentials or Advanced per-element uploads.",
+	Siesta:
+		"Configure Siesta with CSV/CIF inputs, optional per-element pseudopotentials, and Advanced XC settings.",
+	Octopus:
+		"Configure Octopus with CSV/CIF inputs and optional Advanced per-element pseudopotentials.",
+	GPAW: "Configure GPAW with CSV/CIF inputs and optional Advanced per-element pseudopotentials.",
+	Exciting:
+		"Configure Exciting with CSV/CIF inputs, optional RMT values, and Advanced per-element pseudopotentials.",
+	Fleur:
+		"Configure Fleur with CSV/CIF inputs and optional Advanced per-element pseudopotentials.",
 	"BFE.NET - Cantilever Beam":
 		"Upload a cantilever model definition containing geometry, material, loads, and boundary conditions.",
 	MYSTRAN:
@@ -147,6 +171,11 @@ export const simulationParameterComponents: SubTypeConfig = {
 	ABINIT: ABINIT,
 	CP2K: CP2K,
 	BigDFT: BigDFT,
+	Siesta: Siesta,
+	Octopus: Octopus,
+	GPAW: GPAW,
+	Exciting: Exciting,
+	Fleur: Fleur,
 	"BFE.NET - Cantilever Beam": BFE_NET,
 	MYSTRAN: MYSTRAN,
 	"JAX-FEM": JAX_FEM,

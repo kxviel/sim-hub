@@ -1,8 +1,8 @@
 import AdvancedDft from "@/modules/Home/SubTypes/AdvancedDft";
 import type { HomeState } from "@/modules/Home/useHome";
 
-const BigDFT = (homeState: HomeState) => (
-	<AdvancedDft {...homeState} simulator="BigDFT" />
+const Siesta = (homeState: HomeState) => (
+	<AdvancedDft {...homeState} simulator="Siesta" />
 );
 
-export default BigDFT;
+export default Siesta;

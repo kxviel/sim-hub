@@ -20,6 +20,7 @@ import {
 	InputGroupInput,
 	InputGroupText,
 } from "@/components/ui/input-group";
+import ApiEndpointSettings from "@/modules/Auth/ApiEndpointSettings";
 import { useAuthForm } from "@/modules/Auth/useAuthForm";
 
 const Login = () => {
@@ -49,6 +50,7 @@ const Login = () => {
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
+					<ApiEndpointSettings />
 					<form onSubmit={handleSubmit}>
 						<form.Subscribe selector={(state) => state.isSubmitting}>
 							{(isSubmitting) => (

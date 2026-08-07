@@ -112,7 +112,9 @@ export const useHome = (): HomeState => {
 			getProjectResultAPI(submission.username, submission.projectName),
 		enabled: canPoll,
 		refetchInterval: (query) =>
-			query.state.data?.ready || isFatalResultError(query.state.error)
+			query.state.data?.ready ||
+			query.state.data?.failed ||
+			isFatalResultError(query.state.error)
 				? false
 				: RESULT_POLL_INTERVAL,
 		refetchOnWindowFocus: false,
@@ -122,21 +124,34 @@ export const useHome = (): HomeState => {
 	let currentSubmission = submission;
 
 	if (submission.status === "queued" && projectResult.data) {
-		currentSubmission = projectResult.data.ready
+		currentSubmission = projectResult.data.failed
 			? {
 					...submission,
-					status: "completed",
+					status: "error",
 					message:
-						projectResult.data.message || "Simulation results are ready.",
+						projectResult.data.message ||
+						"Simulation failed in middle logic or the backend.",
 					resultData: projectResult.data.resultData,
-					downloadUrl:
-						projectResult.data.downloadUrl ||
-						getProjectDownloadPath(submission.username, submission.projectName),
+					downloadUrl: "",
 				}
-			: {
-					...submission,
-					message: projectResult.data.message || submission.message,
-				};
+			: projectResult.data.ready
+				? {
+						...submission,
+						status: "completed",
+						message:
+							projectResult.data.message || "Simulation results are ready.",
+						resultData: projectResult.data.resultData,
+						downloadUrl:
+							projectResult.data.downloadUrl ||
+							getProjectDownloadPath(
+								submission.username,
+								submission.projectName,
+							),
+					}
+				: {
+						...submission,
+						message: projectResult.data.message || submission.message,
+					};
 	}
 
 	if (
@@ -207,6 +222,23 @@ export const useHome = (): HomeState => {
 			});
 
 			if (requestId !== activeRequest.current) {
+				return;
+			}
+
+			if (response.failed) {
+				const message =
+					response.message ||
+					"Simulation failed in middle logic or the backend.";
+				setSubmission({
+					...EMPTY_SUBMISSION,
+					status: "error",
+					message,
+					simulatorLabel: config.simulatorLabel,
+					projectName: response.projectName,
+					username,
+					resultData: response.resultData,
+				});
+				toast.error(message);
 				return;
 			}
 
