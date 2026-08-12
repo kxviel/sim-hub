@@ -1,0 +1,10 @@
+dft.ixc,PBE
+dft.hgrids,0.35
+dft.rmult, 5.0, 8.0
+dft.nspin,1
+dft.qcharge,0.0
+dft.itermax,50
+dft.gnrm_cv,1e-4
+geopt.method,FIRE
+geopt.ncount_cluster_x,100
+geopt.forcemax,0.001
