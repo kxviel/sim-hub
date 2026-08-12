@@ -27,6 +27,14 @@
 			}
 		}
 	},
+	"overrides": [
+		{
+			"includes": ["public/favicon.svg", "src/routeTree.gen.ts"],
+			"linter": {
+				"enabled": false
+			}
+		}
+	],
 	"css": {
 		"parser": {
 			"tailwindDirectives": true
