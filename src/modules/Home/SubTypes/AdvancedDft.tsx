@@ -105,6 +105,7 @@ const AdvancedDft = ({
 		structureElements,
 		structureFile,
 		structureWarning,
+		supportsAdvanced,
 	} = useAdvancedDft(simulator, handleConfiguredSubmit);
 	const acceptedPseudoFiles = pseudoAccept ? { accept: pseudoAccept } : {};
 
@@ -117,15 +118,20 @@ const AdvancedDft = ({
 
 			<div className="w-full space-y-4 rounded border border-gray-200 p-2">
 				<p>
-					Upload one CSV parameter file and one CIF structure file.
-					Pseudopotential uploads are available in Advanced mode. Each file must
-					be <strong className="font-semibold text-primary">5 MB</strong> or
-					less.
+					Upload one CSV parameter file and one CIF structure file. Each file
+					must be <strong className="font-semibold text-primary">5 MB</strong>{" "}
+					or less.
 				</p>
-				<p className="rounded border border-primary/20 bg-primary/5 p-3 text-sm">
-					Basic mode submits the required CSV and CIF files. Advanced mode
-					requires one pseudopotential for every detected element.
-				</p>
+				{supportsAdvanced ? (
+					<p className="rounded border border-primary/20 bg-primary/5 p-3 text-sm">
+						Basic mode submits the required CSV and CIF files. Advanced mode
+						requires one pseudopotential for every detected element.
+					</p>
+				) : (
+					<p className="rounded border border-primary/20 bg-primary/5 p-3 text-sm">
+						{simulator} requires no pseudopotentials or additional files.
+					</p>
+				)}
 
 				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
 					<p className="font-semibold text-lg">Input Parameters</p>
@@ -170,118 +176,123 @@ const AdvancedDft = ({
 					) : null}
 				</div>
 
-				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
-					<fieldset className="inline-flex rounded border border-gray-200 bg-muted p-1">
-						<legend className="sr-only">{simulator} configuration mode</legend>
-						{DFT_MODES.map((option) => (
-							<Button
-								aria-pressed={mode === option}
-								disabled={isSubmitting}
-								key={option}
-								onClick={() => handleModeChange(option)}
-								type="button"
-								variant={mode === option ? "default" : "ghost"}
-							>
-								{option === "basic" ? "Basic" : "Advanced"}
-							</Button>
-						))}
-					</fieldset>
-
-					{advancedSettings?.kind === "exciting" ? (
-						<div className="space-y-3 rounded border border-gray-200 p-3">
-							<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-								<div>
-									<p className="font-semibold">Optional RMT Parameters</p>
-									<p className="text-muted-foreground text-sm">
-										Set a muffin-tin radius per detected element, or leave all
-										values blank to use backend defaults.
-									</p>
-								</div>
+				{supportsAdvanced ? (
+					<div className="w-full space-y-4 rounded border border-gray-200 p-2">
+						<fieldset className="inline-flex rounded border border-gray-200 bg-muted p-1">
+							<legend className="sr-only">
+								{simulator} configuration mode
+							</legend>
+							{DFT_MODES.map((option) => (
 								<Button
-									disabled={isSubmitting || structureElements.length === 0}
-									onClick={advancedSettings.handleToggle}
+									aria-pressed={mode === option}
+									disabled={isSubmitting}
+									key={option}
+									onClick={() => handleModeChange(option)}
 									type="button"
-									variant="outline"
+									variant={mode === option ? "default" : "ghost"}
 								>
-									{advancedSettings.showRmt ? "Hide RMT" : "Show RMT"}
+									{option === "basic" ? "Basic" : "Advanced"}
 								</Button>
+							))}
+						</fieldset>
+
+						{advancedSettings?.kind === "exciting" ? (
+							<div className="space-y-3 rounded border border-gray-200 p-3">
+								<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+									<div>
+										<p className="font-semibold">Optional RMT Parameters</p>
+										<p className="text-muted-foreground text-sm">
+											Set a muffin-tin radius per detected element, or leave all
+											values blank to use backend defaults.
+										</p>
+									</div>
+									<Button
+										disabled={isSubmitting || structureElements.length === 0}
+										onClick={advancedSettings.handleToggle}
+										type="button"
+										variant="outline"
+									>
+										{advancedSettings.showRmt ? "Hide RMT" : "Show RMT"}
+									</Button>
+								</div>
+								{structureElements.length === 0 ? (
+									<p className="rounded border border-dashed border-gray-300 p-3 text-muted-foreground text-sm">
+										Upload a CIF structure file to unlock optional RMT inputs.
+									</p>
+								) : advancedSettings.showRmt ? (
+									<div className="grid gap-3 sm:grid-cols-2">
+										{structureElements.map((element) => (
+											<div className="space-y-2" key={element}>
+												<Label htmlFor={`exciting-rmt-${element}`}>
+													{element} RMT
+												</Label>
+												<Input
+													disabled={isSubmitting}
+													id={`exciting-rmt-${element}`}
+													min="0"
+													onChange={(event) =>
+														advancedSettings.handleRmtChange(
+															element,
+															event.target.value,
+														)
+													}
+													placeholder="Optional"
+													step="any"
+													type="number"
+													value={advancedSettings.rmtValues[element] ?? ""}
+												/>
+											</div>
+										))}
+									</div>
+								) : null}
 							</div>
-							{structureElements.length === 0 ? (
-								<p className="rounded border border-dashed border-gray-300 p-3 text-muted-foreground text-sm">
-									Upload a CIF structure file to unlock optional RMT inputs.
-								</p>
-							) : advancedSettings.showRmt ? (
-								<div className="grid gap-3 sm:grid-cols-2">
-									{structureElements.map((element) => (
-										<div className="space-y-2" key={element}>
-											<Label htmlFor={`exciting-rmt-${element}`}>
-												{element} RMT
-											</Label>
-											<Input
-												disabled={isSubmitting}
-												id={`exciting-rmt-${element}`}
-												min="0"
-												onChange={(event) =>
-													advancedSettings.handleRmtChange(
-														element,
-														event.target.value,
-													)
-												}
-												placeholder="Optional"
-												step="any"
-												type="number"
-												value={advancedSettings.rmtValues[element] ?? ""}
-											/>
-										</div>
-									))}
-								</div>
-							) : null}
-						</div>
-					) : null}
+						) : null}
 
-					{mode === "basic" ? (
-						<p className="rounded border border-dashed border-gray-300 p-4 text-muted-foreground text-sm">
-							Basic mode submits only the CSV parameter and CIF structure files.
-						</p>
-					) : (
-						<div className="space-y-4">
-							{advancedSettings?.kind === "siesta" ? (
-								<div className="grid gap-4 rounded border border-gray-200 p-3 sm:grid-cols-2">
-									<OptionSelect
-										disabled={isSubmitting}
-										id="siesta-xc-functional"
-										label="XC.Functional"
-										onChange={advancedSettings.handleXcFunctionalChange}
-										options={SIESTA_XC_FUNCTIONAL_OPTIONS}
-										value={advancedSettings.xcFunctional}
-									/>
-									<OptionSelect
-										disabled={isSubmitting}
-										id="siesta-xc-author"
-										label="XC.Authors"
-										onChange={advancedSettings.handleXcAuthorChange}
-										options={SIESTA_XC_AUTHOR_SELECT_OPTIONS}
-										value={advancedSettings.xcAuthor}
-									/>
-								</div>
-							) : null}
+						{mode === "basic" ? (
+							<p className="rounded border border-dashed border-gray-300 p-4 text-muted-foreground text-sm">
+								Basic mode submits only the CSV parameter and CIF structure
+								files.
+							</p>
+						) : (
+							<div className="space-y-4">
+								{advancedSettings?.kind === "siesta" ? (
+									<div className="grid gap-4 rounded border border-gray-200 p-3 sm:grid-cols-2">
+										<OptionSelect
+											disabled={isSubmitting}
+											id="siesta-xc-functional"
+											label="XC.Functional"
+											onChange={advancedSettings.handleXcFunctionalChange}
+											options={SIESTA_XC_FUNCTIONAL_OPTIONS}
+											value={advancedSettings.xcFunctional}
+										/>
+										<OptionSelect
+											disabled={isSubmitting}
+											id="siesta-xc-author"
+											label="XC.Authors"
+											onChange={advancedSettings.handleXcAuthorChange}
+											options={SIESTA_XC_AUTHOR_SELECT_OPTIONS}
+											value={advancedSettings.xcAuthor}
+										/>
+									</div>
+								) : null}
 
-							<ElementPseudopotentialUploads
-								{...acceptedPseudoFiles}
-								ariaLabelSuffix={`${simulator} pseudopotential`}
-								description="Upload one pseudopotential input per detected element."
-								disabled={isSubmitting}
-								elements={structureElements}
-								emptyMessage="Upload a CIF structure file to detect elements and unlock per-element pseudopotential uploads."
-								files={pseudopotentialFiles}
-								hint={pseudoHint}
-								onChange={handlePseudopotentialFileChange}
-								onRemove={removePseudopotentialFile}
-								warning={structureWarning}
-							/>
-						</div>
-					)}
-				</div>
+								<ElementPseudopotentialUploads
+									{...acceptedPseudoFiles}
+									ariaLabelSuffix={`${simulator} pseudopotential`}
+									description="Upload one pseudopotential input per detected element."
+									disabled={isSubmitting}
+									elements={structureElements}
+									emptyMessage="Upload a CIF structure file to detect elements and unlock per-element pseudopotential uploads."
+									files={pseudopotentialFiles}
+									hint={pseudoHint}
+									onChange={handlePseudopotentialFileChange}
+									onRemove={removePseudopotentialFile}
+									warning={structureWarning}
+								/>
+							</div>
+						)}
+					</div>
+				) : null}
 			</div>
 
 			<Button

@@ -23,30 +23,40 @@ const SIMULATOR_CONFIG = {
 	BigDFT: {
 		projectPrefix: "DFT_bigdft",
 		pseudoExtensions: [],
+		supportsAdvanced: true,
 	},
 	Siesta: {
 		projectPrefix: "DFT_siesta",
 		pseudoExtensions: [".psf", ".psml"],
+		supportsAdvanced: true,
 	},
 	Octopus: {
 		projectPrefix: "DFT_octopus",
 		pseudoExtensions: [".upf", ".psf"],
+		supportsAdvanced: true,
 	},
 	GPAW: {
 		projectPrefix: "DFT_gpaw",
 		pseudoExtensions: [],
+		supportsAdvanced: true,
 	},
 	Exciting: {
 		projectPrefix: "DFT_exciting",
 		pseudoExtensions: [],
+		supportsAdvanced: true,
 	},
 	Fleur: {
 		projectPrefix: "DFT_fleur",
 		pseudoExtensions: [],
+		supportsAdvanced: false,
 	},
 } as const satisfies Record<
 	AdvancedDftSimulator,
-	{ projectPrefix: string; pseudoExtensions: readonly string[] }
+	{
+		projectPrefix: string;
+		pseudoExtensions: readonly string[];
+		supportsAdvanced: boolean;
+	}
 >;
 
 export const SIESTA_XC_FUNCTIONAL_OPTIONS = [
@@ -292,7 +302,7 @@ export const useAdvancedDft = (
 			return;
 		}
 
-		const isAdvanced = mode === "advanced";
+		const isAdvanced = config.supportsAdvanced && mode === "advanced";
 		const uploadedPseudopotentials = isAdvanced
 			? structureElements
 					.map((element) => pseudopotentialFiles[element])
@@ -328,11 +338,13 @@ export const useAdvancedDft = (
 				}, {})
 			: {};
 		const serializedMapping = JSON.stringify(pseudopotentialMapping);
-		const extraInputs: Record<string, unknown> = {
-			is_advanced: isAdvanced,
-			pseudo_file_mapping: pseudopotentialMapping,
-			pseudo_mapping: pseudopotentialMapping,
-		};
+		const extraInputs: Record<string, unknown> = config.supportsAdvanced
+			? {
+					is_advanced: isAdvanced,
+					pseudo_file_mapping: pseudopotentialMapping,
+					pseudo_mapping: pseudopotentialMapping,
+				}
+			: { is_advanced: false };
 
 		if (isAdvanced && simulator === "Siesta") {
 			extraInputs["XC.Functional"] = siestaXcFunctional;
@@ -408,5 +420,6 @@ export const useAdvancedDft = (
 		structureElements,
 		structureFile,
 		structureWarning,
+		supportsAdvanced: config.supportsAdvanced,
 	};
 };

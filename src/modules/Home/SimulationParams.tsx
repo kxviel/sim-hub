@@ -13,7 +13,7 @@ const SimulationParams = (homeState: HomeState) => {
 			<SectionTitle title="Simulation Parameters" icon={<Terminal />} />
 
 			{setupComplete && ParameterComponent ? (
-				<ParameterComponent {...homeState} />
+				<ParameterComponent key={simSubType} {...homeState} />
 			) : (
 				<div className="w-full">
 					<p className="font-semibold text-lg">

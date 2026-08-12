@@ -23,6 +23,7 @@ export type ConfiguredSimulationSubmission = {
 	simulatorLabel: string;
 	parameters?: Record<string, SimulationParameterValue>;
 	formFields?: Record<string, string>;
+	skipExtraInputs?: boolean;
 	fileGroups?: {
 		fieldName: string;
 		files: File[];
@@ -322,7 +323,9 @@ export const useHome = (): HomeState => {
 			);
 		}
 
-		appendExtraInputs(formData, configuredSubmission.extraInputs ?? {});
+		if (!configuredSubmission.skipExtraInputs) {
+			appendExtraInputs(formData, configuredSubmission.extraInputs ?? {});
+		}
 
 		for (const [fieldName, value] of Object.entries(
 			configuredSubmission.formFields ?? {},

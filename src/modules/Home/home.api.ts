@@ -154,7 +154,7 @@ const parseSimulationResponse = (
 
 export const runSimulationAPI = async (body: SimulationBody) => {
 	const { data } = await http.post<unknown>(
-		`/run_exec/${body.subtypeSlug}/${body.usernameSlug}`,
+		`/run_exec/csv/${body.subtypeSlug}/${body.usernameSlug}`,
 		body.formData,
 		{ params: { proj_name: body.projectName } },
 	);
