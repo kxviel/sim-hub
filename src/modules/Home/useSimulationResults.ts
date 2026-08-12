@@ -1,3 +1,4 @@
+import { downloadSimulationResultAPI } from "@/modules/Home/home.api";
 import { getSimulationResultFields } from "@/modules/Home/SimUtils";
 import type { SimulationSubmission } from "@/modules/Home/useHome";
 
@@ -147,4 +148,39 @@ export const getSimulationResultRows = (submission: SimulationSubmission) => {
 		: extraRows.length > 0
 			? extraRows
 			: preferredRows;
+};
+
+export const getSummaryResultRows = (summary: unknown) =>
+	Object.entries(parseSummarizedResult(summary)).flatMap(([key, value]) =>
+		isVisibleResultValue(value)
+			? [
+					{
+						key,
+						label: formatResultLabel(key),
+						value: formatResultValue(value),
+					},
+				]
+			: [],
+	);
+
+export const downloadSimulationResult = async (
+	downloadUrl: string,
+	fallbackName: string,
+) => {
+	const { blob, filename } = await downloadSimulationResultAPI(
+		downloadUrl,
+		fallbackName,
+	);
+	const objectUrl = URL.createObjectURL(blob);
+	const link = document.createElement("a");
+
+	try {
+		link.href = objectUrl;
+		link.download = filename;
+		document.body.appendChild(link);
+		link.click();
+		link.remove();
+	} finally {
+		URL.revokeObjectURL(objectUrl);
+	}
 };

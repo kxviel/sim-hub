@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import http, { ApiError, getApiBaseUrl } from "@/lib/http";
+import http, { ApiError } from "@/lib/http";
 
 export type SimulationBody = {
 	subtypeSlug: string;
@@ -17,6 +17,14 @@ export type SimulationResponse = {
 	projectName: string;
 	resultData: SimulationResultData | null;
 	downloadUrl: string;
+};
+
+export type SimulationHistoryItem = {
+	projectName: string;
+	calculator: string;
+	status: string;
+	createdAt: string;
+	resultSummary: unknown;
 };
 
 type ApiResponse = {
@@ -57,6 +65,11 @@ const FAILURE_STATUSES = new Set([
 ]);
 const getString = (value: unknown) =>
 	typeof value === "string" && value.trim() ? value.trim() : "";
+
+const getRecord = (value: unknown): Record<string, unknown> | null =>
+	typeof value === "object" && value !== null && !Array.isArray(value)
+		? (value as Record<string, unknown>)
+		: null;
 
 const hasResultValues = (resultData: SimulationResultData | null) =>
 	Boolean(
@@ -175,6 +188,39 @@ export const getProjectResultPath = (username: string, projectName: string) =>
 export const getProjectDownloadPath = (username: string, projectName: string) =>
 	`${getProjectResultPath(username, projectName)}/download`;
 
+export const getSimulationHistoryAPI = async (username: string) => {
+	const { data } = await http.get<unknown>(
+		`/${encodeURIComponent(username)}/history`,
+	);
+	const response = getRecord(data);
+	const projects = response?.projects;
+
+	if (!Array.isArray(projects)) {
+		return [];
+	}
+
+	return projects.flatMap<SimulationHistoryItem>((value) => {
+		const project = getRecord(value);
+		const projectName = getString(
+			project?.project_name ?? project?.projectName,
+		);
+
+		if (!project || !projectName) {
+			return [];
+		}
+
+		return [
+			{
+				projectName,
+				calculator: getString(project.calculator),
+				status: getString(project.status),
+				createdAt: getString(project.created_at ?? project.createdAt),
+				resultSummary: project.result_summary ?? project.resultSummary ?? null,
+			},
+		];
+	});
+};
+
 export const getProjectResultAPI = async (
 	username: string,
 	projectName: string,
@@ -205,15 +251,57 @@ export const isFatalResultError = (error: unknown) =>
 	error instanceof ApiError &&
 	Boolean(error.status && error.status >= 400 && error.status < 500);
 
-export const resolveDownloadUrl = (downloadUrl: string) => {
-	if (/^https?:\/\//i.test(downloadUrl)) {
-		return downloadUrl;
+const getDownloadFilename = (
+	contentDisposition: unknown,
+	fallbackName: string,
+) => {
+	const safeFallback = fallbackName.replace(/[<>:"/\\|?*]/g, "_");
+	const fallback = safeFallback.toLowerCase().endsWith(".zip")
+		? safeFallback
+		: `${safeFallback}.zip`;
+
+	if (typeof contentDisposition !== "string") {
+		return fallback;
 	}
 
-	const baseUrl = getApiBaseUrl().replace(/\/$/, "");
-	const path = downloadUrl.startsWith("/") ? downloadUrl : `/${downloadUrl}`;
+	const encodedFilename = contentDisposition.match(
+		/filename\*=UTF-8''([^;]+)/i,
+	)?.[1];
 
-	return `${baseUrl}${path}`;
+	if (encodedFilename) {
+		try {
+			return decodeURIComponent(encodedFilename).replace(/[<>:"/\\|?*]/g, "_");
+		} catch {
+			return encodedFilename.replace(/[<>:"/\\|?*]/g, "_");
+		}
+	}
+
+	return (
+		contentDisposition
+			.match(/filename="?([^";]+)"?/i)?.[1]
+			?.replace(/[<>:"/\\|?*]/g, "_") || fallback
+	);
+};
+
+export const downloadSimulationResultAPI = async (
+	downloadUrl: string,
+	fallbackName: string,
+) => {
+	if (!downloadUrl) {
+		throw new Error("A result download is not available.");
+	}
+
+	const response = await http.get<Blob>(downloadUrl, {
+		responseType: "blob",
+	});
+
+	return {
+		blob: response.data,
+		filename: getDownloadFilename(
+			response.headers["content-disposition"],
+			fallbackName,
+		),
+	};
 };
 
 export const useSimulation = () =>

@@ -58,7 +58,6 @@ export const useSimpleUploadSubtype = (
 			calculatorSlug: simulator,
 			projectPrefix: api.projectPrefix,
 			simulatorLabel: simulator,
-			skipExtraInputs: true,
 			formFields: {
 				simulation_family: api.family,
 				[codeField]: simulator,

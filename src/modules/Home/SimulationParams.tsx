@@ -1,4 +1,5 @@
 import { Terminal } from "lucide-react";
+import AdvancedExecutionOptions from "@/modules/Home/AdvancedExecutionOptions";
 import SectionTitle from "@/modules/Home/SectionTitle";
 import { simulationParameterComponents } from "@/modules/Home/SimUtils";
 import type { HomeState } from "@/modules/Home/useHome";
@@ -13,7 +14,10 @@ const SimulationParams = (homeState: HomeState) => {
 			<SectionTitle title="Simulation Parameters" icon={<Terminal />} />
 
 			{setupComplete && ParameterComponent ? (
-				<ParameterComponent key={simSubType} {...homeState} />
+				<>
+					<AdvancedExecutionOptions {...homeState} />
+					<ParameterComponent key={simSubType} {...homeState} />
+				</>
 			) : (
 				<div className="w-full">
 					<p className="font-semibold text-lg">

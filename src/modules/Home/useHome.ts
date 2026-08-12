@@ -6,11 +6,17 @@ import {
 	getProjectDownloadPath,
 	getProjectResultAPI,
 	isFatalResultError,
-	resolveDownloadUrl,
 	type SimulationResultData,
 	useSimulation,
 } from "@/modules/Home/home.api";
 import { getSimulationSubtypeList } from "@/modules/Home/SimUtils";
+import {
+	type AdvancedExecutionInputs,
+	type AdvancedExecutionOptionsState,
+	getAdvancedExecutionInputs,
+	useAdvancedExecutionOptions,
+} from "@/modules/Home/useAdvancedExecutionOptions";
+import { downloadSimulationResult } from "@/modules/Home/useSimulationResults";
 
 const RESULT_POLL_INTERVAL = 5_000;
 
@@ -23,7 +29,6 @@ export type ConfiguredSimulationSubmission = {
 	simulatorLabel: string;
 	parameters?: Record<string, SimulationParameterValue>;
 	formFields?: Record<string, string>;
-	skipExtraInputs?: boolean;
 	fileGroups?: {
 		fieldName: string;
 		files: File[];
@@ -47,7 +52,8 @@ export type SimulationSubmission = {
 	downloadUrl: string;
 };
 
-export type HomeState = {
+export type HomeState = AdvancedExecutionOptionsState & {
+	currentUsername: string;
 	simType: string;
 	simSubType: string;
 	setupComplete: boolean;
@@ -66,7 +72,7 @@ export type HomeState = {
 		pseudopotentialFiles: File[],
 	) => void;
 	handleConfiguredSubmit: (submission: ConfiguredSimulationSubmission) => void;
-	handleDownloadResult: () => void;
+	handleDownloadResult: () => Promise<void>;
 };
 
 const EMPTY_SUBMISSION: SimulationSubmission = {
@@ -82,12 +88,21 @@ const EMPTY_SUBMISSION: SimulationSubmission = {
 const appendExtraInputs = (
 	formData: FormData,
 	extraInputs: Record<string, unknown>,
+	executionInputs: AdvancedExecutionInputs,
 ) => {
-	formData.append("extra_inputs", JSON.stringify(extraInputs));
+	const isAdvanced =
+		typeof extraInputs.is_advanced === "boolean"
+			? extraInputs.is_advanced
+			: false;
+	const combinedInputs = {
+		...extraInputs,
+		is_advanced: isAdvanced,
+		...executionInputs,
+	};
 
-	if (typeof extraInputs.is_advanced === "boolean") {
-		formData.append("is_advanced", String(extraInputs.is_advanced));
-	}
+	formData.append("extra_inputs", JSON.stringify(combinedInputs));
+
+	formData.append("is_advanced", String(combinedInputs.is_advanced));
 };
 
 export const useHome = (): HomeState => {
@@ -96,6 +111,9 @@ export const useHome = (): HomeState => {
 	const [setupComplete, setSetupComplete] = useState(false);
 	const [submission, setSubmission] = useState(EMPTY_SUBMISSION);
 	const activeRequest = useRef(0);
+	const currentUsername = getAuthSession()?.username ?? "";
+	const advancedExecutionOptions = useAdvancedExecutionOptions();
+	const executionInputs = getAdvancedExecutionInputs(advancedExecutionOptions);
 
 	const runSimulation = useSimulation();
 	const simulationSubtypeList = getSimulationSubtypeList(simType);
@@ -198,7 +216,7 @@ export const useHome = (): HomeState => {
 	) => {
 		const requestId = activeRequest.current + 1;
 		activeRequest.current = requestId;
-		const username = getAuthSession()?.username ?? "";
+		const username = currentUsername;
 
 		if (!username) {
 			toast.error("Sign in before running a simulation.");
@@ -295,9 +313,13 @@ export const useHome = (): HomeState => {
 			formData.append("pseudofiles", file);
 		}
 
-		appendExtraInputs(formData, {
-			is_advanced: pseudopotentialFiles.length > 0,
-		});
+		appendExtraInputs(
+			formData,
+			{
+				is_advanced: pseudopotentialFiles.length > 0,
+			},
+			executionInputs,
+		);
 
 		void submitSimulation(
 			{
@@ -323,9 +345,11 @@ export const useHome = (): HomeState => {
 			);
 		}
 
-		if (!configuredSubmission.skipExtraInputs) {
-			appendExtraInputs(formData, configuredSubmission.extraInputs ?? {});
-		}
+		appendExtraInputs(
+			formData,
+			configuredSubmission.extraInputs ?? {},
+			executionInputs,
+		);
 
 		for (const [fieldName, value] of Object.entries(
 			configuredSubmission.formFields ?? {},
@@ -349,7 +373,7 @@ export const useHome = (): HomeState => {
 		);
 	};
 
-	const handleDownloadResult = () => {
+	const handleDownloadResult = async () => {
 		if (!currentSubmission.username || !currentSubmission.projectName) {
 			return;
 		}
@@ -360,21 +384,32 @@ export const useHome = (): HomeState => {
 				currentSubmission.username,
 				currentSubmission.projectName,
 			);
-		const link = document.createElement("a");
-		link.href = resolveDownloadUrl(downloadPath);
-		link.download = "";
-		link.rel = "noopener noreferrer";
-		document.body.appendChild(link);
-		link.click();
-		link.remove();
 
-		setSubmission({
-			...currentSubmission,
-			message: "Result download started.",
-		});
+		try {
+			await downloadSimulationResult(
+				downloadPath,
+				currentSubmission.projectName,
+			);
+			setSubmission({
+				...currentSubmission,
+				message: "Result download started.",
+			});
+		} catch (error) {
+			const message =
+				error instanceof Error
+					? error.message
+					: "Unable to download the simulation result.";
+			setSubmission({
+				...currentSubmission,
+				message,
+			});
+			toast.error(message);
+		}
 	};
 
 	return {
+		...advancedExecutionOptions,
+		currentUsername,
 		simType,
 		simSubType,
 		setupComplete,
