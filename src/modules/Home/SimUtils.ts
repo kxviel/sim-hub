@@ -1,19 +1,16 @@
 import ABINIT from "@/modules/Home/SubTypes/ABINIT";
 import AiiDA_Workflow from "@/modules/Home/SubTypes/AiiDA_Workflow";
 import ASE from "@/modules/Home/SubTypes/ASE";
-import BFE_NET from "@/modules/Home/SubTypes/BFE_NET";
 import BigDFT from "@/modules/Home/SubTypes/BigDFT";
 import CP2K from "@/modules/Home/SubTypes/CP2K";
 import Exciting from "@/modules/Home/SubTypes/Exciting";
 import Fleur from "@/modules/Home/SubTypes/Fleur";
 import GPAW from "@/modules/Home/SubTypes/GPAW";
-import JAX_FEM from "@/modules/Home/SubTypes/JAX_FEM";
-import MEEP_FDTD from "@/modules/Home/SubTypes/MEEP_FDTD";
 import MonteCarlo from "@/modules/Home/SubTypes/MonteCarlo";
-import MYSTRAN from "@/modules/Home/SubTypes/MYSTRAN";
 import Octopus from "@/modules/Home/SubTypes/Octopus";
 import QuantumExpresso from "@/modules/Home/SubTypes/QuantumExpresso";
 import Siesta from "@/modules/Home/SubTypes/Siesta";
+import SimpleUploadSubtype from "@/modules/Home/SubTypes/SimpleUploadSubtype";
 import type { HomeState } from "@/modules/Home/useHome";
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -97,7 +94,18 @@ export const SIMULATION_LIST: SimulationState[] = [
 		id: "FEM",
 		label: "FEM (Finite Element Method)",
 		help: "Continuum simulation for structures, heat transfer, meshes, and PDE models.",
-		subtypes: ["BFE.NET - Cantilever Beam", "MYSTRAN", "JAX-FEM"],
+		subtypes: [
+			"sectionproperties",
+			"FEAScript",
+			"new_abaqus",
+			"JAX-FEM",
+			"BFE.NET",
+			"FEMWELL",
+			"MYSTRAN",
+			"STAN",
+			"MFEM",
+			"FEBio",
+		],
 	},
 	{
 		id: "High-Throughput",
@@ -143,19 +151,22 @@ const SIMULATION_SUBTYPE_HELP: Record<string, string> = {
 	GPAW: "Configure GPAW with CSV/CIF inputs and optional Advanced per-element pseudopotentials.",
 	Exciting:
 		"Configure Exciting with CSV/CIF inputs, optional RMT values, and Advanced per-element pseudopotentials.",
-	Fleur:
-		"Configure Fleur with CSV/CIF inputs and optional Advanced per-element pseudopotentials.",
-	"BFE.NET - Cantilever Beam":
-		"Upload a cantilever model definition containing geometry, material, loads, and boundary conditions.",
-	MYSTRAN:
-		"Upload a NASTRAN-style bulk data model and any referenced include files.",
-	"JAX-FEM":
-		"Upload a differentiable FEM model configuration and its mesh or field data.",
+	Fleur: "Upload one CSV parameter file and one CIF structure file.",
+	sectionproperties:
+		"Upload the sectionproperties rectangle input as a CSV file.",
+	FEAScript: "Upload the FEAScript heat conduction input as a CSV file.",
+	new_abaqus: "Upload the new_abaqus model input as an INP file.",
+	"JAX-FEM": "Upload the JAX-FEM 3D linear Poisson input as a CSV file.",
+	"BFE.NET": "Upload the BFE.NET simple cantilever input as a CSV file.",
+	FEMWELL: "Upload the FEMWELL thermal phase shifter input as a CSV file.",
+	MYSTRAN: "Upload the MYSTRAN model as a BDF file.",
+	STAN: "Upload the STAN input package as a ZIP file.",
+	MFEM: "Upload the MFEM minimal example input as a CSV file.",
+	FEBio: "Upload the FEBio model input as a FEB XML file.",
 	"AiiDA Workflow":
 		"Upload a workflow definition plus the structures and calculator inputs required by AiiDA.",
 	ASE: "Upload an ASE script or atomic structure plus calculator-specific input files.",
-	"MEEP FDTD":
-		"Upload a MEEP simulation definition and optional geometry or material datasets.",
+	"MEEP FDTD": "Upload the MEEP FDTD input parameters as a CSV file.",
 	"Monte Carlo":
 		"Upload a backend-specific Monte Carlo run configuration and optional datasets.",
 };
@@ -176,11 +187,18 @@ export const simulationParameterComponents: SubTypeConfig = {
 	GPAW: GPAW,
 	Exciting: Exciting,
 	Fleur: Fleur,
-	"BFE.NET - Cantilever Beam": BFE_NET,
-	MYSTRAN: MYSTRAN,
-	"JAX-FEM": JAX_FEM,
+	sectionproperties: SimpleUploadSubtype,
+	FEAScript: SimpleUploadSubtype,
+	new_abaqus: SimpleUploadSubtype,
+	"JAX-FEM": SimpleUploadSubtype,
+	"BFE.NET": SimpleUploadSubtype,
+	FEMWELL: SimpleUploadSubtype,
+	MYSTRAN: SimpleUploadSubtype,
+	STAN: SimpleUploadSubtype,
+	MFEM: SimpleUploadSubtype,
+	FEBio: SimpleUploadSubtype,
 	"AiiDA Workflow": AiiDA_Workflow,
 	ASE: ASE,
-	"MEEP FDTD": MEEP_FDTD,
+	"MEEP FDTD": SimpleUploadSubtype,
 	"Monte Carlo": MonteCarlo,
 };
