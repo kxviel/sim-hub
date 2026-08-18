@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import {
 	getProjectDownloadPath,
 	getSimulationHistoryAPI,
+	normalizeSimulationStatus,
 	type SimulationHistoryItem,
 } from "@/modules/Home/home.api";
 import type { SimulationSubmission } from "@/modules/Home/useHome";
@@ -12,11 +13,10 @@ import {
 } from "@/modules/Home/useSimulationResults";
 
 const HISTORY_POLL_INTERVAL = 5_000;
-const VISIBLE_STATUSES = new Set([
+const DOWNLOADABLE_STATUSES = new Set([
 	"completed",
 	"downloaded",
 	"finished",
-	"queued",
 	"success",
 	"successful",
 ]);
@@ -55,6 +55,9 @@ export const getHistoryRunDetails = (project: SimulationHistoryItem) =>
 export const getHistoryRunSummary = (project: SimulationHistoryItem) =>
 	getSummaryResultRows(project.resultSummary);
 
+export const canDownloadHistoryRun = (project: SimulationHistoryItem) =>
+	DOWNLOADABLE_STATUSES.has(normalizeSimulationStatus(project.status));
+
 const getHistoryStatusMessage = ({
 	username,
 	isPending,
@@ -71,18 +74,16 @@ const getHistoryStatusMessage = ({
 	}
 
 	if (isPending) {
-		return "Loading past runs...";
+		return "Loading past runs…";
 	}
 
 	if (error) {
-		return error instanceof Error
-			? error.message
-			: "Could not load simulation history.";
+		return "Past runs couldn’t be loaded. Check the Middle-logic URL and try again.";
 	}
 
 	return projectCount > 0
-		? `${projectCount} successful or queued run${projectCount === 1 ? "" : "s"} found.`
-		: "No successful or queued runs yet.";
+		? `${projectCount} run${projectCount === 1 ? "" : "s"} found.`
+		: "No past runs yet.";
 };
 
 export const useSimulationHistory = (
@@ -107,9 +108,7 @@ export const useSimulationHistory = (
 		refetchOnWindowFocus: false,
 		retry: false,
 	});
-	const projects = (history.data ?? []).filter((project) =>
-		VISIBLE_STATUSES.has(project.status.toLowerCase()),
-	);
+	const projects = history.data ?? [];
 	const statusMessage = getHistoryStatusMessage({
 		username,
 		isPending: history.isPending,
@@ -117,25 +116,31 @@ export const useSimulationHistory = (
 		projectCount: projects.length,
 	});
 
-	const handleDownloadHistoryRun = async (projectName: string) => {
+	const handleDownloadHistoryRun = async (project: SimulationHistoryItem) => {
+		if (!canDownloadHistoryRun(project)) {
+			return;
+		}
+
 		try {
 			await downloadSimulationResult(
-				getProjectDownloadPath(username, projectName),
-				projectName,
+				getProjectDownloadPath(username, project.projectName),
+				project.projectName,
 			);
-			toast.success(`${projectName} download started.`);
+			toast.success(`${project.projectName} download started.`);
 		} catch (error) {
 			toast.error(
 				error instanceof Error
 					? error.message
-					: `Could not download ${projectName}.`,
+					: `Could not download ${project.projectName}.`,
 			);
 		}
 	};
 
 	return {
 		handleDownloadHistoryRun,
+		handleRetry: () => void history.refetch(),
 		isError: history.isError,
+		isRefreshing: history.isFetching,
 		projects,
 		statusMessage,
 	};

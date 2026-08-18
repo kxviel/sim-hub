@@ -1,0 +1,17 @@
+Parameter,Type,Mandatory,Description,Options
+kpoints_mode,CHARACTER,No,"Options are mesh, explicit, path",mesh;explicit;path
+kpoints_mesh,INTEGER,No,"Used and required for kpoints_mode=mesh. Grid size along axis 1, 2 and 3 (for Monkhorst-Pack grids). Ex: kpoints_mesh, 4, 4, 4."
+kpoints_offset,INTEGER,No,"Used and required for kpoints_mode=mesh. Ex: kpoints_offset, 0, 0, 0"
+kpoints_explicit,CHARACTER,No,"Used and required for kpoints_mode=explicit. A string or combination of strings with format: x-coordinate y-coordinate z-coordinate weight. Ex: kpoints, '2.0 2.0 2.0 1.0; 2.0 2.0 2.0 1.0'"
+kpoints_distance,REAL,No,"Used and required for kpoints_mode=path. Density of points along the path. Let AiiDA calculate the standard high-symmetry path. Ex: kpoints_distance, 0.015"
+mode:func,CHARACTER,No,"Wave-function representation mode.",
+mode:ecut,REAL,No,"Energy cutoff for plane-wave calculations in eV. Used and required if mode=pw.",
+xc,CHARACTER,No,"Exchange-correlation functional.",LDA;PBE;RPBE;revPBE;BEEF-vdW
+spinpol,LOGICAL,No,"Enable spin-polarized calculation.",
+nbands,INTEGER,No,"Number of electronic bands. A negative value adds that many empty bands.",
+occupations:func,CHARACTER,No,"Smearing function used for Brillouin-zone integration.",fermi-dirac;methfessel-paxton;marzari-vanderbilt
+occupations:width,REAL,No,"Smearing width in eV for the occupations distribution.",
+convergence.energy,REAL,No,"Energy convergence criterion per electron in eV.",
+maxiter,INTEGER,No,"Maximum number of SCF iterations.",
+setups,CHARACTER,No,"Pseudopotential or PAW dataset configuration. Accepts a string.",
+basis,CHARACTER,No,"Atomic basis set specification. Required if mode=lcao. Accepts a string.",

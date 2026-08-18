@@ -1,4 +1,7 @@
-import { downloadSimulationResultAPI } from "@/modules/Home/home.api";
+import {
+	downloadSimulationResultAPI,
+	type SimulationResultData,
+} from "@/modules/Home/home.api";
 import { getSimulationResultFields } from "@/modules/Home/SimUtils";
 import type { SimulationSubmission } from "@/modules/Home/useHome";
 
@@ -16,10 +19,12 @@ const RESULT_METADATA_KEYS = new Set([
 	"result_download_url",
 	"result_file",
 	"result_url",
+	"started_at",
 	"status",
 	"submitted_by",
 	"time_concluded",
 	"time_queued",
+	"time_started",
 	"username",
 ]);
 
@@ -110,6 +115,85 @@ const formatResultValue = (value: unknown) => {
 	}
 
 	return String(value);
+};
+
+const formatTimestamp = (value: unknown) => {
+	if (typeof value !== "string" && typeof value !== "number") {
+		return "";
+	}
+
+	const date = new Date(value);
+
+	return Number.isNaN(date.getTime())
+		? String(value)
+		: new Intl.DateTimeFormat(undefined, {
+				dateStyle: "medium",
+				timeStyle: "short",
+			}).format(date);
+};
+
+const getFirstResultValue = (
+	resultData: SimulationResultData,
+	keys: readonly string[],
+) => {
+	for (const key of keys) {
+		const value = resultData[key];
+
+		if (isVisibleResultValue(value)) {
+			return value;
+		}
+	}
+
+	return undefined;
+};
+
+const ESSENTIAL_METADATA_FIELDS = [
+	{
+		key: "aiida_id",
+		label: "Job ID",
+		aliases: ["aiida_id"],
+		format: formatResultValue,
+	},
+	{
+		key: "time_queued",
+		label: "Queued At",
+		aliases: ["time_queued", "created_at"],
+		format: formatTimestamp,
+	},
+	{
+		key: "time_started",
+		label: "Started At",
+		aliases: ["time_started", "started_at"],
+		format: formatTimestamp,
+	},
+	{
+		key: "time_concluded",
+		label: "Completed At",
+		aliases: ["time_concluded", "concluded_at"],
+		format: formatTimestamp,
+	},
+] as const;
+
+export const getSimulationMetadataRows = (submission: SimulationSubmission) => {
+	const resultData = submission.resultData;
+
+	if (!resultData) {
+		return [];
+	}
+
+	return ESSENTIAL_METADATA_FIELDS.flatMap(
+		({ key, label, aliases, format }) => {
+			const value = getFirstResultValue(resultData, aliases);
+
+			if (!isVisibleResultValue(value)) {
+				return [];
+			}
+
+			const formattedValue = format(value);
+
+			return formattedValue ? [{ key, label, value: formattedValue }] : [];
+		},
+	);
 };
 
 export const getSimulationResultRows = (submission: SimulationSubmission) => {

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -10,7 +10,10 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import FileUpload from "@/modules/Home/FileUpload";
-import { simulationTypeList } from "@/modules/Home/SimUtils";
+import {
+	getSimulationCsvExample,
+	simulationTypeList,
+} from "@/modules/Home/SimUtils";
 import {
 	ElementPseudopotentialUploads,
 	SelectedFile,
@@ -108,6 +111,7 @@ const AdvancedDft = ({
 		supportsAdvanced,
 	} = useAdvancedDft(simulator, handleConfiguredSubmit);
 	const acceptedPseudoFiles = pseudoAccept ? { accept: pseudoAccept } : {};
+	const csvExample = getSimulationCsvExample(simulator);
 
 	return (
 		<div className="w-full space-y-4">
@@ -136,14 +140,25 @@ const AdvancedDft = ({
 				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
 					<p className="font-semibold text-lg">Input Parameters</p>
 					<p>Upload the {simulator} input parameters as a CSV file.</p>
-					<FileUpload
-						accept=".csv,text/csv"
-						ariaLabel={`${simulator} CSV parameter file`}
-						disabled={isSubmitting}
-						files={parameterFile ? [parameterFile] : []}
-						hint="CSV · Up to 5 MB"
-						onChange={handleParameterFileChange}
-					/>
+					<div className={csvExample ? "grid gap-3 sm:grid-cols-2" : undefined}>
+						{csvExample ? (
+							<a
+								className={buttonVariants({ variant: "outline" })}
+								download={csvExample.downloadName}
+								href={csvExample.href}
+							>
+								Download CSV Example
+							</a>
+						) : null}
+						<FileUpload
+							accept=".csv,text/csv"
+							ariaLabel={`${simulator} CSV parameter file`}
+							disabled={isSubmitting}
+							files={parameterFile ? [parameterFile] : []}
+							hint="CSV · Up to 5 MB"
+							onChange={handleParameterFileChange}
+						/>
+					</div>
 					{parameterFile ? (
 						<SelectedFile
 							ariaLabel={`Remove ${parameterFile.name}`}

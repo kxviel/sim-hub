@@ -1,0 +1,16 @@
+Parameter,Type,Mandatory,Description,Options
+kpoints_mode,CHARACTER,No,"Options are mesh, explicit, path",mesh;explicit;path
+kpoints_mesh,INTEGER,No,"Used and required for kpoints_mode=mesh. Grid size along axis 1, 2 and 3 (for Monkhorst-Pack grids). Ex: kpoints_mesh, 4, 4, 4."
+kpoints_offset,INTEGER,No,"Used and required for kpoints_mode=mesh. Ex: kpoints_offset, 0, 0, 0"
+kpoints_explicit,CHARACTER,No,"Used and required for kpoints_mode=explicit. A string or combination of strings with format: x-coordinate y-coordinate z-coordinate weight. Ex: kpoints, '2.0 2.0 2.0 1.0; 2.0 2.0 2.0 1.0'"
+kpoints_distance,REAL,No,"Used and required for kpoints_mode=path. Density of points along the path. Let AiiDA calculate the standard high-symmetry path. Ex: kpoints_distance, 0.015"
+CalculationMode,CHARACTER,No,"The primary run mode. gs (ground state) is typically run first.",gs;td;unocc
+Spacing,REAL,No,"The distance between real-space grid points. Primary convergence parameter.",
+BoxShape,CHARACTER,No,"The geometry of the simulation envelope.",minimum;sphere;parallelepiped
+Radius,REAL,No,"The size of the simulation box. Only used for finite systems.",
+XCFunctional,CHARACTER,No,"The exchange-correlation functional. Ex: lda_x + lda_c_pz",
+SpinComponents,CHARACTER,No,"How spin is treated in the system.",unpolarized;spin_polarized;spinors
+ExtraStates,INTEGER,No,"The number of empty states to compute.",
+Smearing,REAL,No,"The broadening temperature for state occupations (in eV or Hartree).",
+SmearingFunction,CHARACTER,No,"The mathematical method used for broadening.",fermi_dirac;methfessel_paxton;marzari_vanderbilt
+TheoryLevel,CHARACTER,No,"The fundamental theory applied.",dft;independent_particles;hartree_fock

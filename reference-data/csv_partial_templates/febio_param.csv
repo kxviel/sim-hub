@@ -1,0 +1,16 @@
+Parameter,Type,Mandatory,Description,Options
+Control.time_steps,INTEGER,Yes,"Total number of time steps for the simulation. Ex: 10",
+Control.step_size,REAL,Yes,"Time step size (dt) for each increment. Ex: 0.1",
+Control.analysis,CHARACTER,No,"Type of physical analysis solver to run.",STATIC;DYNAMIC
+Control.solver.max_refs,INTEGER,No,"Maximum number of stiffness matrix reformations (Newton iterations) allowed per time step. Ex: 15",
+Control.solver.qn_method.max_ups,INTEGER,No,"Maximum number of quasi-Newton (BFGS) updates between reformations. Ex: 10",
+Control.dtol,REAL,No,"Displacement convergence tolerance for the nonlinear solver. Ex: 0.001",
+Control.etol,REAL,No,"Energy convergence tolerance for the nonlinear solver. Ex: 0.01",
+Control.rtol,REAL,No,"Residual convergence tolerance for the nonlinear solver. Ex: 0",
+Control.lstol,REAL,No,"Line search convergence tolerance. Ex: 0.9",
+Control.time_stepper.dtmin,REAL,No,"Minimum allowed time step size if auto-stepping is enabled. Ex: 0.001",
+Control.time_stepper.dtmax,REAL,No,"Maximum allowed time step size if auto-stepping is enabled. Ex: 0.1",
+Control.time_stepper.max_retries,INTEGER,No,"Maximum number of times the solver will cut the time step and retry upon failure. Ex: 5",
+Material.material.type,CHARACTER,No,"Constitutive material model definition.",neo-Hookean;isotropic elastic;Mooney-Rivlin
+Material.material.E,REAL,No,"Young's modulus for linear isotropic or neo-Hookean materials. Ex: 1000.0",
+Material.material.v,REAL,No,"Poisson's ratio. Must be strictly less than 0.5 for standard compressible formulations. Ex: 0.3"

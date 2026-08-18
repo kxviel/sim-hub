@@ -18,7 +18,7 @@ function RootComponent() {
 			</a>
 			<Header />
 			<main
-				className="min-h-0 flex-1 overflow-y-auto"
+				className="min-h-0 flex-1 overflow-y-auto xl:overflow-hidden"
 				id="main-content"
 				tabIndex={-1}
 			>

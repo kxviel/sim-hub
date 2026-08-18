@@ -7,13 +7,13 @@ import {
 	getProjectResultAPI,
 	isFatalResultError,
 	type SimulationResultData,
+	type SimulationRunEndpoint,
 	useSimulation,
 } from "@/modules/Home/home.api";
 import { getSimulationSubtypeList } from "@/modules/Home/SimUtils";
 import {
 	type AdvancedExecutionInputs,
 	type AdvancedExecutionOptionsState,
-	getAdvancedExecutionInputs,
 	useAdvancedExecutionOptions,
 } from "@/modules/Home/useAdvancedExecutionOptions";
 import { downloadSimulationResult } from "@/modules/Home/useSimulationResults";
@@ -33,6 +33,7 @@ export type ConfiguredSimulationSubmission = {
 		fieldName: string;
 		files: File[];
 	}[];
+	runEndpoint?: SimulationRunEndpoint;
 };
 
 export type SubmissionStatus =
@@ -53,6 +54,7 @@ export type SimulationSubmission = {
 };
 
 export type HomeState = AdvancedExecutionOptionsState & {
+	canLoadHistory: boolean;
 	currentUsername: string;
 	simType: string;
 	simSubType: string;
@@ -64,6 +66,8 @@ export type HomeState = AdvancedExecutionOptionsState & {
 	submission: SimulationSubmission;
 	isSubmitting: boolean;
 	isPolling: boolean;
+	isRefreshingResults: boolean;
+	isDownloadingResult: boolean;
 	handleSimulationTypeChange: (value: string | null) => void;
 	handleSimulationSubtypeChange: (value: string | null) => void;
 	handleParamSubmit: (
@@ -73,6 +77,7 @@ export type HomeState = AdvancedExecutionOptionsState & {
 	) => void;
 	handleConfiguredSubmit: (submission: ConfiguredSimulationSubmission) => void;
 	handleDownloadResult: () => Promise<void>;
+	handleRefreshResults: () => Promise<void>;
 };
 
 const EMPTY_SUBMISSION: SimulationSubmission = {
@@ -110,10 +115,12 @@ export const useHome = (): HomeState => {
 	const [simSubType, setSimSubType] = useState("");
 	const [setupComplete, setSetupComplete] = useState(false);
 	const [submission, setSubmission] = useState(EMPTY_SUBMISSION);
+	const [isDownloadingResult, setIsDownloadingResult] = useState(false);
 	const activeRequest = useRef(0);
-	const currentUsername = getAuthSession()?.username ?? "";
+	const authSession = getAuthSession();
+	const currentUsername = authSession?.username ?? "";
+	const canLoadHistory = Boolean(authSession && !authSession.isTemporary);
 	const advancedExecutionOptions = useAdvancedExecutionOptions();
-	const executionInputs = getAdvancedExecutionInputs(advancedExecutionOptions);
 
 	const runSimulation = useSimulation();
 	const simulationSubtypeList = getSimulationSubtypeList(simType);
@@ -197,18 +204,21 @@ export const useHome = (): HomeState => {
 		setSimType(value ?? "");
 		setSimSubType("");
 		setSetupComplete(false);
+		advancedExecutionOptions.resetExecutionOptions();
 		resetSubmission();
 	};
 
 	const handleSimulationSubtypeChange = (value: string | null) => {
 		setSimSubType(value ?? "");
 		setSetupComplete(Boolean(simType && value));
+		advancedExecutionOptions.resetExecutionOptions();
 		resetSubmission();
 	};
 
 	const submitSimulation = async (
 		config: {
 			calculatorSlug: string;
+			runEndpoint: SimulationRunEndpoint;
 			simulatorLabel: string;
 			projectName: string;
 		},
@@ -234,6 +244,7 @@ export const useHome = (): HomeState => {
 
 		try {
 			const response = await runSimulation.mutateAsync({
+				runEndpoint: config.runEndpoint,
 				subtypeSlug: config.calculatorSlug,
 				usernameSlug: encodeURIComponent(username),
 				projectName: config.projectName,
@@ -303,6 +314,13 @@ export const useHome = (): HomeState => {
 		structureFile: File,
 		pseudopotentialFiles: File[],
 	) => {
+		const executionInputs = advancedExecutionOptions.validateExecutionOptions();
+
+		if (!executionInputs) {
+			toast.error("Please fix the highlighted execution options.");
+			return;
+		}
+
 		const projectName = `DFT_quantum_espresso_${Date.now()}`;
 		const formData = new FormData();
 		formData.append("proj_name", projectName);
@@ -324,6 +342,7 @@ export const useHome = (): HomeState => {
 		void submitSimulation(
 			{
 				calculatorSlug: "Quantum-Espresso",
+				runEndpoint: "csv",
 				simulatorLabel: "Quantum ESPRESSO",
 				projectName,
 			},
@@ -334,6 +353,13 @@ export const useHome = (): HomeState => {
 	const handleConfiguredSubmit = (
 		configuredSubmission: ConfiguredSimulationSubmission,
 	) => {
+		const executionInputs = advancedExecutionOptions.validateExecutionOptions();
+
+		if (!executionInputs) {
+			toast.error("Please fix the highlighted execution options.");
+			return;
+		}
+
 		const projectName = `${configuredSubmission.projectPrefix}_${Date.now()}`;
 		const formData = new FormData();
 		formData.append("proj_name", projectName);
@@ -366,6 +392,7 @@ export const useHome = (): HomeState => {
 		void submitSimulation(
 			{
 				calculatorSlug: configuredSubmission.calculatorSlug,
+				runEndpoint: configuredSubmission.runEndpoint ?? "csv",
 				simulatorLabel: configuredSubmission.simulatorLabel,
 				projectName,
 			},
@@ -386,29 +413,34 @@ export const useHome = (): HomeState => {
 			);
 
 		try {
+			setIsDownloadingResult(true);
 			await downloadSimulationResult(
 				downloadPath,
 				currentSubmission.projectName,
 			);
-			setSubmission({
-				...currentSubmission,
-				message: "Result download started.",
-			});
+			toast.success("Result download started.");
 		} catch (error) {
 			const message =
 				error instanceof Error
 					? error.message
 					: "Unable to download the simulation result.";
-			setSubmission({
-				...currentSubmission,
-				message,
-			});
 			toast.error(message);
+		} finally {
+			setIsDownloadingResult(false);
 		}
+	};
+
+	const handleRefreshResults = async () => {
+		if (!canPoll) {
+			return;
+		}
+
+		await projectResult.refetch();
 	};
 
 	return {
 		...advancedExecutionOptions,
+		canLoadHistory,
 		currentUsername,
 		simType,
 		simSubType,
@@ -417,10 +449,13 @@ export const useHome = (): HomeState => {
 		submission: currentSubmission,
 		isSubmitting: runSimulation.isPending,
 		isPolling: currentSubmission.status === "queued",
+		isRefreshingResults: projectResult.isFetching,
+		isDownloadingResult,
 		handleSimulationTypeChange,
 		handleSimulationSubtypeChange,
 		handleParamSubmit,
 		handleConfiguredSubmit,
 		handleDownloadResult,
+		handleRefreshResults,
 	};
 };

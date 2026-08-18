@@ -6,6 +6,7 @@ export type AuthSession = {
 	username: string;
 	email: string;
 	sshDomain: string;
+	isTemporary: boolean;
 	notifications: unknown[];
 	downloadLinks: string[];
 };
@@ -28,6 +29,7 @@ const readStoredSession = (): AuthSession | null => {
 			username: session.username,
 			email: session.email ?? "",
 			sshDomain: session.sshDomain ?? "",
+			isTemporary: false,
 			notifications: Array.isArray(session.notifications)
 				? session.notifications
 				: [],

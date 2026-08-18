@@ -1,0 +1,8 @@
+Parameter,Type,Mandatory,Description,Options
+geometry_type,CHARACTER,Yes,"""Defines the fundamental shape of the cross-section.""",rectangular;circular;polygon
+mesh_size,REAL,Yes,"""Maximum area of the mesh elements. Smaller values yield finer meshes and higher accuracy but require more memory. Ex: 5.0""",
+depth,REAL,No,"""Depth (height) of the section. Mandatory if geometry_type is rectangular. Ex: 100.0""",
+width,REAL,No,"""Width of the section. Mandatory if geometry_type is rectangular. Ex: 50.0""",
+diameter,REAL,No,"""Diameter of the section. Mandatory if geometry_type is circular. Ex: 50.0""",
+n_points,INTEGER,No,"""Number of points used to discretize the circular perimeter. Used if geometry_type is circular. Ex: 64""",
+points,CHARACTER,No,"""String representation of a 2D array containing [x, y] coordinates. Mandatory if geometry_type is polygon. Ex: [[0, 0], [10, 0], [10, 10], [0, 10]]""",

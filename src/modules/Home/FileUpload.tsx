@@ -45,7 +45,7 @@ const FileUpload = ({
 	return (
 		<label
 			className={cn(
-				"flex min-h-12 w-full touch-manipulation cursor-pointer items-center gap-3 rounded border border-gray-200 bg-muted/30 p-2 transition-[border-color,background-color,box-shadow] hover:border-primary/40 hover:bg-primary/5 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/15",
+				"relative flex min-h-12 w-full touch-manipulation cursor-pointer items-center gap-3 rounded border border-gray-200 bg-muted/30 p-2 transition-[border-color,background-color,box-shadow] hover:border-primary/40 hover:bg-primary/5 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/15",
 				disabled && "pointer-events-none opacity-50",
 				className,
 			)}

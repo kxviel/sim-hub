@@ -3,6 +3,28 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, loadEnv } from "vite";
 
+const API_TARGET_QUERY_PARAM = "__middle_logic_target";
+
+const getMiddlewareTarget = (request: { url?: string }) => {
+	const requestUrl = new URL(request.url ?? "", "http://localhost");
+	const target =
+		requestUrl.searchParams.get(API_TARGET_QUERY_PARAM)?.trim() ?? "";
+
+	return /^https?:\/\//i.test(target) ? target.replace(/\/+$/, "") : undefined;
+};
+
+const rewriteMiddlewarePath = (path: string) => {
+	const url = new URL(path, "http://localhost");
+	url.pathname = url.pathname.replace(/^\/middleware/, "");
+	return `${url.pathname}${url.search}`;
+};
+
+const removeMiddlewareTarget = (request: { url?: string }) => {
+	const url = new URL(request.url ?? "", "http://localhost");
+	url.searchParams.delete(API_TARGET_QUERY_PARAM);
+	request.url = `${url.pathname}${url.search}`;
+};
+
 export default defineConfig(({ mode }) => {
 	const env = loadEnv(mode, process.cwd(), "");
 
@@ -14,6 +36,9 @@ export default defineConfig(({ mode }) => {
 	}
 
 	return {
+		define: {
+			__TAURI_MIDDLE_LOGIC_URI__: JSON.stringify(middlewareUri),
+		},
 		plugins: [
 			tanstackRouter({
 				target: "react",
@@ -51,10 +76,19 @@ export default defineConfig(({ mode }) => {
 				"/middleware": {
 					target: middlewareUri,
 					changeOrigin: true,
+					configure: (proxy) => {
+						const proxyWeb = proxy.web.bind(proxy);
+
+						proxy.web = (request, response, options) => {
+							const target = getMiddlewareTarget(request) ?? middlewareUri;
+							removeMiddlewareTarget(request);
+							return proxyWeb(request, response, { ...options, target });
+						};
+					},
 					headers: {
 						"ngrok-skip-browser-warning": "true",
 					},
-					rewrite: (path: string) => path.replace(/^\/middleware/, ""),
+					rewrite: rewriteMiddlewarePath,
 				},
 			},
 		},
