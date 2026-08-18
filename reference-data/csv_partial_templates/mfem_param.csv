@@ -1,0 +1,3 @@
+Parameter,Type,Mandatory,Description,Options
+order,INTEGER,No,"Finite element polynomial degree. Higher values increase accuracy but require more computational power. Ex: 2",
+pa,LOGICAL,No,"Enable Partial Assembly (matrix-free) evaluation, which is highly efficient for high-order elements. Ex: True"

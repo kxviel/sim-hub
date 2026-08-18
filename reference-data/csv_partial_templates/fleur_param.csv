@@ -1,0 +1,11 @@
+Parameter,Type,Mandatory,Description,Options
+kpoints_mode,CHARACTER,No,"Options are mesh, explicit, path",mesh;explicit;path
+kpoints_mesh,INTEGER,No,"Used and required for kpoints_mode=mesh. Grid size along axis 1, 2 and 3 (for Monkhorst-Pack grids). Ex: kpoints_mesh, 4, 4, 4."
+kpoints_offset,INTEGER,No,"Used and required for kpoints_mode=mesh. Ex: kpoints_offset, 0, 0, 0"
+kpoints_explicit,CHARACTER,No,"Used and required for kpoints_mode=explicit. A string or combination of strings with format: x-coordinate y-coordinate z-coordinate weight. Ex: kpoints, '2.0 2.0 2.0 1.0; 2.0 2.0 2.0 1.0'"
+kpoints_distance,REAL,No,"Used and required for kpoints_mode=path. Density of points along the path. Let AiiDA calculate the standard high-symmetry path. Ex: kpoints_distance, 0.015"
+exco.xctyp,CHARACTER,No,"Exchange-correlation functional to be used.",pbe;lda;vwn;pw91;pbe0
+comp.kmax,REAL,No,"Plane-wave cutoff for the basis functions in the interstitial region (1/bohr). Usually between 3.5 and 5.5.",
+comp.gmax,REAL,No,"Cutoff for the charge density expansion (1/bohr). Usually roughly 3 times kmax.",
+comp.gmaxxc,REAL,No,"Cutoff for the exchange-correlation potential expansion (1/bohr). Typically set equal to gmax.",
+comp.jspins,INTEGER,No,"Number of spin directions. 1 for non-magnetic, 2 for collinear spin-polarized (magnetic) systems.",1;2

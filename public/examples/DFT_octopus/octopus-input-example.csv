@@ -1,0 +1,12 @@
+kpoints_mode,mesh
+kpoints_mesh,4, 4, 4
+kpoints_offset,0, 0, 0
+CalculationMode,gs
+Spacing,0.2
+BoxShape,minimum
+Radius,4.0
+XCFunctional,lda_x + lda_c_pz
+SpinComponents,unpolarized
+ExtraStates,0
+Smearing,0.1
+SmearingFunction,fermi_dirac
