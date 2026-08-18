@@ -14,7 +14,7 @@ const Header = () => {
 
 	return (
 		<header className="shrink-0 border-gray-200 border-b bg-white">
-			<div className="mx-auto flex min-h-16 w-full max-w-[1600px] items-center justify-between gap-3 px-3 sm:px-5 lg:px-6">
+			<div className="mx-auto flex min-h-16 w-full max-w-[1920px] items-center justify-between gap-3 px-3 sm:px-5 lg:px-6">
 				<Link
 					className="flex min-w-0 items-center gap-3 font-bold text-primary text-xl"
 					to="/"

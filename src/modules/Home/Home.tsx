@@ -16,14 +16,14 @@ const Home = () => {
 	};
 
 	return (
-		<section className="min-h-full w-full overflow-x-hidden bg-accent p-2 sm:p-3 xl:h-full xl:overflow-hidden xl:p-4">
+		<section className="min-h-full w-full overflow-x-hidden bg-accent p-2 sm:p-3 xl:h-full xl:min-h-0 xl:overflow-hidden xl:p-4">
 			<h1 className="sr-only">Simulation Workspace</h1>
 			<div
 				className={cn(
-					"grid min-h-0 w-full grid-cols-1 gap-3 lg:grid-cols-2 xl:h-full",
+					"mx-auto grid min-h-0 w-full max-w-[1920px] grid-cols-1 items-start gap-3 lg:grid-cols-2 xl:h-full xl:items-stretch",
 					isSetupCollapsed
-						? "xl:grid-cols-[3rem_minmax(26rem,2fr)_minmax(18rem,1fr)]"
-						: "xl:grid-cols-[minmax(15rem,0.8fr)_minmax(26rem,2fr)_minmax(18rem,1fr)]",
+						? "xl:grid-cols-[3rem_minmax(30rem,2fr)_minmax(18rem,1fr)]"
+						: "xl:grid-cols-[minmax(16rem,0.85fr)_minmax(30rem,2fr)_minmax(18rem,1fr)]",
 				)}
 			>
 				<aside className="min-h-0 min-w-0 lg:col-span-2 xl:col-span-1 xl:h-full">

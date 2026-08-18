@@ -31,7 +31,7 @@ export const useApiEndpointSettings = () => {
 	const handleReset = () => {
 		setUrl(resetApiBaseUrl());
 		setMessage(
-			"Default proxy selected. If login fails, paste the active ngrok URL.",
+			"Default URL selected. If login fails, paste the active ngrok URL.",
 		);
 	};
 

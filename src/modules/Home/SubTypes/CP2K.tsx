@@ -14,6 +14,7 @@ import {
 import FileUpload from "@/modules/Home/FileUpload";
 import {
 	CP2K_TEMPLATE_BASE,
+	getSimulationCsvExample,
 	simulationTypeList,
 } from "@/modules/Home/SimUtils";
 import {
@@ -109,7 +110,7 @@ const SelectField = ({
 	placeholder,
 	value,
 }: SelectFieldProps) => (
-	<div className="space-y-2">
+	<div className="min-w-0 space-y-2">
 		<Label htmlFor={id}>{label}</Label>
 		<Select
 			disabled={disabled}
@@ -118,8 +119,11 @@ const SelectField = ({
 			onValueChange={onChange}
 			value={value || null}
 		>
-			<SelectTrigger aria-invalid={Boolean(error)}>
-				<SelectValue placeholder={placeholder} />
+			<SelectTrigger
+				aria-invalid={Boolean(error)}
+				className="w-full min-w-0 max-w-full"
+			>
+				<SelectValue className="min-w-0 truncate" placeholder={placeholder} />
 			</SelectTrigger>
 			<SelectContent alignItemWithTrigger>
 				<SelectGroup>
@@ -217,7 +221,7 @@ const Cp2kBasicSettings = ({
 			every element detected in the CIF file.
 		</p>
 
-		<div className="grid gap-4 sm:grid-cols-2">
+		<div className="grid min-w-0 gap-4 sm:grid-cols-2">
 			<SelectField
 				disabled={disabled}
 				error={errors.basicPseudopotential}
@@ -258,8 +262,12 @@ const Cp2kBasicSettings = ({
 							key={element}
 						>
 							<span className="font-semibold text-primary">{element}</span>
-							<span>Basis: {basicBasisSet}</span>
-							<span>Potential: {basicPseudopotential}</span>
+							<span className="min-w-0 wrap-break-word">
+								Basis: {basicBasisSet}
+							</span>
+							<span className="min-w-0 wrap-break-word">
+								Potential: {basicPseudopotential}
+							</span>
 						</div>
 					))}
 				</div>
@@ -422,6 +430,7 @@ const Cp2kAdvancedSettings = ({
 );
 
 const CP2K = ({ simType, isSubmitting, handleConfiguredSubmit }: HomeState) => {
+	const csvExample = getSimulationCsvExample("CP2K");
 	const {
 		basicBasisSet,
 		basicPseudopotential,
@@ -470,14 +479,25 @@ const CP2K = ({ simType, isSubmitting, handleConfiguredSubmit }: HomeState) => {
 				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
 					<p className="font-semibold text-lg">Input Parameters</p>
 					<p>Upload the CP2K input parameters as a CSV file.</p>
-					<div className="grid gap-4 sm:grid-cols-2">
-						<a
-							className={buttonVariants({ variant: "outline" })}
-							download="cp2k-input-parameters-template.csv"
-							href={`${CP2K_TEMPLATE_BASE}/input-parameters-template.csv`}
-						>
-							Download CSV Template
-						</a>
+					<div className="grid min-w-0 gap-4 sm:grid-cols-2">
+						<div className="grid min-w-0 gap-2">
+							<a
+								className={buttonVariants({ variant: "outline" })}
+								download="cp2k-input-parameters-template.csv"
+								href={`${CP2K_TEMPLATE_BASE}/input-parameters-template.csv`}
+							>
+								Download CSV Template
+							</a>
+							{csvExample ? (
+								<a
+									className={buttonVariants({ variant: "outline" })}
+									download={csvExample.downloadName}
+									href={csvExample.href}
+								>
+									Download CSV Example
+								</a>
+							) : null}
+						</div>
 						<FileUpload
 							accept=".csv,text/csv"
 							ariaLabel="CP2K CSV parameter file"

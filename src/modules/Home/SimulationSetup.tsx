@@ -27,7 +27,7 @@ const SimulationSetup = (homeState: HomeState) => {
 	} = homeState;
 
 	return (
-		<div className="h-full min-h-0 w-full space-y-4 overflow-y-auto overscroll-contain rounded border border-gray-200 bg-white p-4 sm:p-6">
+		<div className="h-full min-h-0 w-full space-y-4 overflow-y-auto overscroll-contain rounded border border-gray-200 bg-white p-4 lg:p-5 2xl:p-6">
 			<SectionTitle title="Simulation Setup" icon={<Settings />} />
 
 			<form className="w-full">

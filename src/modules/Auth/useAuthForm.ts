@@ -139,6 +139,7 @@ export const useAuthForm = () => {
 			username: "demo_user",
 			email: "demo@prototype.local",
 			sshDomain: "",
+			isTemporary: true,
 			notifications: [],
 			downloadLinks: [],
 		});

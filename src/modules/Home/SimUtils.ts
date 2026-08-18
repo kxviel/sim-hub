@@ -18,6 +18,31 @@ export const QE_TEMPLATE_BASE = "/templates/DFT_quantum_espresso";
 export const ABINIT_TEMPLATE_BASE = "/templates/DFT_abinit";
 export const CP2K_TEMPLATE_BASE = "/templates/DFT_cp2k";
 
+const SIMULATION_CSV_EXAMPLES: Record<
+	string,
+	{ downloadName: string; href: string }
+> = {
+	CP2K: {
+		downloadName: "cp2k-input-example.csv",
+		href: "/examples/DFT_cp2k/cp2k-input-example.csv",
+	},
+	GPAW: {
+		downloadName: "gpaw-input-example.csv",
+		href: "/examples/DFT_gpaw/gpaw-input-example.csv",
+	},
+	Octopus: {
+		downloadName: "octopus-input-example.csv",
+		href: "/examples/DFT_octopus/octopus-input-example.csv",
+	},
+	Siesta: {
+		downloadName: "siesta-input-example.csv",
+		href: "/examples/DFT_siesta/siesta-input-example.csv",
+	},
+};
+
+export const getSimulationCsvExample = (simulator: string) =>
+	SIMULATION_CSV_EXAMPLES[simulator];
+
 type SimulationResultField = {
 	key: string;
 	label: string;
@@ -159,10 +184,10 @@ const SIMULATION_SUBTYPE_HELP: Record<string, string> = {
 	"JAX-FEM": "Upload the JAX-FEM 3D linear Poisson input as a CSV file.",
 	"BFE.NET": "Upload the BFE.NET simple cantilever input as a CSV file.",
 	FEMWELL: "Upload the FEMWELL thermal phase shifter input as a CSV file.",
-	MYSTRAN: "Upload the MYSTRAN model as a BDF file.",
+	MYSTRAN: "Upload the MYSTRAN model as a BDF, DAT, or NAS file.",
 	STAN: "Upload the STAN input package as a ZIP file.",
-	MFEM: "Upload the MFEM minimal example input as a CSV file.",
-	FEBio: "Upload the FEBio model input as a FEB XML file.",
+	MFEM: "Upload the MFEM CSV input and mesh file.",
+	FEBio: "Upload the FEBio model input as a .feb file.",
 	"AiiDA Workflow":
 		"Upload a workflow definition plus the structures and calculator inputs required by AiiDA.",
 	ASE: "Upload an ASE script or atomic structure plus calculator-specific input files.",

@@ -2,11 +2,14 @@ import { useMutation } from "@tanstack/react-query";
 import http, { ApiError } from "@/lib/http";
 
 export type SimulationBody = {
+	runEndpoint: SimulationRunEndpoint;
 	subtypeSlug: string;
 	usernameSlug: string;
 	projectName: string;
 	formData: FormData;
 };
+
+export type SimulationRunEndpoint = "csv" | "file_only";
 
 export type SimulationResultData = Record<string, unknown>;
 
@@ -61,7 +64,9 @@ const FAILURE_STATUSES = new Set([
 	"error",
 	"errored",
 	"failed",
+	"failed to queue",
 	"failure",
+	"system exception",
 ]);
 const getString = (value: unknown) =>
 	typeof value === "string" && value.trim() ? value.trim() : "";
@@ -70,6 +75,11 @@ const getRecord = (value: unknown): Record<string, unknown> | null =>
 	typeof value === "object" && value !== null && !Array.isArray(value)
 		? (value as Record<string, unknown>)
 		: null;
+
+export const normalizeSimulationStatus = (value: unknown) =>
+	typeof value === "string"
+		? value.trim().toLowerCase().replace(/[-_]+/g, " ").replace(/\s+/g, " ")
+		: "";
 
 const hasResultValues = (resultData: SimulationResultData | null) =>
 	Boolean(
@@ -108,11 +118,7 @@ const getResponseStatus = (
 		nestedResponse.state ??
 		resultData?.status;
 
-	if (typeof status === "string") {
-		return status.trim().toLowerCase();
-	}
-
-	return "";
+	return normalizeSimulationStatus(status);
 };
 
 const parseSimulationResponse = (
@@ -167,7 +173,7 @@ const parseSimulationResponse = (
 
 export const runSimulationAPI = async (body: SimulationBody) => {
 	const { data } = await http.post<unknown>(
-		`/run_exec/csv/${body.subtypeSlug}/${body.usernameSlug}`,
+		`/run_exec/${body.runEndpoint}/${body.subtypeSlug}/${body.usernameSlug}`,
 		body.formData,
 		{ params: { proj_name: body.projectName } },
 	);
