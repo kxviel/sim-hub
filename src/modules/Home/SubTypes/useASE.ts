@@ -7,6 +7,7 @@ import type { HomeState } from "@/modules/Home/useHome";
 // API template: update these values when the ASE backend contract is finalized.
 const API_TEMPLATE = {
 	calculatorSlug: "ASE",
+	localPrototype: true,
 	projectPrefix: "HT_ase",
 	simulatorLabel: "ASE",
 	primaryFileField: "input_file",

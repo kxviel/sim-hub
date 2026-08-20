@@ -1,13 +1,13 @@
 Parameter,Type,Mandatory,Description,Options
 youngs_modulus,REAL,Yes,"""Young's modulus of the material (E). Determines stiffness. Ex: 1000.0""",
 poissons_ratio,REAL,Yes,"""Poisson's ratio of the material (nu). Ex: 0.3""",
-mesh.shape.x,INTEGER,No,"""Number of elements along x-axis (used if mesh.type is 'generated'). Ex: 10""",
-mesh.shape.y,INTEGER,No,"""Number of elements along y-axis (used if mesh.type is 'generated').""",
-mesh.shape.z,INTEGER,No,"""Number of elements along z-axis (used if mesh.type is 'generated').""",
+mesh.shape.x,INTEGER,Yes,"""Number of elements along x-axis (used if mesh.type is 'generated'). Ex: 10""",
+mesh.shape.y,INTEGER,Yes,"""Number of elements along y-axis (used if mesh.type is 'generated').""",
+mesh.shape.z,INTEGER,Yes,"""Number of elements along z-axis (used if mesh.type is 'generated').""",
 mesh.element_type,CHARACTER,Yes,"""Type of finite element to use in the formulation.""",HEX8;TET4;QUAD4;TRI3
-mesh.size.x,REAL,No,The physical length of the mesh domain along the X-axis. Ex: 10.0
-mesh.size.y,REAL,No,The physical length of the mesh domain along the Y-axis. Ex: 2.0
-mesh.size.z,REAL,No,The physical length of the mesh domain along the Z-axis. Ex: 2.0
+mesh.size.x,REAL,Yes,The physical length of the mesh domain along the X-axis. Ex: 10.0
+mesh.size.y,REAL,Yes,The physical length of the mesh domain along the Y-axis. Ex: 2.0
+mesh.size.z,REAL,Yes,The physical length of the mesh domain along the Z-axis. Ex: 2.0
 dirichlet_bcs.0.location_axis,CHARACTER,No,"""Axis to evaluate for the spatial boundary constraint.""",x;y;z
 dirichlet_bcs.0.location_operator,CHARACTER,No,"""Mathematical operator to define the boundary region.""",<;>;<=;>=;==
 dirichlet_bcs.0.location_value,REAL,No,"""Coordinate threshold value for the boundary. Ex: 0.00001""",
@@ -19,5 +19,5 @@ neumann_bcs.0.location_value,REAL,No,"""Coordinate threshold value for the bound
 neumann_bcs.0.force.x,REAL,No,"""Applied traction/force vector component in the X direction.""",
 neumann_bcs.0.force.y,REAL,No,"""Applied traction/force vector component in the Y direction.""",
 neumann_bcs.0.force.z,REAL,No,"""Applied traction/force vector component in the Z direction.""",
-solver.ksp_type,CHARACTER,No,"""Krylov subspace method type for the PETSc solver.""",cg;gmres;minres
-solver.pc_type,CHARACTER,No,"""Preconditioner type for the PETSc solver.""",gamg;ilu;jacobi;none
+solver.ksp_type,CHARACTER,Yes,"""Krylov subspace method type for the PETSc solver.""",cg;gmres;minres
+solver.pc_type,CHARACTER,Yes,"""Preconditioner type for the PETSc solver.""",gamg;ilu;jacobi;none

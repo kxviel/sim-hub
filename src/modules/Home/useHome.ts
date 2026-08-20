@@ -25,6 +25,7 @@ export type SimulationParameterValue = string | number | boolean | number[];
 export type ConfiguredSimulationSubmission = {
 	calculatorSlug: string;
 	extraInputs?: Record<string, unknown>;
+	localPrototype?: boolean;
 	projectPrefix: string;
 	simulatorLabel: string;
 	parameters?: Record<string, SimulationParameterValue>;
@@ -40,6 +41,8 @@ export type SubmissionStatus =
 	| "idle"
 	| "submitting"
 	| "queued"
+	| "running"
+	| "prototype"
 	| "completed"
 	| "error";
 
@@ -89,6 +92,8 @@ const EMPTY_SUBMISSION: SimulationSubmission = {
 	resultData: null,
 	downloadUrl: "",
 };
+
+const RUNNING_STATUSES = new Set(["ongoing", "running", "started"]);
 
 const appendExtraInputs = (
 	formData: FormData,
@@ -176,6 +181,9 @@ export const useHome = (): HomeState => {
 					}
 				: {
 						...submission,
+						status: RUNNING_STATUSES.has(projectResult.data.status)
+							? "running"
+							: "queued",
 						message: projectResult.data.message || submission.message,
 					};
 	}
@@ -353,6 +361,24 @@ export const useHome = (): HomeState => {
 	const handleConfiguredSubmit = (
 		configuredSubmission: ConfiguredSimulationSubmission,
 	) => {
+		if (configuredSubmission.localPrototype) {
+			activeRequest.current += 1;
+			runSimulation.reset();
+			setSubmission({
+				...EMPTY_SUBMISSION,
+				status: "prototype",
+				message:
+					"Files validated locally. Backend execution is not available for this prototype yet.",
+				simulatorLabel: configuredSubmission.simulatorLabel,
+				projectName: `${configuredSubmission.projectPrefix}_prototype`,
+				username: currentUsername,
+			});
+			toast.success(
+				`${configuredSubmission.simulatorLabel} prototype inputs are ready.`,
+			);
+			return;
+		}
+
 		const executionInputs = advancedExecutionOptions.validateExecutionOptions();
 
 		if (!executionInputs) {
@@ -448,7 +474,7 @@ export const useHome = (): HomeState => {
 		simulationSubtypeList,
 		submission: currentSubmission,
 		isSubmitting: runSimulation.isPending,
-		isPolling: currentSubmission.status === "queued",
+		isPolling: ["queued", "running"].includes(currentSubmission.status),
 		isRefreshingResults: projectResult.isFetching,
 		isDownloadingResult,
 		handleSimulationTypeChange,

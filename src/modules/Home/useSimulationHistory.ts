@@ -90,7 +90,9 @@ export const useSimulationHistory = (
 	username: string,
 	submission: SimulationSubmission,
 ) => {
-	const isActive = ["submitting", "queued"].includes(submission.status);
+	const isActive = ["submitting", "queued", "running"].includes(
+		submission.status,
+	);
 	const settledStatus = ["completed", "error"].includes(submission.status)
 		? submission.status
 		: "active";

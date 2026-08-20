@@ -13,6 +13,8 @@ const STATUS_LABELS: Record<SubmissionStatus, string> = {
 	idle: "Not Started",
 	submitting: "Submitting",
 	queued: "Queued",
+	running: "Running",
+	prototype: "Prototype",
 	completed: "Completed",
 	error: "Error",
 };

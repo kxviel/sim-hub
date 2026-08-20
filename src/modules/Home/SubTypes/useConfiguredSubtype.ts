@@ -5,6 +5,7 @@ import type { HomeState } from "@/modules/Home/useHome";
 
 export type ConfiguredSubtypeApi = {
 	calculatorSlug: string;
+	localPrototype?: boolean;
 	optionalFileField: string;
 	primaryFileField: string;
 	projectPrefix: string;
@@ -77,6 +78,7 @@ export const useConfiguredSubtype = (
 
 		handleConfiguredSubmit({
 			calculatorSlug: api.calculatorSlug,
+			...(api.localPrototype ? { localPrototype: true } : {}),
 			projectPrefix: api.projectPrefix,
 			simulatorLabel: api.simulatorLabel,
 			fileGroups: [

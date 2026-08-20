@@ -15,7 +15,6 @@ const API_TEMPLATE = {
 	structureFileField: "structure_file",
 	pseudopotentialFileField: "pseudofiles",
 	basisFileField: "basis_file",
-	legacyBasisFileField: "basis_files",
 	modeField: "cp2k_mode",
 	xcFunctionalField: "xc_functional",
 	pseudopotentialNamesField: "pseudo_names",
@@ -426,10 +425,6 @@ export const useCP2K = (
 				},
 				{
 					fieldName: API_TEMPLATE.basisFileField,
-					files: isAdvanced && basisFile ? [basisFile] : [],
-				},
-				{
-					fieldName: API_TEMPLATE.legacyBasisFileField,
 					files: isAdvanced && basisFile ? [basisFile] : [],
 				},
 			],

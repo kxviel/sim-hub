@@ -7,6 +7,7 @@ import type { HomeState } from "@/modules/Home/useHome";
 // API template: update these values when the AiiDA backend contract is finalized.
 const API_TEMPLATE = {
 	calculatorSlug: "AiiDA",
+	localPrototype: true,
 	projectPrefix: "HT_aiida",
 	simulatorLabel: "AiiDA Workflow",
 	primaryFileField: "workflow_file",

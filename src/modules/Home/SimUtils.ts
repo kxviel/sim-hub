@@ -185,7 +185,7 @@ const SIMULATION_SUBTYPE_HELP: Record<string, string> = {
 	"BFE.NET": "Upload the BFE.NET simple cantilever input as a CSV file.",
 	FEMWELL: "Upload the FEMWELL thermal phase shifter input as a CSV file.",
 	MYSTRAN: "Upload the MYSTRAN model as a BDF, DAT, or NAS file.",
-	STAN: "Upload the STAN input package as a ZIP file.",
+	STAN: "Upload the STAN model input as an STDb file.",
 	MFEM: "Upload the MFEM CSV input and mesh file.",
 	FEBio: "Upload the FEBio model input as a .feb file.",
 	"AiiDA Workflow":

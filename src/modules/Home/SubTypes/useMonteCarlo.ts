@@ -7,6 +7,7 @@ import type { HomeState } from "@/modules/Home/useHome";
 // API template: update these values when the Monte Carlo backend contract is finalized.
 const API_TEMPLATE = {
 	calculatorSlug: "Monte-Carlo",
+	localPrototype: true,
 	projectPrefix: "MC",
 	simulatorLabel: "Monte Carlo",
 	primaryFileField: "config_file",

@@ -13,6 +13,9 @@ const SimpleUploadSubtype = ({
 }: HomeState) => {
 	const { files, handleFileChange, handleRunSimulation, removeFile, uploads } =
 		useSimpleUploadSubtype(simSubType, handleConfiguredSubmit);
+	const hasSizeLimitedUploads = uploads.some(
+		(upload) => !upload.skipSizeLimit,
+	);
 
 	return (
 		<div className="w-full space-y-4">
@@ -22,10 +25,13 @@ const SimpleUploadSubtype = ({
 			</p>
 
 			<div className="w-full space-y-4 rounded border border-gray-200 p-2">
-				<p>
-					Each file must be{" "}
-					<strong className="font-semibold text-primary">5 MB</strong> or less.
-				</p>
+				{hasSizeLimitedUploads ? (
+					<p>
+						Each file must be{" "}
+						<strong className="font-semibold text-primary">5 MB</strong> or
+						 less.
+					</p>
+				) : null}
 
 				{uploads.map((upload) => {
 					const file = files[upload.fileField];

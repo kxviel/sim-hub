@@ -20,6 +20,7 @@ export type SimulationResponse = {
 	projectName: string;
 	resultData: SimulationResultData | null;
 	downloadUrl: string;
+	status: string;
 };
 
 export type SimulationHistoryItem = {
@@ -49,6 +50,7 @@ type ApiResponse = {
 };
 
 const WAITING_STATUSES = new Set([
+	"created",
 	"ongoing",
 	"pending",
 	"queue",
@@ -63,10 +65,28 @@ const FAILURE_STATUSES = new Set([
 	"cancelled",
 	"error",
 	"errored",
+	"excepted",
 	"failed",
 	"failed to queue",
 	"failure",
+	"killed",
 	"system exception",
+]);
+const SUCCESS_STATUSES = new Set([
+	"completed",
+	"downloaded",
+	"finished",
+	"success",
+	"successful",
+]);
+const RESULT_METADATA_KEYS = new Set([
+	"aiida id",
+	"calculator",
+	"project name",
+	"status",
+	"time concluded",
+	"time queued",
+	"time started",
 ]);
 const getString = (value: unknown) =>
 	typeof value === "string" && value.trim() ? value.trim() : "";
@@ -84,8 +104,13 @@ export const normalizeSimulationStatus = (value: unknown) =>
 const hasResultValues = (resultData: SimulationResultData | null) =>
 	Boolean(
 		resultData &&
-			Object.values(resultData).some(
-				(value) => value !== undefined && value !== null && value !== "",
+			Object.entries(resultData).some(
+				([key, value]) =>
+					!RESULT_METADATA_KEYS.has(normalizeSimulationStatus(key)) &&
+					value !== undefined &&
+					value !== null &&
+					value !== "" &&
+					value !== "null",
 			),
 	);
 
@@ -121,6 +146,55 @@ const getResponseStatus = (
 	return normalizeSimulationStatus(status);
 };
 
+const getFailureMessage = (resultData: SimulationResultData | null) => {
+	const summary = parseResultData(
+		resultData?.summarized_dict ??
+			resultData?.result_summary ??
+			resultData?.summary,
+	);
+
+	return (
+		getString(resultData?.error_message ?? resultData?.error) ||
+		getString(summary?.error_message ?? summary?.error) ||
+		"Simulation failed in middle logic or the backend."
+	);
+};
+
+const getStatusMessage = (
+	response: ApiResponse,
+	status: string,
+	resultData: SimulationResultData | null,
+	ready: boolean,
+	failed: boolean,
+	waiting: boolean,
+) => {
+	if (failed) {
+		return getFailureMessage(resultData);
+	}
+
+	if (waiting) {
+		if (["ongoing", "running", "started"].includes(status)) {
+			return "Simulation is running.";
+		}
+
+		if (status === "created") {
+			return "Simulation is being prepared.";
+		}
+
+		return "Simulation is queued. Waiting for results...";
+	}
+
+	if (ready) {
+		return "Simulation results are ready.";
+	}
+
+	if (status) {
+		return `Simulation status: ${status}.`;
+	}
+
+	return getString(response.message);
+};
+
 const parseSimulationResponse = (
 	payload: unknown,
 	fallbackProjectName: string,
@@ -136,6 +210,11 @@ const parseSimulationResponse = (
 	);
 	const failed = FAILURE_STATUSES.has(responseStatus);
 	const waiting = WAITING_STATUSES.has(responseStatus);
+	const ready =
+		!failed &&
+		!waiting &&
+		(SUCCESS_STATUSES.has(responseStatus) ||
+			(!responseStatus && hasResultValues(resultData)));
 	const projectNameValue =
 		response.project_name ??
 		response.projectName ??
@@ -160,14 +239,20 @@ const parseSimulationResponse = (
 	);
 
 	return {
-		ready: !failed && !waiting && hasResultValues(resultData),
+		ready,
 		failed,
-		message:
-			getString(response.message) ||
-			(failed ? getString(resultData?.error) : ""),
+		message: getStatusMessage(
+			response,
+			responseStatus,
+			resultData,
+			ready,
+			failed,
+			waiting,
+		),
 		projectName: projectName || fallbackProjectName,
 		resultData,
 		downloadUrl,
+		status: responseStatus,
 	};
 };
 
@@ -246,6 +331,7 @@ export const getProjectResultAPI = async (
 				projectName,
 				resultData: null,
 				downloadUrl: "",
+				status: "queued",
 			};
 		}
 

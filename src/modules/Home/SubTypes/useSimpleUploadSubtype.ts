@@ -1,31 +1,35 @@
 import { type ChangeEvent, useState } from "react";
 import { toast } from "sonner";
+import type { SimulationRunEndpoint } from "@/modules/Home/home.api";
 import { MAX_FILE_SIZE } from "@/modules/Home/SimUtils";
 import type { HomeState } from "@/modules/Home/useHome";
 
 type SimpleUploadField = {
 	accept: string;
+	apiField: "csv_file" | "files" | "structure_file";
 	description: string;
 	extensions: readonly string[];
 	fileField: string;
 	hint: string;
+	skipSizeLimit?: boolean;
 	title: string;
 };
 
 type SimpleUploadSubtypeApi = {
 	calculatorSlug?: string;
-	family: "FEM" | "Others";
 	projectPrefix: string;
+	runEndpoint: SimulationRunEndpoint;
 	uploads: readonly SimpleUploadField[];
 };
 
 const SIMPLE_UPLOADS = {
 	sectionproperties: {
-		family: "FEM",
 		projectPrefix: "FEM_sectionproperties",
+		runEndpoint: "csv",
 		uploads: [
 			{
 				accept: ".csv",
+				apiField: "csv_file",
 				description:
 					"Upload the sectionproperties rectangle input as a CSV file.",
 				extensions: [".csv"],
@@ -36,11 +40,12 @@ const SIMPLE_UPLOADS = {
 		],
 	},
 	FEAScript: {
-		family: "FEM",
 		projectPrefix: "FEM_feascript",
+		runEndpoint: "csv",
 		uploads: [
 			{
 				accept: ".csv",
+				apiField: "csv_file",
 				description:
 					"Upload the FEAScript heat conduction input as a CSV file.",
 				extensions: [".csv"],
@@ -51,11 +56,12 @@ const SIMPLE_UPLOADS = {
 		],
 	},
 	new_abaqus: {
-		family: "FEM",
 		projectPrefix: "FEM_new_abaqus",
+		runEndpoint: "file_only",
 		uploads: [
 			{
 				accept: ".inp",
+				apiField: "files",
 				description: "Upload the new_abaqus model input as an INP file.",
 				extensions: [".inp"],
 				fileField: "femInput",
@@ -65,11 +71,13 @@ const SIMPLE_UPLOADS = {
 		],
 	},
 	"JAX-FEM": {
-		family: "FEM",
+		calculatorSlug: "jaxfem",
 		projectPrefix: "FEM_jax-fem",
+		runEndpoint: "csv",
 		uploads: [
 			{
 				accept: ".csv",
+				apiField: "csv_file",
 				description:
 					"Upload the JAX-FEM 3D linear Poisson input as a CSV file.",
 				extensions: [".csv"],
@@ -80,11 +88,13 @@ const SIMPLE_UPLOADS = {
 		],
 	},
 	"BFE.NET": {
-		family: "FEM",
+		calculatorSlug: "bfenet",
 		projectPrefix: "FEM_bfe_net",
+		runEndpoint: "csv",
 		uploads: [
 			{
 				accept: ".csv",
+				apiField: "csv_file",
 				description:
 					"Upload the BFE.NET simple cantilever input as a CSV file.",
 				extensions: [".csv"],
@@ -95,11 +105,12 @@ const SIMPLE_UPLOADS = {
 		],
 	},
 	FEMWELL: {
-		family: "FEM",
 		projectPrefix: "FEM_femwell",
+		runEndpoint: "csv",
 		uploads: [
 			{
 				accept: ".csv",
+				apiField: "csv_file",
 				description:
 					"Upload the FEMWELL thermal phase shifter input as a CSV file.",
 				extensions: [".csv"],
@@ -110,11 +121,12 @@ const SIMPLE_UPLOADS = {
 		],
 	},
 	MYSTRAN: {
-		family: "FEM",
 		projectPrefix: "FEM_mystran",
+		runEndpoint: "file_only",
 		uploads: [
 			{
 				accept: ".bdf,.dat,.nas",
+				apiField: "files",
 				description: "Upload the MYSTRAN model as a BDF, DAT, or NAS file.",
 				extensions: [".bdf", ".dat", ".nas"],
 				fileField: "femInput",
@@ -124,25 +136,28 @@ const SIMPLE_UPLOADS = {
 		],
 	},
 	STAN: {
-		family: "FEM",
 		projectPrefix: "FEM_stan",
+		runEndpoint: "file_only",
 		uploads: [
 			{
-				accept: ".zip",
-				description: "Upload the STAN input package as a ZIP file.",
-				extensions: [".zip"],
+				accept: ".stdb",
+				apiField: "files",
+				description: "Upload the STAN input file in STDb format.",
+				extensions: [".stdb"],
 				fileField: "femInput",
-				hint: "ZIP · Up to 5 MB",
-				title: "STAN Input Package",
+				hint: "STDb",
+				skipSizeLimit: true,
+				title: "STAN Input",
 			},
 		],
 	},
 	MFEM: {
-		family: "FEM",
 		projectPrefix: "FEM_mfem",
+		runEndpoint: "csv",
 		uploads: [
 			{
 				accept: ".csv",
+				apiField: "csv_file",
 				description: "Upload the MFEM minimal example input as a CSV file.",
 				extensions: [".csv"],
 				fileField: "femInput",
@@ -151,6 +166,7 @@ const SIMPLE_UPLOADS = {
 			},
 			{
 				accept: ".mesh",
+				apiField: "structure_file",
 				description: "Upload the MFEM mesh file.",
 				extensions: [".mesh"],
 				fileField: "meshFile",
@@ -160,11 +176,12 @@ const SIMPLE_UPLOADS = {
 		],
 	},
 	FEBio: {
-		family: "FEM",
 		projectPrefix: "FEM_febio",
+		runEndpoint: "file_only",
 		uploads: [
 			{
 				accept: ".feb",
+				apiField: "files",
 				description: "Upload the FEBio model input as a .feb file.",
 				extensions: [".feb"],
 				fileField: "femInput",
@@ -175,11 +192,12 @@ const SIMPLE_UPLOADS = {
 	},
 	"MEEP FDTD": {
 		calculatorSlug: "meep",
-		family: "Others",
 		projectPrefix: "OTHER_meep",
+		runEndpoint: "csv",
 		uploads: [
 			{
 				accept: ".csv",
+				apiField: "csv_file",
 				description: "Upload the MEEP FDTD input parameters as a CSV file.",
 				extensions: [".csv"],
 				fileField: "simInput",
@@ -231,7 +249,7 @@ export const useSimpleUploadSubtype = (
 			return;
 		}
 
-		if (selectedFile.size > MAX_FILE_SIZE) {
+		if (!upload.skipSizeLimit && selectedFile.size > MAX_FILE_SIZE) {
 			toast.error(`${upload.title} must be 5 MB or smaller.`);
 			event.target.value = "";
 			return;
@@ -253,7 +271,6 @@ export const useSimpleUploadSubtype = (
 	};
 
 	const handleRunSimulation = () => {
-		const selectedFiles: File[] = [];
 		const groupedFiles = new Map<string, File[]>();
 		const addFile = (fieldName: string, file: File) => {
 			const fieldFiles = groupedFiles.get(fieldName) ?? [];
@@ -272,39 +289,14 @@ export const useSimpleUploadSubtype = (
 				return;
 			}
 
-			selectedFiles.push(file);
-			addFile(upload.fileField, file);
-			addFile("input_file", file);
-			addFile("input_files", file);
-			addFile("files", file);
-
-			if (file.name.toLowerCase().endsWith(".csv")) {
-				addFile("csv_file", file);
-			}
-
-			if (file.name.toLowerCase().endsWith(".json")) {
-				addFile("json_file", file);
-			}
+			addFile(upload.apiField, file);
 		}
-
-		const firstFile = selectedFiles[0];
-
-		if (api.family === "FEM" && firstFile) {
-			addFile("csv_file", firstFile);
-			addFile("structure_file", firstFile);
-		}
-
-		const codeField = api.family === "FEM" ? "fem_code" : "other_code";
 
 		handleConfiguredSubmit({
 			calculatorSlug: api.calculatorSlug ?? simulator,
 			projectPrefix: api.projectPrefix,
-			runEndpoint: api.family === "FEM" ? "file_only" : "csv",
+			runEndpoint: api.runEndpoint,
 			simulatorLabel: simulator,
-			formFields: {
-				simulation_family: api.family,
-				[codeField]: simulator,
-			},
 			fileGroups: Array.from(groupedFiles, ([fieldName, grouped]) => ({
 				fieldName,
 				files: grouped,
