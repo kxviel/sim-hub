@@ -1,10 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
 import http, { ApiError } from "@/lib/http";
+import { getRecord, getString } from "@/lib/parse";
+import { isReadinessMetadataKey } from "@/modules/Home/resultMetadata";
 
 export type SimulationBody = {
 	runEndpoint: SimulationRunEndpoint;
 	subtypeSlug: string;
-	usernameSlug: string;
+	username: string;
 	projectName: string;
 	formData: FormData;
 };
@@ -79,23 +81,6 @@ const SUCCESS_STATUSES = new Set([
 	"success",
 	"successful",
 ]);
-const RESULT_METADATA_KEYS = new Set([
-	"aiida id",
-	"calculator",
-	"project name",
-	"status",
-	"time concluded",
-	"time queued",
-	"time started",
-]);
-const getString = (value: unknown) =>
-	typeof value === "string" && value.trim() ? value.trim() : "";
-
-const getRecord = (value: unknown): Record<string, unknown> | null =>
-	typeof value === "object" && value !== null && !Array.isArray(value)
-		? (value as Record<string, unknown>)
-		: null;
-
 export const normalizeSimulationStatus = (value: unknown) =>
 	typeof value === "string"
 		? value.trim().toLowerCase().replace(/[-_]+/g, " ").replace(/\s+/g, " ")
@@ -106,7 +91,7 @@ const hasResultValues = (resultData: SimulationResultData | null) =>
 		resultData &&
 			Object.entries(resultData).some(
 				([key, value]) =>
-					!RESULT_METADATA_KEYS.has(normalizeSimulationStatus(key)) &&
+					!isReadinessMetadataKey(key) &&
 					value !== undefined &&
 					value !== null &&
 					value !== "" &&
@@ -133,15 +118,13 @@ const parseResultData = (value: unknown): SimulationResultData | null => {
 
 const getResponseStatus = (
 	response: ApiResponse,
-	nestedResponse: ApiResponse,
 	resultData: SimulationResultData | null,
 ) => {
 	const status =
 		response.status ??
 		response.state ??
-		nestedResponse.status ??
-		nestedResponse.state ??
-		resultData?.status;
+		resultData?.status ??
+		resultData?.state;
 
 	return normalizeSimulationStatus(status);
 };
@@ -200,14 +183,8 @@ const parseSimulationResponse = (
 	fallbackProjectName: string,
 ): SimulationResponse => {
 	const response = (payload ?? {}) as ApiResponse;
-	const parsedResponseData = parseResultData(response.data);
-	const nestedResponse = (parsedResponseData ?? {}) as ApiResponse;
-	const resultData = parsedResponseData;
-	const responseStatus = getResponseStatus(
-		response,
-		nestedResponse,
-		resultData,
-	);
+	const resultData = parseResultData(response.data);
+	const responseStatus = getResponseStatus(response, resultData);
 	const failed = FAILURE_STATUSES.has(responseStatus);
 	const waiting = WAITING_STATUSES.has(responseStatus);
 	const ready =
@@ -218,8 +195,8 @@ const parseSimulationResponse = (
 	const projectNameValue =
 		response.project_name ??
 		response.projectName ??
-		nestedResponse.project_name ??
-		nestedResponse.projectName;
+		resultData?.project_name ??
+		resultData?.projectName;
 	const projectName = Array.isArray(projectNameValue)
 		? getString(projectNameValue[0])
 		: getString(projectNameValue);
@@ -232,10 +209,10 @@ const parseSimulationResponse = (
 			response.resultUrl ??
 			response.result_download_url ??
 			response.resultDownloadUrl ??
-			nestedResponse.download_url ??
-			nestedResponse.downloadUrl ??
-			nestedResponse.download_link ??
-			nestedResponse.downloadLink,
+			resultData?.download_url ??
+			resultData?.downloadUrl ??
+			resultData?.download_link ??
+			resultData?.downloadLink,
 	);
 
 	return {
@@ -257,8 +234,11 @@ const parseSimulationResponse = (
 };
 
 export const runSimulationAPI = async (body: SimulationBody) => {
+	const path = [body.runEndpoint, body.subtypeSlug, body.username]
+		.map((segment) => encodeURIComponent(segment))
+		.join("/");
 	const { data } = await http.post<unknown>(
-		`/run_exec/${body.runEndpoint}/${body.subtypeSlug}/${body.usernameSlug}`,
+		`/run_exec/${path}`,
 		body.formData,
 		{ params: { proj_name: body.projectName } },
 	);

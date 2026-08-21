@@ -20,9 +20,11 @@ const STATUS_LABELS: Record<SubmissionStatus, string> = {
 };
 
 const ResultRow = ({ label, value }: { label: string; value: string }) => (
-	<div className="flex justify-between gap-4 border-gray-100 border-b py-2 last:border-0">
-		<p className="text-muted-foreground text-sm">{label}</p>
-		<p className="min-w-0 wrap-break-word text-right text-sm">{value}</p>
+	<div className="grid grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] gap-4 border-border border-b py-2.5 last:border-0">
+		<p className="text-muted-foreground text-xs">{label}</p>
+		<p className="min-w-0 text-right text-xs [overflow-wrap:anywhere]">
+			{value}
+		</p>
 	</div>
 );
 
@@ -42,7 +44,7 @@ const SimulationResults = ({
 	const showCurrentResult = setupComplete && submission.status !== "idle";
 
 	return (
-		<div className="h-full min-h-0 w-full space-y-4 overflow-y-auto overscroll-contain rounded border border-gray-200 bg-white p-4 lg:p-5 2xl:p-6">
+		<div className="workspace-panel space-y-4">
 			<SectionTitle title="Simulation Results" icon={<ScrollText />} />
 			<SimulationNotifications />
 
@@ -50,15 +52,23 @@ const SimulationResults = ({
 				<>
 					<div
 						aria-live={submission.status === "error" ? "assertive" : "polite"}
-						className={`rounded border p-4 ${
+						className={`rounded-md border p-4 ${
 							submission.status === "error"
-								? "border-red-200 bg-red-50 text-red-900"
+								? "border-foreground/25 bg-background text-foreground"
 								: "border-primary/20 bg-primary/5 text-foreground"
 						}`}
 						role={submission.status === "error" ? "alert" : "status"}
 					>
 						<div className="flex flex-wrap items-start justify-between gap-3">
-							<p className="font-semibold">
+							<p className="inline-flex items-center gap-2 font-semibold text-sm">
+								<span
+									aria-hidden="true"
+									className={`size-2 rounded-full ${
+										submission.status === "error"
+											? "bg-foreground"
+											: "bg-primary"
+									}`}
+								/>
 								{STATUS_LABELS[submission.status]}
 							</p>
 							{isPolling ? (
@@ -91,8 +101,8 @@ const SimulationResults = ({
 						) : null}
 					</div>
 
-					<div className="rounded border border-gray-200 p-4">
-						<p className="mb-2 font-semibold">Simulation Summary</p>
+					<div className="rounded-md border border-border p-4">
+						<p className="mb-2 font-semibold text-sm">Simulation Summary</p>
 						<ResultRow
 							label="Status"
 							value={STATUS_LABELS[submission.status]}
@@ -122,9 +132,11 @@ const SimulationResults = ({
 					) : null}
 				</>
 			) : (
-				<p className="text-muted-foreground">
-					Results will appear here after running the simulation.
-				</p>
+				<div className="flex min-h-36 items-center justify-center rounded-md border border-border border-dashed bg-background/60 px-4 text-center">
+					<p className="max-w-56 text-muted-foreground text-sm leading-relaxed">
+						Results will appear here after running the simulation.
+					</p>
+				</div>
 			)}
 
 			{canLoadHistory ? (

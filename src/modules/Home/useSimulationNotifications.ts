@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { getRecord, getString } from "@/lib/parse";
 import { saveAuthSession, useAuthSession } from "@/modules/Auth/auth.session";
 import { getProjectDownloadPath } from "@/modules/Home/home.api";
 import { downloadSimulationResult } from "@/modules/Home/useSimulationResults";
@@ -10,14 +11,6 @@ export type SimulationNotification = {
 	projectName: string;
 	success: boolean;
 };
-
-const getRecord = (value: unknown): Record<string, unknown> | null =>
-	typeof value === "object" && value !== null && !Array.isArray(value)
-		? (value as Record<string, unknown>)
-		: null;
-
-const getString = (value: unknown) =>
-	typeof value === "string" && value.trim() ? value.trim() : "";
 
 const getDownloadPath = (downloadLink: string) => {
 	if (!downloadLink) {
