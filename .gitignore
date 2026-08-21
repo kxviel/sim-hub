@@ -28,3 +28,9 @@ dist-ssr
 AGENTS.md
 /graphify-out
 /.agents/*
+
+# Local release artifacts and unused mobile icon outputs
+/exectuable/
+/src-tauri/icons/64x64.png
+/src-tauri/icons/android/
+/src-tauri/icons/ios/
