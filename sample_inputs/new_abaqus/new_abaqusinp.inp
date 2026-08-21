@@ -1,0 +1,31 @@
+*HEADING
+Minimal Test Based on Native Formatting
+**
+*MATERIAL, NAME=STEEL
+*ELASTIC, TYPE=ISOTROPIC
+                 210E9,                      0.3
+**
+*SOLID SECTION, ELSET=PLATE, MATERIAL=STEEL
+                      1.,
+**
+*NODE
+       1,                       0.,                       0.,                       0.
+       2,                       1.,                       0.,                       0.
+       3,                       1.,                       1.,                       0.
+       4,                       0.,                       1.,                       0.
+**
+*ELEMENT, TYPE=CPS4, ELSET=PLATE
+       1,        1,        2,        3,        4
+**
+*STEP
+*NODE FILE
+u
+*STATIC
+**
+*CLOAD
+       3,        2,                 -1500.0
+**
+*BOUNDARY, TYPE=DISPLACEMENT
+       1,        1,        2,                       0.
+       4,        1,        2,                       0.
+*END STEP

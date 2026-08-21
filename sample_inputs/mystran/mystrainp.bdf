@@ -1,0 +1,41 @@
+$ --- 1. EXECUTIVE CONTROL SECTION ---
+SOL 1           $ Selects Linear Static Analysis
+CEND            $ Ends Executive Control
+$
+$ --- 2. CASE CONTROL SECTION ---
+TITLE = Simple Rod Tension Test
+SPC = 1         $ Applies Single-Point Constraint set #1
+LOAD = 2        $ Applies Load set #2
+DISP = ALL      $ Requests displacement output for all nodes
+STRESS = ALL    $ Requests stress output for all elements
+BEGIN BULK      $ Ends Case Control / Begins physical model definition
+$
+$ --- 3. BULK DATA SECTION ---
+$
+$ Define Nodes (GRID)
+$ format: GRID, Node_ID, Coord_System, X, Y, Z
+GRID    1       0       0.0     0.0     0.0
+GRID    2       0       10.0    0.0     0.0
+$
+$ Define Element (CROD - Simple tension/compression rod)
+$ format: CROD, Elem_ID, Prop_ID, Node1, Node2
+CROD    1       1       1       2
+$
+$ Define Element Property (PROD)
+$ format: PROD, Prop_ID, Mat_ID, Area
+PROD    1       1       0.1
+$
+$ Define Material (MAT1)
+$ format: MAT1, Mat_ID, Youngs_Modulus, Shear_Modulus, Poisson_Ratio
+MAT1    1       30.0E6          0.3
+$
+$ Define Boundary Conditions (SPC1)
+$ format: SPC1, Constraint_Set_ID, Constrained_DOFs(123456=All), Node_ID
+SPC1    1       123456  1
+$
+$ Define External Force (FORCE)
+$ format: FORCE, Load_Set_ID, Node_ID, Coord_Sys, Magnitude, X_dir, Y_dir, Z_dir
+FORCE   2       2       0       100.0   1.0     0.0     0.0
+$
+$ End of simulation deck
+ENDDATA

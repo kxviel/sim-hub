@@ -1,0 +1,42 @@
+{
+  "nodes": [
+    {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    {
+      "x": 0,
+      "y": 0,
+      "z": 5.0
+    }
+  ],
+  "elements": [
+    {
+      "type": "BarElement",
+      "n1": 0,
+      "n2": 1,
+      "E": 210000000000,
+      "A": 0.005
+    }
+  ],
+  "constraints": [
+    {
+      "node": 0,
+      "dx": "Fixed",
+      "dy": "Fixed",
+      "dz": "Fixed",
+      "rx": "Fixed",
+      "ry": "Fixed",
+      "rz": "Fixed"
+    }
+  ],
+  "loads": [
+    {
+      "node": 1,
+      "fx": 1000.0,
+      "fy": 0.0,
+      "fz": -500.0
+    }
+  ]
+}

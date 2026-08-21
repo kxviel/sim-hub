@@ -1,0 +1,26 @@
+{
+  "physicsModel": "heatConductionScript",
+  "meshConfig": {
+    "meshDimension": "2D",
+    "elementOrder": "linear",
+    "numElementsX": 10,
+    "numElementsY": 10,
+    "maxX": 1.0,
+    "maxY": 1.0
+  },
+  "materialConfig": {
+    "thermalConductivity": 400.0
+  },
+  "boundaryConditions": [
+    {
+      "boundaryIndex": "left",
+      "conditionType": "constantTemp",
+      "value": 100.0
+    },
+    {
+      "boundaryIndex": "right",
+      "conditionType": "constantTemp",
+      "value": 25.0
+    }
+  ]
+}

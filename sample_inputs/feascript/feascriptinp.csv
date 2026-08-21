@@ -1,0 +1,11 @@
+physicsModel,heatConductionScript
+meshConfig.meshDimension,2D
+meshConfig.elementOrder,linear
+meshConfig.numElementsX,10
+meshConfig.numElementsY,6
+meshConfig.maxX,1.0
+meshConfig.maxY,0.5
+materialConfig.thermalConductivity,400.0
+boundaryConditions.0.boundaryIndex,left
+boundaryConditions.0.conditionType,constantTemp
+boundaryConditions.0.value,100.0

@@ -1,0 +1,12 @@
+K_POINTS.kpoints_mode,mesh
+K_POINTS.kpoints_mesh,"4, 4, 4"
+K_POINTS.kpoints_offset,"0, 0, 0"
+CONTROL.calculation,scf
+SYSTEM.ecutwfc,50.0
+SYSTEM.ecutrho,200.0
+ELECTRONS.conv_thr,1.0d-8
+ELECTRONS.mixing_beta,0.7
+ELECTRONS.electron_maxstep,100
+SYSTEM.occupations,smearing
+SYSTEM.smearing,cold
+SYSTEM.degauss,0.02

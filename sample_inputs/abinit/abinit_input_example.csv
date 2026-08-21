@@ -1,0 +1,14 @@
+kpoints_mode,mesh
+kpoints_mesh,"4, 4, 4"
+kpoints_offset,"0, 0, 0"
+accuracy,1
+ecut,20.0
+einterp,"1, 50, 0, 0"
+iscf,7
+nband,20
+nsppol,1
+nstep,50
+occopt,3
+toldfe,1.0d-8
+usewvl,0
+ionmov,3

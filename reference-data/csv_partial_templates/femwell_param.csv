@@ -1,9 +1,0 @@
-Parameter,Type,Mandatory,Description,Options
-wavelength,REAL,Yes,"Operating wavelength of the simulation in micrometers. Ex: 1.55",
-n_core,REAL,Yes,"Refractive index of the waveguide core material. Ex: 3.48",
-n_clad,REAL,Yes,"Refractive index of the cladding material. Ex: 1.44",
-core_width,REAL,Yes,"Width of the waveguide core in micrometers. Ex: 0.5",
-core_thickness,REAL,Yes,"Thickness of the waveguide core in micrometers. Ex: 0.22",
-buffer,REAL,Yes,"Buffer distance around the core to define the cladding domain bounds in micrometers. Ex: 2.0",
-resolution,INTEGER,Yes,"Mesh resolution parameter specifying the number of elements per distance unit. Ex: 20",
-num_modes,INTEGER,Yes,"Number of optical eigenmodes to compute. Ex: 1",

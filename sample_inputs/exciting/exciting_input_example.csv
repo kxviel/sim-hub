@@ -1,0 +1,16 @@
+kpoints_mode,mesh
+kpoints_mesh,"4, 4, 4"
+kpoints_offset,"0, 0, 0"
+groundstate.rgkmax,7.0
+groundstate.xctype,GGA_PBE
+groundstate.epsengy,1e-4
+groundstate.nempty,10
+groundstate.swidth,0.01
+groundstate.stype,Gaussian
+groundstate.gmaxvr,16.0
+groundstate.lmaxapw,8
+groundstate.lmaxvr,8
+groundstate.maxscl,50
+groundstate.do,fromscratch
+groundstate.epschg,1e-4
+groundstate.epspot,1e-4

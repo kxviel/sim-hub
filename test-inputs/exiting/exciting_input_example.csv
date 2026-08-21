@@ -1,9 +1,0 @@
-kpoints_mode,mesh
-kpoints_mesh,4, 4, 4
-kpoints_offset,0, 0, 0
-rgkmax,7.0
-xctype,GGA_PBE
-epsengy,1e-4
-nempty,10
-swidth,0.01
-stype,Gaussian

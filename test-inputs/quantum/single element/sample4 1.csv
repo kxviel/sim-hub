@@ -1,5 +1,0 @@
-calculation,scf
-ecutwfc,30.0
-kpoints_mode,mesh
-kpoints_mesh,2, 2, 2
-kpoints_offset,0, 0, 0

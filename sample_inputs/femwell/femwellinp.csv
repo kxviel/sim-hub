@@ -1,0 +1,8 @@
+wavelength,1.55
+n_core,3.48
+n_clad,1.44
+core_width,0.5
+core_thickness,0.22
+buffer,2.0
+resolution,20
+num_modes,1

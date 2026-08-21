@@ -1,0 +1,20 @@
+data_Invalid_Structure
+
+# --- ERROR 1: Incomplete Cell Parameters ---
+# _cell_length_b and _cell_length_c are missing. 
+# ASE cannot build a 3D simulation box.
+_cell_length_a 5.64000
+_cell_angle_alpha 90.00000
+_cell_angle_beta 90.00000
+_cell_angle_gamma 90.00000
+
+# --- ERROR 2: Broken Data Loop ---
+# The loop headers declare 4 columns, but the data rows contain 5 values.
+# Additionally, _atom_site_fract_z is missing, making 3D coordinates impossible.
+loop_
+  _atom_site_label
+  _atom_site_type_symbol
+  _atom_site_fract_x
+  _atom_site_fract_y
+  Na1 Na 0.00000 0.00000 0.00000
+  Cl1 Cl 0.50000 0.50000 0.50000

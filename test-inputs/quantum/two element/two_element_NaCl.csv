@@ -1,5 +1,0 @@
-﻿calculation,scf
-ecutwfc,40.0
-kpoints_mode,gamma
-fix_atom(1),True, True, True
-fix_atom(2),False, False, False
