@@ -27,8 +27,11 @@ const SimulationHistory = ({
 	} = useSimulationHistory(username, submission);
 
 	return (
-		<section aria-labelledby="past-runs-title" className="rounded border p-4">
-			<h2 className="font-semibold" id="past-runs-title">
+		<section
+			aria-labelledby="past-runs-title"
+			className="rounded-md border border-border p-4"
+		>
+			<h2 className="font-semibold text-sm" id="past-runs-title">
 				Past Runs
 			</h2>
 			<div className="mt-1 flex flex-wrap items-center justify-between gap-3">
@@ -68,7 +71,7 @@ const SimulationHistory = ({
 
 						return (
 							<article
-								className="rounded border border-gray-200 p-3"
+								className="rounded-md border border-border bg-background/35 p-3"
 								key={project.projectName}
 							>
 								<div className="flex items-start justify-between gap-3">
@@ -76,7 +79,7 @@ const SimulationHistory = ({
 										<h3 className="wrap-break-word font-medium">
 											{project.projectName}
 										</h3>
-										<p className="mt-1 text-muted-foreground text-xs">
+										<p className="mt-1 text-muted-foreground text-xs [overflow-wrap:anywhere]">
 											{getHistoryRunDetails(project)}
 										</p>
 									</div>
@@ -98,13 +101,15 @@ const SimulationHistory = ({
 								</div>
 
 								{summaryRows.length > 0 ? (
-									<dl className="mt-3 grid gap-2 border-gray-100 border-t pt-3">
+									<dl className="mt-3 grid gap-2 border-border border-t pt-3">
 										{summaryRows.map(({ key, label, value }) => (
 											<div className="flex justify-between gap-3" key={key}>
 												<dt className="text-muted-foreground text-xs">
 													{label}
 												</dt>
-												<dd className="text-right text-xs">{value}</dd>
+												<dd className="min-w-0 text-right text-xs [overflow-wrap:anywhere]">
+													{value}
+												</dd>
 											</div>
 										))}
 									</dl>

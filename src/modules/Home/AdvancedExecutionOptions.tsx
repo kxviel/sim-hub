@@ -21,11 +21,11 @@ const AdvancedExecutionOptions = ({
 	isSubmitting,
 }: HomeState) => (
 	<details
-		className="@container/execution-options group w-full rounded border border-gray-200 bg-white"
+		className="@container/execution-options group w-full rounded-md border border-border bg-card"
 		onToggle={handleExecutionOptionsToggle}
 		open={executionOptionsOpen}
 	>
-		<summary className="flex cursor-pointer list-none items-center gap-2 p-3 font-semibold text-primary marker:content-none [&::-webkit-details-marker]:hidden">
+		<summary className="flex cursor-pointer list-none items-center gap-2 rounded-md p-3 font-semibold text-primary text-sm marker:content-none focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2 [&::-webkit-details-marker]:hidden">
 			<ChevronRight
 				aria-hidden="true"
 				className="size-4 shrink-0 transition-transform group-open:rotate-90 motion-reduce:transition-none"
@@ -33,7 +33,7 @@ const AdvancedExecutionOptions = ({
 			Advanced Execution Options
 		</summary>
 
-		<FieldGroup className="grid gap-4 border-gray-200 border-t p-3 @sm/execution-options:grid-cols-2 @xl/execution-options:grid-cols-3">
+		<FieldGroup className="grid gap-4 border-border border-t bg-background/40 p-3 @sm/execution-options:grid-cols-2 @xl/execution-options:grid-cols-3">
 			<Field data-invalid={Boolean(executionOptionErrors.executionMemory)}>
 				<FieldLabel htmlFor="execution-memory">RAM Memory (GB)</FieldLabel>
 				<Input

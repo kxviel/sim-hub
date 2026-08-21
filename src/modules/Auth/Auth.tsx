@@ -1,3 +1,4 @@
+import BrandMark from "@/components/BrandMark";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -33,66 +34,44 @@ const Login = () => {
 	} = useAuthForm();
 
 	return (
-		<section className="flex min-h-full w-full flex-col items-center bg-accent p-4">
-			<Card className="my-auto w-full max-w-lg">
-				<CardHeader>
-					<CardTitle className="font-semibold">
-						<h1>
+		<section className="flex min-h-svh w-full bg-background px-4 py-8 sm:px-6">
+			<div className="mx-auto my-auto w-full max-w-[28rem]">
+				<div className="mb-5 flex items-center gap-3 px-1">
+					<BrandMark className="size-11" />
+					<div className="min-w-0">
+						<p className="truncate font-bold text-foreground text-xl tracking-tight">
+							Simulation Hub
+						</p>
+						<p className="text-muted-foreground text-sm">
+							Research simulation workspace
+						</p>
+					</div>
+				</div>
+
+				<Card className="gap-0 py-0 shadow-lg shadow-foreground/5">
+					<CardHeader className="px-5 pt-5 pb-0 sm:px-6 sm:pt-6">
+						<CardTitle className="font-semibold text-xl tracking-tight">
+							<h1>
+								{isRegistering
+									? "Create an Account"
+									: "Sign in to Simulation Hub"}
+							</h1>
+						</CardTitle>
+						<CardDescription className="mt-1">
 							{isRegistering
-								? "Create an Account"
-								: "Sign in to Simulation Hub"}
-						</h1>
-					</CardTitle>
-					<CardDescription>
-						{isRegistering
-							? "Register with your name, email, and password."
-							: "Enter your credentials to login."}
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<ApiEndpointSettings />
-					<form onSubmit={handleSubmit}>
-						<form.Subscribe selector={(state) => state.isSubmitting}>
-							{(isSubmitting) => (
-								<>
-									<FieldGroup className="gap-4">
-										<form.Field
-											name="username"
-											children={(field) => {
-												const isInvalid =
-													field.state.meta.isTouched &&
-													!field.state.meta.isValid;
-
-												return (
-													<Field data-invalid={isInvalid}>
-														<FieldLabel htmlFor={field.name}>
-															Username
-														</FieldLabel>
-														<Input
-															id={field.name}
-															name={field.name}
-															type="text"
-															placeholder="researcher_name"
-															autoComplete="username"
-															value={field.state.value}
-															onBlur={field.handleBlur}
-															onChange={(event) =>
-																field.handleChange(event.target.value)
-															}
-															aria-invalid={isInvalid}
-															disabled={isSubmitting}
-														/>
-														{isInvalid ? (
-															<FieldError errors={field.state.meta.errors} />
-														) : null}
-													</Field>
-												);
-											}}
-										/>
-
-										{isRegistering ? (
+								? "Register with your name, email, and password."
+								: "Enter your credentials to login."}
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="px-5 pt-5 sm:px-6">
+						<ApiEndpointSettings />
+						<form onSubmit={handleSubmit}>
+							<form.Subscribe selector={(state) => state.isSubmitting}>
+								{(isSubmitting) => (
+									<>
+										<FieldGroup className="gap-4">
 											<form.Field
-												name="domain"
+												name="username"
 												children={(field) => {
 													const isInvalid =
 														field.state.meta.isTouched &&
@@ -101,18 +80,92 @@ const Login = () => {
 													return (
 														<Field data-invalid={isInvalid}>
 															<FieldLabel htmlFor={field.name}>
-																SSH Domain
+																Username
 															</FieldLabel>
-															<InputGroup data-disabled={isSubmitting}>
-																<InputGroupAddon>
-																	<InputGroupText>ssh://</InputGroupText>
-																</InputGroupAddon>
-																<InputGroupInput
+															<Input
+																id={field.name}
+																name={field.name}
+																type="text"
+																placeholder="researcher_name"
+																autoComplete="username"
+																value={field.state.value}
+																onBlur={field.handleBlur}
+																onChange={(event) =>
+																	field.handleChange(event.target.value)
+																}
+																aria-invalid={isInvalid}
+																disabled={isSubmitting}
+															/>
+															{isInvalid ? (
+																<FieldError errors={field.state.meta.errors} />
+															) : null}
+														</Field>
+													);
+												}}
+											/>
+
+											{isRegistering ? (
+												<form.Field
+													name="domain"
+													children={(field) => {
+														const isInvalid =
+															field.state.meta.isTouched &&
+															!field.state.meta.isValid;
+
+														return (
+															<Field data-invalid={isInvalid}>
+																<FieldLabel htmlFor={field.name}>
+																	SSH Domain
+																</FieldLabel>
+																<InputGroup data-disabled={isSubmitting}>
+																	<InputGroupAddon>
+																		<InputGroupText>ssh://</InputGroupText>
+																	</InputGroupAddon>
+																	<InputGroupInput
+																		id={field.name}
+																		name={field.name}
+																		type="text"
+																		placeholder="example.hpc.domain"
+																		autoComplete="url"
+																		value={field.state.value}
+																		onBlur={field.handleBlur}
+																		onChange={(event) =>
+																			field.handleChange(event.target.value)
+																		}
+																		aria-invalid={isInvalid}
+																		disabled={isSubmitting}
+																	/>
+																</InputGroup>
+																{isInvalid ? (
+																	<FieldError
+																		errors={field.state.meta.errors}
+																	/>
+																) : null}
+															</Field>
+														);
+													}}
+												/>
+											) : null}
+
+											{isRegistering ? (
+												<form.Field
+													name="email"
+													children={(field) => {
+														const isInvalid =
+															field.state.meta.isTouched &&
+															!field.state.meta.isValid;
+
+														return (
+															<Field data-invalid={isInvalid}>
+																<FieldLabel htmlFor={field.name}>
+																	Email
+																</FieldLabel>
+																<Input
 																	id={field.name}
 																	name={field.name}
-																	type="text"
-																	placeholder="example.hpc.domain"
-																	autoComplete="url"
+																	type="email"
+																	placeholder="researcher@institute.org"
+																	autoComplete="email"
 																	value={field.state.value}
 																	onBlur={field.handleBlur}
 																	onChange={(event) =>
@@ -121,19 +174,19 @@ const Login = () => {
 																	aria-invalid={isInvalid}
 																	disabled={isSubmitting}
 																/>
-															</InputGroup>
-															{isInvalid ? (
-																<FieldError errors={field.state.meta.errors} />
-															) : null}
-														</Field>
-													);
-												}}
-											/>
-										) : null}
+																{isInvalid ? (
+																	<FieldError
+																		errors={field.state.meta.errors}
+																	/>
+																) : null}
+															</Field>
+														);
+													}}
+												/>
+											) : null}
 
-										{isRegistering ? (
 											<form.Field
-												name="email"
+												name="password"
 												children={(field) => {
 													const isInvalid =
 														field.state.meta.isTouched &&
@@ -142,88 +195,18 @@ const Login = () => {
 													return (
 														<Field data-invalid={isInvalid}>
 															<FieldLabel htmlFor={field.name}>
-																Email
-															</FieldLabel>
-															<Input
-																id={field.name}
-																name={field.name}
-																type="email"
-																placeholder="researcher@institute.org"
-																autoComplete="email"
-																value={field.state.value}
-																onBlur={field.handleBlur}
-																onChange={(event) =>
-																	field.handleChange(event.target.value)
-																}
-																aria-invalid={isInvalid}
-																disabled={isSubmitting}
-															/>
-															{isInvalid ? (
-																<FieldError errors={field.state.meta.errors} />
-															) : null}
-														</Field>
-													);
-												}}
-											/>
-										) : null}
-
-										<form.Field
-											name="password"
-											children={(field) => {
-												const isInvalid =
-													field.state.meta.isTouched &&
-													!field.state.meta.isValid;
-
-												return (
-													<Field data-invalid={isInvalid}>
-														<FieldLabel htmlFor={field.name}>
-															Password
-														</FieldLabel>
-														<Input
-															id={field.name}
-															name={field.name}
-															type="password"
-															placeholder="Password"
-															autoComplete={
-																isRegistering
-																	? "new-password"
-																	: "current-password"
-															}
-															value={field.state.value}
-															onBlur={field.handleBlur}
-															onChange={(event) =>
-																field.handleChange(event.target.value)
-															}
-															aria-invalid={isInvalid}
-															disabled={isSubmitting}
-														/>
-														{isInvalid ? (
-															<FieldError errors={field.state.meta.errors} />
-														) : null}
-													</Field>
-												);
-											}}
-										/>
-
-										{isRegistering ? (
-											<form.Field
-												name="confirmPassword"
-												children={(field) => {
-													const isInvalid =
-														field.state.meta.isTouched &&
-														!field.state.meta.isValid;
-
-													return (
-														<Field data-invalid={isInvalid}>
-															<FieldLabel htmlFor={field.name}>
-																Confirm Password
+																Password
 															</FieldLabel>
 															<Input
 																id={field.name}
 																name={field.name}
 																type="password"
 																placeholder="Password"
-																autoComplete="new-password"
+																autoComplete={
+																	isRegistering
+																		? "new-password"
+																		: "current-password"
+																}
 																value={field.state.value}
 																onBlur={field.handleBlur}
 																onChange={(event) =>
@@ -239,53 +222,91 @@ const Login = () => {
 													);
 												}}
 											/>
-										) : null}
-									</FieldGroup>
 
-									<Button
-										type="submit"
-										className="mt-4 w-full"
-										disabled={isSubmitting}
-									>
-										{isSubmitting
-											? isRegistering
-												? "Creating account..."
-												: "Signing in..."
-											: isRegistering
-												? "Create Account"
-												: "Sign In"}
-									</Button>
+											{isRegistering ? (
+												<form.Field
+													name="confirmPassword"
+													children={(field) => {
+														const isInvalid =
+															field.state.meta.isTouched &&
+															!field.state.meta.isValid;
 
-									{!isRegistering ? (
+														return (
+															<Field data-invalid={isInvalid}>
+																<FieldLabel htmlFor={field.name}>
+																	Confirm Password
+																</FieldLabel>
+																<Input
+																	id={field.name}
+																	name={field.name}
+																	type="password"
+																	placeholder="Password"
+																	autoComplete="new-password"
+																	value={field.state.value}
+																	onBlur={field.handleBlur}
+																	onChange={(event) =>
+																		field.handleChange(event.target.value)
+																	}
+																	aria-invalid={isInvalid}
+																	disabled={isSubmitting}
+																/>
+																{isInvalid ? (
+																	<FieldError
+																		errors={field.state.meta.errors}
+																	/>
+																) : null}
+															</Field>
+														);
+													}}
+												/>
+											) : null}
+										</FieldGroup>
+
 										<Button
-											type="button"
-											className="mt-2 w-full"
+											type="submit"
+											className="mt-4 w-full"
 											disabled={isSubmitting}
-											onClick={handleTemporaryAccess}
-											variant="outline"
 										>
-											Continue without login
+											{isSubmitting
+												? isRegistering
+													? "Creating account..."
+													: "Signing in..."
+												: isRegistering
+													? "Create Account"
+													: "Sign In"}
 										</Button>
-									) : null}
-								</>
-							)}
-						</form.Subscribe>
-					</form>
-				</CardContent>
-				<CardFooter className="flex-col gap-2">
-					<div className="mt-4 text-center text-sm">
-						{isRegistering ? "Already registered?" : "Need an account?"}{" "}
-						<Button
-							type="button"
-							variant="link"
-							className="h-auto p-0 underline-offset-4"
-							onClick={switchAuthMode}
-						>
-							{isRegistering ? "Sign in" : "Register"}
-						</Button>
-					</div>
-				</CardFooter>
-			</Card>
+
+										{!isRegistering ? (
+											<Button
+												type="button"
+												className="mt-2 w-full"
+												disabled={isSubmitting}
+												onClick={handleTemporaryAccess}
+												variant="outline"
+											>
+												Continue without login
+											</Button>
+										) : null}
+									</>
+								)}
+							</form.Subscribe>
+						</form>
+					</CardContent>
+					<CardFooter className="flex-col gap-2 px-5 pt-4 pb-5 sm:px-6 sm:pb-6">
+						<div className="text-center text-sm">
+							{isRegistering ? "Already registered?" : "Need an account?"}{" "}
+							<Button
+								type="button"
+								variant="link"
+								className="h-auto p-0 underline-offset-4"
+								onClick={switchAuthMode}
+							>
+								{isRegistering ? "Sign in" : "Register"}
+							</Button>
+						</div>
+					</CardFooter>
+				</Card>
+			</div>
 		</section>
 	);
 };

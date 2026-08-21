@@ -16,7 +16,7 @@ const Home = () => {
 	};
 
 	return (
-		<section className="min-h-full w-full overflow-x-hidden bg-accent p-2 sm:p-3 xl:h-full xl:min-h-0 xl:overflow-hidden xl:p-4">
+		<section className="min-h-full w-full overflow-x-hidden bg-background p-2 sm:p-3 xl:h-full xl:min-h-0 xl:overflow-hidden xl:p-4">
 			<h1 className="sr-only">Simulation Workspace</h1>
 			<div
 				className={cn(
@@ -29,7 +29,7 @@ const Home = () => {
 				<aside className="min-h-0 min-w-0 lg:col-span-2 xl:col-span-1 xl:h-full">
 					{isSetupCollapsed ? (
 						<>
-							<div className="hidden h-full w-full items-start justify-center rounded border border-gray-200 bg-white py-4 xl:flex">
+							<div className="hidden h-full w-full items-start justify-center rounded-lg border border-border bg-card py-4 shadow-sm xl:flex">
 								<Button
 									aria-label="Expand simulation setup"
 									aria-expanded={false}
