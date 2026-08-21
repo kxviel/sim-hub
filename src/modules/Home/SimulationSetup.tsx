@@ -27,13 +27,13 @@ const SimulationSetup = (homeState: HomeState) => {
 	} = homeState;
 
 	return (
-		<div className="h-full min-h-0 w-full space-y-4 overflow-y-auto overscroll-contain rounded border border-gray-200 bg-white p-4 lg:p-5 2xl:p-6">
+		<div className="workspace-panel space-y-4">
 			<SectionTitle title="Simulation Setup" icon={<Settings />} />
 
 			<form className="w-full">
-				<FieldGroup className="gap-4 w-full">
+				<FieldGroup className="w-full gap-4">
 					<Field>
-						<FieldLabel htmlFor={"simType"} className="font-semibold text-lg">
+						<FieldLabel htmlFor={"simType"} className="font-semibold text-sm">
 							1. Simulation Type
 						</FieldLabel>
 						<Select
@@ -56,13 +56,15 @@ const SimulationSetup = (homeState: HomeState) => {
 								</SelectGroup>
 							</SelectContent>
 						</Select>
-						<p>Choose the broad category of simulation</p>
+						<p className="text-muted-foreground text-xs leading-relaxed">
+							Choose the broad category of simulation
+						</p>
 					</Field>
 
 					<Field>
 						<FieldLabel
 							htmlFor={"simSubtype"}
-							className="font-semibold text-lg"
+							className="font-semibold text-sm"
 						>
 							2. Simulation Subtype / Code
 						</FieldLabel>
@@ -93,23 +95,27 @@ const SimulationSetup = (homeState: HomeState) => {
 								</SelectGroup>
 							</SelectContent>
 						</Select>
-						<p>Choose the specific code or method</p>
+						<p className="text-muted-foreground text-xs leading-relaxed">
+							Choose the specific code or method
+						</p>
 					</Field>
 				</FieldGroup>
 			</form>
 
-			<div className="p-4 bg-primary-foreground rounded space-y-2">
-				<p className="text-primary font-semibold text-base">
+			<div className="space-y-2 rounded-md border border-primary/15 bg-primary/5 p-4">
+				<p className="font-semibold text-primary text-sm">
 					{setupComplete ? "About This Setup" : "Examples"}
 				</p>
 				{setupComplete ? (
-					<p>{getSimulationSubtypeHelp(simSubType)}</p>
+					<p className="text-sm leading-relaxed">
+						{getSimulationSubtypeHelp(simSubType)}
+					</p>
 				) : (
 					<ul className="space-y-2">
 						{infoList.map((item) => (
-							<li className="text-sm" key={item.type}>
+							<li className="text-sm leading-relaxed" key={item.type}>
 								{item.type}&nbsp;
-								<span className="text-primary text-sm font-semibold">to</span>
+								<span className="font-semibold text-primary text-sm">to</span>
 								&nbsp;
 								{item.subtype}
 							</li>

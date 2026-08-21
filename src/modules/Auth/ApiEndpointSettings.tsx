@@ -7,9 +7,11 @@ const ApiEndpointSettings = () => {
 		useApiEndpointSettings();
 
 	return (
-		<details className="mb-4 rounded border border-gray-200 p-3 text-sm">
-			<summary className="cursor-pointer font-medium">Middle-logic URL</summary>
-			<div className="mt-3 space-y-3">
+		<details className="group mb-5 rounded-md border border-border bg-background/60 text-sm">
+			<summary className="cursor-pointer px-3 py-2.5 font-semibold text-foreground marker:text-primary focus-visible:outline-2 focus-visible:outline-primary focus-visible:outline-offset-2">
+				Middle-logic URL
+			</summary>
+			<div className="space-y-3 border-border border-t p-3">
 				<Input
 					aria-label="Middle-logic URL"
 					autoComplete="url"
@@ -31,7 +33,10 @@ const ApiEndpointSettings = () => {
 						Use default
 					</Button>
 				</div>
-				<p aria-live="polite" className="text-muted-foreground text-xs">
+				<p
+					aria-live="polite"
+					className="min-h-4 text-muted-foreground text-xs leading-relaxed"
+				>
 					{message}
 				</p>
 			</div>

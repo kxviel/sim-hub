@@ -1,31 +1,37 @@
-import { Link, useNavigate } from "@tanstack/react-router";
-import { Ghost, LogOut } from "lucide-react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { LogOut } from "lucide-react";
+import BrandMark from "@/components/BrandMark";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { clearAuthSession, useAuthSession } from "@/modules/Auth/auth.session";
 
 const Header = () => {
 	const navigate = useNavigate();
 	const session = useAuthSession();
+	const isLoginPage = useRouterState({
+		select: (state) => state.location.pathname === "/",
+	});
 
 	const handleLogout = () => {
 		clearAuthSession();
 		navigate({ to: "/" });
 	};
 
+	if (isLoginPage) {
+		return null;
+	}
+
 	return (
-		<header className="shrink-0 border-gray-200 border-b bg-white">
-			<div className="mx-auto flex min-h-16 w-full max-w-[1920px] items-center justify-between gap-3 px-3 sm:px-5 lg:px-6">
+		<header className="z-10 shrink-0 border-border border-b bg-card shadow-xs">
+			<div className="mx-auto flex min-h-14 w-full max-w-[1920px] items-center justify-between gap-3 px-3 sm:px-5 lg:px-6">
 				<Link
-					className="flex min-w-0 items-center gap-3 font-bold text-primary text-xl"
+					className="flex min-w-0 items-center gap-2.5 font-bold text-primary text-lg tracking-tight"
 					to="/"
 				>
-					<span className="grid size-10 shrink-0 place-items-center rounded border border-primary bg-primary-foreground">
-						<Ghost aria-hidden="true" className="size-5" />
-					</span>
+					<BrandMark className="size-9" />
 					<span className="truncate">Simulation Hub</span>
 				</Link>
 
-				<nav aria-label="Account" className="flex min-w-0 items-center gap-3">
+				<nav aria-label="Account" className="flex min-w-0 items-center gap-2.5">
 					{session ? (
 						<>
 							<span className="hidden min-w-0 truncate text-muted-foreground text-sm md:inline">

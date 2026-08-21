@@ -45,7 +45,7 @@ const FileUpload = ({
 	return (
 		<label
 			className={cn(
-				"relative flex min-h-12 w-full touch-manipulation cursor-pointer items-center gap-3 rounded border border-gray-200 bg-muted/30 p-2 transition-[border-color,background-color,box-shadow] hover:border-primary/40 hover:bg-primary/5 focus-within:border-primary focus-within:ring-3 focus-within:ring-primary/15",
+				"relative flex min-h-12 w-full touch-manipulation cursor-pointer items-center gap-3 rounded-md border border-border bg-background/50 p-2 transition-[border-color,background-color,box-shadow] hover:border-primary/40 hover:bg-primary/5 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15",
 				disabled && "pointer-events-none opacity-50",
 				className,
 			)}
@@ -61,7 +61,7 @@ const FileUpload = ({
 				onChange={onChange}
 				type="file"
 			/>
-			<span className="inline-flex shrink-0 items-center gap-2 rounded bg-background px-3 py-2 font-medium text-sm shadow-sm ring-1 ring-border">
+			<span className="inline-flex shrink-0 items-center gap-2 rounded-sm border border-border bg-card px-3 py-2 font-semibold text-sm shadow-xs">
 				<Upload aria-hidden="true" className="size-4" />
 				{action}
 			</span>

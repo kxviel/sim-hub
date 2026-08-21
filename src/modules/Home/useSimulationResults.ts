@@ -2,43 +2,24 @@ import {
 	downloadSimulationResultAPI,
 	type SimulationResultData,
 } from "@/modules/Home/home.api";
+import {
+	isDisplayMetadataKey,
+	normalizeResultKey,
+} from "@/modules/Home/resultMetadata";
 import { getSimulationResultFields } from "@/modules/Home/SimUtils";
 import type { SimulationSubmission } from "@/modules/Home/useHome";
 
-const RESULT_METADATA_KEYS = new Set([
-	"aiida_id",
-	"calculator",
-	"calculator_used",
-	"concluded_at",
-	"created_at",
-	"download_link",
-	"download_url",
-	"message",
-	"project",
-	"project_name",
-	"result_download_url",
-	"result_file",
-	"result_url",
-	"started_at",
-	"status",
-	"submitted_by",
-	"time_concluded",
-	"time_queued",
-	"time_started",
-	"username",
-]);
+const RESULT_NUMBER_FORMATTER = new Intl.NumberFormat("en-US", {
+	maximumSignificantDigits: 8,
+	notation: "standard",
+	useGrouping: false,
+});
 
 const isVisibleResultValue = (value: unknown) =>
 	value !== undefined &&
 	value !== null &&
 	value !== "" &&
 	typeof value !== "object";
-
-const normalizeResultKey = (key: string) =>
-	key
-		.trim()
-		.replace(/[-\s]+/g, "_")
-		.toLowerCase();
 
 const isSummarizedResultKey = (key: string) => {
 	const normalizedKey = normalizeResultKey(key);
@@ -111,7 +92,13 @@ const formatResultValue = (value: unknown) => {
 	}
 
 	if (typeof value === "number") {
-		return Number.isInteger(value) ? String(value) : value.toPrecision(8);
+		if (Number.isInteger(value)) {
+			return String(value);
+		}
+
+		return Number.isFinite(value)
+			? RESULT_NUMBER_FORMATTER.format(value)
+			: String(value);
 	}
 
 	return String(value);
@@ -215,7 +202,7 @@ export const getSimulationResultRows = (submission: SimulationSubmission) => {
 	);
 	const extraRows = Object.entries(resultData).flatMap(([key, value]) => {
 		return !preferredKeys.has(key) &&
-			!RESULT_METADATA_KEYS.has(normalizeResultKey(key)) &&
+			!isDisplayMetadataKey(key) &&
 			isVisibleResultValue(value)
 			? [
 					{

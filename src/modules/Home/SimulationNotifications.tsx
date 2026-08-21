@@ -17,9 +17,9 @@ const SimulationNotifications = () => {
 	return (
 		<section
 			aria-labelledby="run-notifications-title"
-			className="rounded border border-primary/20 bg-primary/5 p-4"
+			className="rounded-md border border-primary/20 bg-primary/5 p-4"
 		>
-			<h2 className="font-semibold" id="run-notifications-title">
+			<h2 className="font-semibold text-sm" id="run-notifications-title">
 				Run Notifications
 			</h2>
 			<p className="mt-1 text-muted-foreground text-sm">
@@ -29,7 +29,7 @@ const SimulationNotifications = () => {
 			<ul className="mt-3 space-y-2">
 				{notifications.map((notification) => (
 					<li
-						className="flex flex-wrap items-center gap-3 rounded border border-gray-200 bg-white p-3"
+						className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-card p-3"
 						key={notification.projectName}
 					>
 						{notification.success ? (

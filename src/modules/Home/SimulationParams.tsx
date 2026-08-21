@@ -10,7 +10,7 @@ const SimulationParams = (homeState: HomeState) => {
 	const ParameterComponent = simulationParameterComponents[simSubType];
 
 	return (
-		<div className="h-full min-h-0 w-full space-y-4 overflow-y-auto overscroll-contain rounded border border-gray-200 bg-white p-4 lg:p-5 2xl:p-6">
+		<div className="workspace-panel space-y-4">
 			<SectionTitle title="Simulation Parameters" icon={<Terminal />} />
 
 			{setupComplete && ParameterComponent ? (
@@ -19,8 +19,8 @@ const SimulationParams = (homeState: HomeState) => {
 					<ParameterComponent key={simSubType} {...homeState} />
 				</>
 			) : (
-				<div className="w-full">
-					<p className="font-semibold text-lg">
+				<div className="w-full pt-1">
+					<p className="max-w-2xl text-muted-foreground text-sm leading-relaxed">
 						Select a simulation type and subtype to configure parameters.
 					</p>
 				</div>

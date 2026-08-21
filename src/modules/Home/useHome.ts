@@ -129,6 +129,8 @@ export const useHome = (): HomeState => {
 
 	const runSimulation = useSimulation();
 	const simulationSubtypeList = getSimulationSubtypeList(simType);
+	// Polling transitions are derived below so the stored queued state keeps this
+	// query enabled until the backend reports a terminal result.
 	const canPoll =
 		submission.status === "queued" &&
 		Boolean(submission.username && submission.projectName);
@@ -254,7 +256,7 @@ export const useHome = (): HomeState => {
 			const response = await runSimulation.mutateAsync({
 				runEndpoint: config.runEndpoint,
 				subtypeSlug: config.calculatorSlug,
-				usernameSlug: encodeURIComponent(username),
+				username,
 				projectName: config.projectName,
 				formData,
 			});
