@@ -2,29 +2,34 @@ import { XSquare } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import FileUpload from "@/modules/Home/FileUpload";
 import { QE_TEMPLATE_BASE, simulationTypeList } from "@/modules/Home/SimUtils";
-import { ElementPseudopotentialUploads } from "@/modules/Home/SubTypes/DftFields";
+import {
+	DftModeSelector,
+	ElementPseudopotentialUploads,
+} from "@/modules/Home/SubTypes/DftFields";
 import { useQuantumExpresso } from "@/modules/Home/SubTypes/useQuantumExpresso";
 import type { HomeState } from "@/modules/Home/useHome";
 
 const QuantumExpresso = ({
 	simType,
 	isSubmitting,
-	handleParamSubmit,
+	handleConfiguredSubmit,
 }: HomeState) => {
 	const {
+		handleModeChange,
 		handleParameterFileChange,
 		handlePseudopotentialFileChange,
 		handleRemovePseudopotentialFile,
 		handleRemoveRequiredFile,
 		handleRunSimulation,
 		handleStructureFileChange,
+		mode,
 		parameterFile,
 		pseudopotentialFiles,
 		requiredFiles,
 		structureElements,
 		structureFile,
 		structureWarning,
-	} = useQuantumExpresso(handleParamSubmit);
+	} = useQuantumExpresso(handleConfiguredSubmit);
 
 	return (
 		<div className="w-full space-y-4">
@@ -35,13 +40,13 @@ const QuantumExpresso = ({
 
 			<div className="w-full space-y-4 rounded border border-gray-200 p-2">
 				<p>
-					Upload one CSV parameter file and one CIF structure file. UPF
-					pseudopotentials are optional. Each file must be{" "}
-					<strong className="font-semibold text-primary">5 MB</strong> or less.
+					Upload one CSV parameter file and one CIF structure file. Each file
+					must be <strong className="font-semibold text-primary">5 MB</strong>{" "}
+					or less.
 				</p>
 				<p className="rounded border border-primary/20 bg-primary/5 p-3 text-sm">
-					UPF rule: upload no UPF files, or upload one UPF file for every
-					detected element.
+					Basic mode submits only CSV and CIF files. Advanced mode can include
+					one UPF pseudopotential for every detected element.
 				</p>
 
 				{requiredFiles.length > 0 ? (
@@ -107,27 +112,42 @@ const QuantumExpresso = ({
 					/>
 				</div>
 
-				<ElementPseudopotentialUploads
-					accept=".upf"
-					ariaLabelSuffix="UPF pseudopotential"
-					description="Upload the CIF to unlock one optional UPF input per element."
-					disabled={isSubmitting}
-					elements={structureElements}
-					emptyMessage="Upload a CIF structure file to detect elements and unlock per-element UPF uploads."
-					files={pseudopotentialFiles}
-					hint="UPF · Up to 5 MB"
-					onChange={handlePseudopotentialFileChange}
-					onRemove={handleRemovePseudopotentialFile}
-					warning={structureWarning}
-				>
-					<a
-						className={buttonVariants({ variant: "outline" })}
-						download="pseudopotential-template.upf"
-						href={`${QE_TEMPLATE_BASE}/pseudopotential-template.upf`}
-					>
-						Download UPF Template
-					</a>
-				</ElementPseudopotentialUploads>
+				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
+					<DftModeSelector
+						disabled={isSubmitting}
+						mode={mode}
+						onChange={handleModeChange}
+						simulator="Quantum ESPRESSO"
+					/>
+
+					{mode === "basic" ? (
+						<p className="rounded border border-dashed border-gray-300 p-4 text-muted-foreground text-sm">
+							Basic mode submits only the CSV parameter and CIF structure files.
+						</p>
+					) : (
+						<ElementPseudopotentialUploads
+							accept=".upf"
+							ariaLabelSuffix="UPF pseudopotential"
+							description="Optionally upload one UPF input per detected element."
+							disabled={isSubmitting}
+							elements={structureElements}
+							emptyMessage="Upload a CIF structure file to detect elements and unlock per-element UPF uploads."
+							files={pseudopotentialFiles}
+							hint="UPF · Up to 5 MB"
+							onChange={handlePseudopotentialFileChange}
+							onRemove={handleRemovePseudopotentialFile}
+							warning={structureWarning}
+						>
+							<a
+								className={buttonVariants({ variant: "outline" })}
+								download="pseudopotential-template.upf"
+								href={`${QE_TEMPLATE_BASE}/pseudopotential-template.upf`}
+							>
+								Download UPF Template
+							</a>
+						</ElementPseudopotentialUploads>
+					)}
+				</div>
 			</div>
 
 			<Button

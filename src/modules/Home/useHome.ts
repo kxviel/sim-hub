@@ -73,11 +73,6 @@ export type HomeState = AdvancedExecutionOptionsState & {
 	isDownloadingResult: boolean;
 	handleSimulationTypeChange: (value: string | null) => void;
 	handleSimulationSubtypeChange: (value: string | null) => void;
-	handleParamSubmit: (
-		parameterFile: File,
-		structureFile: File,
-		pseudopotentialFiles: File[],
-	) => void;
 	handleConfiguredSubmit: (submission: ConfiguredSimulationSubmission) => void;
 	handleDownloadResult: () => Promise<void>;
 	handleRefreshResults: () => Promise<void>;
@@ -124,7 +119,7 @@ export const useHome = (): HomeState => {
 	const activeRequest = useRef(0);
 	const authSession = getAuthSession();
 	const currentUsername = authSession?.username ?? "";
-	const canLoadHistory = Boolean(authSession && !authSession.isTemporary);
+	const canLoadHistory = Boolean(authSession);
 	const advancedExecutionOptions = useAdvancedExecutionOptions();
 
 	const runSimulation = useSimulation();
@@ -319,47 +314,6 @@ export const useHome = (): HomeState => {
 		}
 	};
 
-	const handleParamSubmit = (
-		parameterFile: File,
-		structureFile: File,
-		pseudopotentialFiles: File[],
-	) => {
-		const executionInputs = advancedExecutionOptions.validateExecutionOptions();
-
-		if (!executionInputs) {
-			toast.error("Please fix the highlighted execution options.");
-			return;
-		}
-
-		const projectName = `DFT_quantum_espresso_${Date.now()}`;
-		const formData = new FormData();
-		formData.append("proj_name", projectName);
-		formData.append("csv_file", parameterFile);
-		formData.append("structure_file", structureFile);
-
-		for (const file of pseudopotentialFiles) {
-			formData.append("pseudofiles", file);
-		}
-
-		appendExtraInputs(
-			formData,
-			{
-				is_advanced: pseudopotentialFiles.length > 0,
-			},
-			executionInputs,
-		);
-
-		void submitSimulation(
-			{
-				calculatorSlug: "Quantum-Espresso",
-				runEndpoint: "csv",
-				simulatorLabel: "Quantum ESPRESSO",
-				projectName,
-			},
-			formData,
-		);
-	};
-
 	const handleConfiguredSubmit = (
 		configuredSubmission: ConfiguredSimulationSubmission,
 	) => {
@@ -481,7 +435,6 @@ export const useHome = (): HomeState => {
 		isDownloadingResult,
 		handleSimulationTypeChange,
 		handleSimulationSubtypeChange,
-		handleParamSubmit,
 		handleConfiguredSubmit,
 		handleDownloadResult,
 		handleRefreshResults,

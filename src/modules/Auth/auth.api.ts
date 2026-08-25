@@ -32,7 +32,6 @@ export const signInAPI = async (body: SignInBody): Promise<AuthResult> => {
 			username: body.username,
 			email: "",
 			sshDomain: "",
-			isTemporary: false,
 			notifications: data.notifications ?? [],
 			downloadLinks: (data.download_links ?? []).filter(
 				(downloadLink): downloadLink is string =>
@@ -56,7 +55,6 @@ export const registerAPI = async (body: RegisterBody): Promise<AuthResult> => {
 			username: body.username,
 			email: body.email,
 			sshDomain: body.sshDomain,
-			isTemporary: false,
 			notifications: [],
 			downloadLinks: [],
 		},

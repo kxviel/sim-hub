@@ -8,6 +8,7 @@ import { MAX_FILE_SIZE } from "@/modules/Home/SimUtils";
 import type { HomeState } from "@/modules/Home/useHome";
 
 type PseudopotentialFilesByElement = Record<string, File | undefined>;
+export type QuantumEspressoMode = "basic" | "advanced";
 
 const validateFile = (
 	file: File,
@@ -26,7 +27,7 @@ const validateFile = (
 };
 
 export const useQuantumExpresso = (
-	handleParamSubmit: HomeState["handleParamSubmit"],
+	handleConfiguredSubmit: HomeState["handleConfiguredSubmit"],
 ) => {
 	const [parameterFile, setParameterFile] = useState<File | null>(null);
 	const [structureFile, setStructureFile] = useState<File | null>(null);
@@ -34,6 +35,7 @@ export const useQuantumExpresso = (
 	const [structureWarning, setStructureWarning] = useState("");
 	const [pseudopotentialFiles, setPseudopotentialFiles] =
 		useState<PseudopotentialFilesByElement>({});
+	const [mode, setMode] = useState<QuantumEspressoMode>("basic");
 
 	const handleParameterFileChange = (event: ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
@@ -151,11 +153,15 @@ export const useQuantumExpresso = (
 			return;
 		}
 
-		const uploadedPseudopotentials = structureElements
-			.map((element) => pseudopotentialFiles[element])
-			.filter((file): file is File => Boolean(file));
+		const isAdvanced = mode === "advanced";
+		const uploadedPseudopotentials = isAdvanced
+			? structureElements
+					.map((element) => pseudopotentialFiles[element])
+					.filter((file): file is File => Boolean(file))
+			: [];
 
 		if (
+			isAdvanced &&
 			uploadedPseudopotentials.length > 0 &&
 			uploadedPseudopotentials.length < structureElements.length
 		) {
@@ -169,11 +175,44 @@ export const useQuantumExpresso = (
 		}
 
 		const normalizedStructureFile = await normalizeCifFile(structureFile);
-		handleParamSubmit(
-			parameterFile,
-			normalizedStructureFile,
-			uploadedPseudopotentials,
-		);
+		const pseudopotentialMapping = structureElements.reduce<
+			Record<string, string>
+		>((mapping, element) => {
+			const filename = isAdvanced
+				? pseudopotentialFiles[element]?.name
+				: undefined;
+
+			if (filename) {
+				mapping[element] = filename;
+			}
+
+			return mapping;
+		}, {});
+		const serializedMapping = JSON.stringify(pseudopotentialMapping);
+
+		handleConfiguredSubmit({
+			calculatorSlug: "Quantum-Espresso",
+			extraInputs: {
+				is_advanced: isAdvanced,
+				pseudo_file_mapping: pseudopotentialMapping,
+				pseudo_mapping: pseudopotentialMapping,
+			},
+			projectPrefix: "DFT_quantum_espresso",
+			simulatorLabel: "Quantum ESPRESSO",
+			...(isAdvanced
+				? {
+						formFields: {
+							pseudo_file_mapping: serializedMapping,
+							pseudo_mapping: serializedMapping,
+						},
+					}
+				: {}),
+			fileGroups: [
+				{ fieldName: "csv_file", files: [parameterFile] },
+				{ fieldName: "structure_file", files: [normalizedStructureFile] },
+				{ fieldName: "pseudofiles", files: uploadedPseudopotentials },
+			],
+		});
 	};
 
 	const requiredFiles = [
@@ -190,12 +229,14 @@ export const useQuantumExpresso = (
 	);
 
 	return {
+		handleModeChange: setMode,
 		handleParameterFileChange,
 		handlePseudopotentialFileChange,
 		handleRemovePseudopotentialFile,
 		handleRemoveRequiredFile,
 		handleRunSimulation,
 		handleStructureFileChange,
+		mode,
 		parameterFile,
 		pseudopotentialFiles,
 		requiredFiles,

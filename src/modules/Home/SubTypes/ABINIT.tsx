@@ -5,6 +5,7 @@ import {
 	simulationTypeList,
 } from "@/modules/Home/SimUtils";
 import {
+	DftModeSelector,
 	ElementPseudopotentialUploads,
 	SelectedFile,
 } from "@/modules/Home/SubTypes/DftFields";
@@ -20,11 +21,13 @@ const ABINIT = ({
 	handleConfiguredSubmit,
 }: HomeState) => {
 	const {
+		handleModeChange,
 		handleParameterFileChange,
 		handlePseudopotentialFileChange,
 		handleRemovePseudopotentialFile,
 		handleRunSimulation,
 		handleStructureFileChange,
+		mode,
 		parameterFile,
 		pseudopotentialFiles,
 		removeParameterFile,
@@ -43,14 +46,14 @@ const ABINIT = ({
 
 			<div className="w-full space-y-4 rounded border border-gray-200 p-2">
 				<p>
-					Upload one CSV parameter file and one CIF structure file.
-					Pseudopotentials are optional. Each file must be{" "}
-					<strong className="font-semibold text-primary">5 MB</strong> or less.
+					Upload one CSV parameter file and one CIF structure file. Each file
+					must be <strong className="font-semibold text-primary">5 MB</strong>{" "}
+					or less.
 				</p>
 				<p className="rounded border border-primary/20 bg-primary/5 p-3 text-sm">
-					Pseudopotential rule: upload none, or upload one file for every
-					detected element. All uploaded files must share one format: .xml,
-					.paw, or .psp8.
+					Basic mode submits only CSV and CIF files. Advanced mode can include
+					one pseudopotential per detected element; uploaded files must share
+					one format: .xml, .paw, or .psp8.
 				</p>
 
 				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
@@ -107,19 +110,34 @@ const ABINIT = ({
 					) : null}
 				</div>
 
-				<ElementPseudopotentialUploads
-					accept={ABINIT_PSEUDOPOTENTIAL_EXTENSIONS.join(",")}
-					ariaLabelSuffix="ABINIT pseudopotential"
-					description="Upload the CIF to unlock one optional pseudopotential input per element."
-					disabled={isSubmitting}
-					elements={structureElements}
-					emptyMessage="Upload a CIF structure file to detect elements and unlock per-element pseudopotential uploads."
-					files={pseudopotentialFiles}
-					hint="XML, PAW, or PSP8 · Up to 5 MB"
-					onChange={handlePseudopotentialFileChange}
-					onRemove={handleRemovePseudopotentialFile}
-					warning={structureWarning}
-				/>
+				<div className="w-full space-y-4 rounded border border-gray-200 p-2">
+					<DftModeSelector
+						disabled={isSubmitting}
+						mode={mode}
+						onChange={handleModeChange}
+						simulator="ABINIT"
+					/>
+
+					{mode === "basic" ? (
+						<p className="rounded border border-dashed border-gray-300 p-4 text-muted-foreground text-sm">
+							Basic mode submits only the CSV parameter and CIF structure files.
+						</p>
+					) : (
+						<ElementPseudopotentialUploads
+							accept={ABINIT_PSEUDOPOTENTIAL_EXTENSIONS.join(",")}
+							ariaLabelSuffix="ABINIT pseudopotential"
+							description="Optionally upload one pseudopotential input per detected element."
+							disabled={isSubmitting}
+							elements={structureElements}
+							emptyMessage="Upload a CIF structure file to detect elements and unlock per-element pseudopotential uploads."
+							files={pseudopotentialFiles}
+							hint="XML, PAW, or PSP8 · Up to 5 MB"
+							onChange={handlePseudopotentialFileChange}
+							onRemove={handleRemovePseudopotentialFile}
+							warning={structureWarning}
+						/>
+					)}
+				</div>
 			</div>
 
 			<Button

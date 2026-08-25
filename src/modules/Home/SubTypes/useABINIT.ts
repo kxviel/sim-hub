@@ -8,6 +8,7 @@ import { MAX_FILE_SIZE } from "@/modules/Home/SimUtils";
 import type { HomeState } from "@/modules/Home/useHome";
 
 export const ABINIT_PSEUDOPOTENTIAL_EXTENSIONS = [".xml", ".paw", ".psp8"];
+export type AbinitMode = "basic" | "advanced";
 
 const API_TEMPLATE = {
 	calculatorSlug: "ABINIT",
@@ -50,6 +51,7 @@ export const useABINIT = (
 	const [structureWarning, setStructureWarning] = useState("");
 	const [pseudopotentialFiles, setPseudopotentialFiles] =
 		useState<PseudopotentialFilesByElement>({});
+	const [mode, setMode] = useState<AbinitMode>("basic");
 
 	const handleParameterFileChange = (event: ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
@@ -173,11 +175,15 @@ export const useABINIT = (
 			return;
 		}
 
-		const uploadedPseudopotentials = structureElements
-			.map((element) => pseudopotentialFiles[element])
-			.filter((file): file is File => Boolean(file));
+		const isAdvanced = mode === "advanced";
+		const uploadedPseudopotentials = isAdvanced
+			? structureElements
+					.map((element) => pseudopotentialFiles[element])
+					.filter((file): file is File => Boolean(file))
+			: [];
 
 		if (
+			isAdvanced &&
 			uploadedPseudopotentials.length > 0 &&
 			uploadedPseudopotentials.length < structureElements.length
 		) {
@@ -202,11 +208,36 @@ export const useABINIT = (
 		}
 
 		const normalizedStructureFile = await normalizeCifFile(structureFile);
+		const pseudopotentialMapping = structureElements.reduce<
+			Record<string, string>
+		>((mapping, element) => {
+			const filename = isAdvanced
+				? pseudopotentialFiles[element]?.name
+				: undefined;
+
+			if (filename) {
+				mapping[element] = filename;
+			}
+
+			return mapping;
+		}, {});
+		const serializedMapping = JSON.stringify(pseudopotentialMapping);
+
 		handleConfiguredSubmit({
 			...API_TEMPLATE,
 			extraInputs: {
-				is_advanced: uploadedPseudopotentials.length > 0,
+				is_advanced: isAdvanced,
+				pseudo_file_mapping: pseudopotentialMapping,
+				pseudo_mapping: pseudopotentialMapping,
 			},
+			...(isAdvanced
+				? {
+						formFields: {
+							pseudo_file_mapping: serializedMapping,
+							pseudo_mapping: serializedMapping,
+						},
+					}
+				: {}),
 			fileGroups: [
 				{
 					fieldName: API_TEMPLATE.parameterFileField,
@@ -229,11 +260,13 @@ export const useABINIT = (
 	};
 
 	return {
+		handleModeChange: setMode,
 		handleParameterFileChange,
 		handlePseudopotentialFileChange,
 		handleRemovePseudopotentialFile,
 		handleRunSimulation,
 		handleStructureFileChange,
+		mode,
 		parameterFile,
 		pseudopotentialFiles,
 		removeParameterFile,

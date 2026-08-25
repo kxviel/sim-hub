@@ -1,6 +1,4 @@
 import ABINIT from "@/modules/Home/SubTypes/ABINIT";
-import AiiDA_Workflow from "@/modules/Home/SubTypes/AiiDA_Workflow";
-import ASE from "@/modules/Home/SubTypes/ASE";
 import BigDFT from "@/modules/Home/SubTypes/BigDFT";
 import CP2K from "@/modules/Home/SubTypes/CP2K";
 import Exciting from "@/modules/Home/SubTypes/Exciting";
@@ -133,12 +131,6 @@ export const SIMULATION_LIST: SimulationState[] = [
 		],
 	},
 	{
-		id: "High-Throughput",
-		label: "High-Throughput Workflow",
-		help: "Workflow orchestration, provenance, and automated simulator execution.",
-		subtypes: ["AiiDA Workflow", "ASE"],
-	},
-	{
 		id: "Others",
 		label: "Others",
 		help: "Specialized simulators outside the main DFT/FEM workflow categories.",
@@ -163,9 +155,9 @@ export const getSimulationSubtypeList = (simulationType: string) =>
 
 const SIMULATION_SUBTYPE_HELP: Record<string, string> = {
 	"Quantum ESPRESSO":
-		"Configure a Quantum ESPRESSO calculation and its required input files.",
+		"Upload CSV and CIF inputs in Basic mode, or add per-element UPF files in Advanced mode.",
 	ABINIT:
-		"Configure the ABINIT workflow, plane-wave basis, Brillouin-zone sampling, and convergence controls.",
+		"Upload CSV and CIF inputs in Basic mode, or add same-format per-element pseudopotentials in Advanced mode.",
 	CP2K: "Configure the CP2K workflow, Quickstep method, density grid, and SCF convergence controls.",
 	BigDFT:
 		"Configure BigDFT with internal pseudopotentials or Advanced per-element uploads.",
@@ -188,9 +180,6 @@ const SIMULATION_SUBTYPE_HELP: Record<string, string> = {
 	STAN: "Upload the STAN model input as an STDb file.",
 	MFEM: "Upload the MFEM CSV input and mesh file.",
 	FEBio: "Upload the FEBio model input as a .feb file.",
-	"AiiDA Workflow":
-		"Upload a workflow definition plus the structures and calculator inputs required by AiiDA.",
-	ASE: "Upload an ASE script or atomic structure plus calculator-specific input files.",
 	"MEEP FDTD": "Upload the MEEP FDTD input parameters as a CSV file.",
 	"Monte Carlo":
 		"Upload a backend-specific Monte Carlo run configuration and optional datasets.",
@@ -222,8 +211,6 @@ export const simulationParameterComponents: SubTypeConfig = {
 	STAN: SimpleUploadSubtype,
 	MFEM: SimpleUploadSubtype,
 	FEBio: SimpleUploadSubtype,
-	"AiiDA Workflow": AiiDA_Workflow,
-	ASE: ASE,
 	"MEEP FDTD": SimpleUploadSubtype,
 	"Monte Carlo": MonteCarlo,
 };

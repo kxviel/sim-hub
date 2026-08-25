@@ -15,23 +15,11 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-	InputGroup,
-	InputGroupAddon,
-	InputGroupInput,
-	InputGroupText,
-} from "@/components/ui/input-group";
 import ApiEndpointSettings from "@/modules/Auth/ApiEndpointSettings";
 import { useAuthForm } from "@/modules/Auth/useAuthForm";
 
 const Login = () => {
-	const {
-		form,
-		handleSubmit,
-		handleTemporaryAccess,
-		isRegistering,
-		switchAuthMode,
-	} = useAuthForm();
+	const { form, handleSubmit, isRegistering, switchAuthMode } = useAuthForm();
 
 	return (
 		<section className="flex min-h-svh w-full bg-background px-4 py-8 sm:px-6">
@@ -103,49 +91,6 @@ const Login = () => {
 													);
 												}}
 											/>
-
-											{isRegistering ? (
-												<form.Field
-													name="domain"
-													children={(field) => {
-														const isInvalid =
-															field.state.meta.isTouched &&
-															!field.state.meta.isValid;
-
-														return (
-															<Field data-invalid={isInvalid}>
-																<FieldLabel htmlFor={field.name}>
-																	SSH Domain
-																</FieldLabel>
-																<InputGroup data-disabled={isSubmitting}>
-																	<InputGroupAddon>
-																		<InputGroupText>ssh://</InputGroupText>
-																	</InputGroupAddon>
-																	<InputGroupInput
-																		id={field.name}
-																		name={field.name}
-																		type="text"
-																		placeholder="example.hpc.domain"
-																		autoComplete="url"
-																		value={field.state.value}
-																		onBlur={field.handleBlur}
-																		onChange={(event) =>
-																			field.handleChange(event.target.value)
-																		}
-																		aria-invalid={isInvalid}
-																		disabled={isSubmitting}
-																	/>
-																</InputGroup>
-																{isInvalid ? (
-																	<FieldError
-																		errors={field.state.meta.errors}
-																	/>
-																) : null}
-															</Field>
-														);
-													}}
-												/>
-											) : null}
 
 											{isRegistering ? (
 												<form.Field
@@ -275,18 +220,6 @@ const Login = () => {
 													? "Create Account"
 													: "Sign In"}
 										</Button>
-
-										{!isRegistering ? (
-											<Button
-												type="button"
-												className="mt-2 w-full"
-												disabled={isSubmitting}
-												onClick={handleTemporaryAccess}
-												variant="outline"
-											>
-												Continue without login
-											</Button>
-										) : null}
 									</>
 								)}
 							</form.Subscribe>

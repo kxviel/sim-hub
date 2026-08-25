@@ -3,6 +3,38 @@ import type { ChangeEvent, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import FileUpload from "@/modules/Home/FileUpload";
 
+export type DftMode = "basic" | "advanced";
+
+type DftModeSelectorProps = {
+	disabled: boolean;
+	mode: DftMode;
+	onChange: (mode: DftMode) => void;
+	simulator: string;
+};
+
+export const DftModeSelector = ({
+	disabled,
+	mode,
+	onChange,
+	simulator,
+}: DftModeSelectorProps) => (
+	<fieldset className="inline-flex rounded border border-gray-200 bg-muted p-1">
+		<legend className="sr-only">{simulator} configuration mode</legend>
+		{(["basic", "advanced"] as const).map((option) => (
+			<Button
+				aria-pressed={mode === option}
+				disabled={disabled}
+				key={option}
+				onClick={() => onChange(option)}
+				type="button"
+				variant={mode === option ? "default" : "ghost"}
+			>
+				{option === "basic" ? "Basic" : "Advanced"}
+			</Button>
+		))}
+	</fieldset>
+);
+
 type SelectedFileProps = {
 	ariaLabel: string;
 	file: File;

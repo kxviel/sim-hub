@@ -4,9 +4,11 @@ import { type SubmitEvent, useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod/mini";
 import { useRegister, useSignIn } from "./auth.api";
-import { saveAuthSession, saveTemporaryAuthSession } from "./auth.session";
+import { saveAuthSession } from "./auth.session";
 
 export type AuthMode = "login" | "register";
+
+const DEMO_SSH_DOMAIN = "demo.hpc.domain";
 
 const usernameField = z
 	.string()
@@ -23,7 +25,6 @@ const registrationPasswordField = z
 
 const loginSchema = z.object({
 	username: usernameField,
-	domain: z.string(),
 	email: z.string(),
 	password: loginPasswordField,
 	confirmPassword: z.string(),
@@ -32,11 +33,6 @@ const loginSchema = z.object({
 const registerSchema = z
 	.object({
 		username: usernameField,
-		domain: z
-			.string()
-			.check(
-				z.refine((value) => value.trim().length > 0, "SSH domain is required."),
-			),
 		email: z.email({
 			error: ({ input }) =>
 				input === "" ? "Email is required." : "Enter a valid email address.",
@@ -57,7 +53,6 @@ type AuthFormValues = z.infer<typeof registerSchema>;
 
 const defaultValues: AuthFormValues = {
 	username: "",
-	domain: "",
 	email: "",
 	password: "",
 	confirmPassword: "",
@@ -108,7 +103,7 @@ export const useAuthForm = () => {
 					const result = await register.mutateAsync({
 						email: value.email.trim(),
 						password: value.password,
-						sshDomain: value.domain.trim(),
+						sshDomain: DEMO_SSH_DOMAIN,
 						username: value.username.trim(),
 					});
 					handleAuthSuccess(result, "Account created.");
@@ -132,21 +127,6 @@ export const useAuthForm = () => {
 		form.handleSubmit();
 	};
 
-	const handleTemporaryAccess = () => {
-		resetMutations();
-		form.reset();
-		saveTemporaryAuthSession({
-			username: "demo_user",
-			email: "demo@prototype.local",
-			sshDomain: "",
-			isTemporary: true,
-			notifications: [],
-			downloadLinks: [],
-		});
-		toast.success("Temporary demo access enabled.");
-		navigate({ to: "/home" });
-	};
-
 	const switchAuthMode = () => {
 		setAuthMode((currentMode) =>
 			currentMode === "register" ? "login" : "register",
@@ -159,7 +139,6 @@ export const useAuthForm = () => {
 		authMode,
 		form,
 		handleSubmit,
-		handleTemporaryAccess,
 		isRegistering,
 		switchAuthMode,
 	};

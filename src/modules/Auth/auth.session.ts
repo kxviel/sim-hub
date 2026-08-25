@@ -6,7 +6,6 @@ export type AuthSession = {
 	username: string;
 	email: string;
 	sshDomain: string;
-	isTemporary: boolean;
 	notifications: unknown[];
 	downloadLinks: string[];
 };
@@ -29,7 +28,6 @@ const readStoredSession = (): AuthSession | null => {
 			username: session.username,
 			email: session.email ?? "",
 			sshDomain: session.sshDomain ?? "",
-			isTemporary: false,
 			notifications: Array.isArray(session.notifications)
 				? session.notifications
 				: [],
@@ -72,16 +70,6 @@ export const saveAuthSession = (session: AuthSession) => {
 		// Keep the session available in memory when browser storage is unavailable.
 	}
 	emitSessionChange();
-};
-
-export const saveTemporaryAuthSession = (session: AuthSession) => {
-	currentSession = session;
-	try {
-		window.localStorage.removeItem(AUTH_SESSION_KEY);
-	} catch {
-		// Temporary access remains available in memory for the current app run.
-	}
-	setTimeout(emitSessionChange, 0);
 };
 
 export const clearAuthSession = () => {

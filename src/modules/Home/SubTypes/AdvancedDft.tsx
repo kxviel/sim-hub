@@ -15,11 +15,11 @@ import {
 	simulationTypeList,
 } from "@/modules/Home/SimUtils";
 import {
+	DftModeSelector,
 	ElementPseudopotentialUploads,
 	SelectedFile,
 } from "@/modules/Home/SubTypes/DftFields";
 import {
-	type AdvancedDftMode,
 	type AdvancedDftSimulator,
 	SIESTA_XC_AUTHOR_OPTIONS,
 	SIESTA_XC_FUNCTIONAL_OPTIONS,
@@ -34,10 +34,6 @@ type AdvancedDftProps = Pick<
 	simulator: AdvancedDftSimulator;
 };
 
-const DFT_MODES = [
-	"basic",
-	"advanced",
-] as const satisfies readonly AdvancedDftMode[];
 const SIESTA_XC_AUTHOR_SELECT_OPTIONS = SIESTA_XC_AUTHOR_OPTIONS.map(
 	(value) => ({ label: value, value }),
 );
@@ -193,23 +189,12 @@ const AdvancedDft = ({
 
 				{supportsAdvanced ? (
 					<div className="w-full space-y-4 rounded border border-gray-200 p-2">
-						<fieldset className="inline-flex rounded border border-gray-200 bg-muted p-1">
-							<legend className="sr-only">
-								{simulator} configuration mode
-							</legend>
-							{DFT_MODES.map((option) => (
-								<Button
-									aria-pressed={mode === option}
-									disabled={isSubmitting}
-									key={option}
-									onClick={() => handleModeChange(option)}
-									type="button"
-									variant={mode === option ? "default" : "ghost"}
-								>
-									{option === "basic" ? "Basic" : "Advanced"}
-								</Button>
-							))}
-						</fieldset>
+						<DftModeSelector
+							disabled={isSubmitting}
+							mode={mode}
+							onChange={handleModeChange}
+							simulator={simulator}
+						/>
 
 						{advancedSettings?.kind === "exciting" ? (
 							<div className="space-y-3 rounded border border-gray-200 p-3">
