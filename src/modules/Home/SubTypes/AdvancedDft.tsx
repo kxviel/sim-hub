@@ -171,7 +171,7 @@ const AdvancedDft = ({
 						detected from this file.
 					</p>
 					<FileUpload
-						accept=".cif,chemical/x-cif"
+						accept=".cif"
 						ariaLabel={`${simulator} CIF structure file`}
 						disabled={isSubmitting}
 						files={structureFile ? [structureFile] : []}

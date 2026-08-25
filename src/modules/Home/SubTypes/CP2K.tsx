@@ -523,7 +523,7 @@ const CP2K = ({ simType, isSubmitting, handleConfiguredSubmit }: HomeState) => {
 						detected from this file.
 					</p>
 					<FileUpload
-						accept=".cif,chemical/x-cif"
+						accept=".cif"
 						ariaLabel="CP2K CIF structure file"
 						disabled={isSubmitting}
 						files={structureFile ? [structureFile] : []}

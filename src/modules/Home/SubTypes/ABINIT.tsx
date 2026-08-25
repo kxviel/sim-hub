@@ -94,7 +94,7 @@ const ABINIT = ({
 						detected from this file.
 					</p>
 					<FileUpload
-						accept=".cif,chemical/x-cif"
+						accept=".cif"
 						ariaLabel="ABINIT CIF structure file"
 						disabled={isSubmitting}
 						files={structureFile ? [structureFile] : []}

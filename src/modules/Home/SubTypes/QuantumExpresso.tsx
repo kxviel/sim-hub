@@ -103,7 +103,7 @@ const QuantumExpresso = ({
 						detected from this file.
 					</p>
 					<FileUpload
-						accept=".cif,chemical/x-cif"
+						accept=".cif"
 						ariaLabel="Quantum ESPRESSO CIF structure file"
 						disabled={isSubmitting}
 						files={structureFile ? [structureFile] : []}
