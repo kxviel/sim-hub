@@ -61,9 +61,7 @@ const ABINIT = ({
 					<p>Upload the ABINIT input parameters as a CSV file.</p>
 					<div className="grid gap-4 sm:grid-cols-2">
 						<a
-							className={buttonVariants({
-								variant: "outline",
-							})}
+							className={buttonVariants({ className: "place-self-center" })}
 							download="abinit-input-parameters-template.csv"
 							href={`${ABINIT_TEMPLATE_BASE}/input-parameters-template.csv`}
 						>

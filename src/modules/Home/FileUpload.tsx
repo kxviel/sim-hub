@@ -1,5 +1,6 @@
 import { Upload } from "lucide-react";
 import { type ChangeEventHandler, useId } from "react";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -61,7 +62,7 @@ const FileUpload = ({
 				onChange={onChange}
 				type="file"
 			/>
-			<span className="inline-flex shrink-0 items-center gap-2 rounded-sm border border-border bg-card px-3 py-2 font-semibold text-sm shadow-xs">
+			<span className={buttonVariants()}>
 				<Upload aria-hidden="true" className="size-4" />
 				{action}
 			</span>

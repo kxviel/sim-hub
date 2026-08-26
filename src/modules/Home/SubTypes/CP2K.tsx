@@ -482,7 +482,9 @@ const CP2K = ({ simType, isSubmitting, handleConfiguredSubmit }: HomeState) => {
 					<div className="grid min-w-0 gap-4 sm:grid-cols-2">
 						<div className="grid min-w-0 gap-2">
 							<a
-								className={buttonVariants({ variant: "outline" })}
+								className={buttonVariants({
+									className: "place-self-center",
+								})}
 								download="cp2k-input-parameters-template.csv"
 								href={`${CP2K_TEMPLATE_BASE}/input-parameters-template.csv`}
 							>

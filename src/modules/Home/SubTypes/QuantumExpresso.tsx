@@ -77,9 +77,7 @@ const QuantumExpresso = ({
 					<p>Upload the Quantum ESPRESSO input parameters as a CSV file.</p>
 					<div className="grid gap-4 sm:grid-cols-2">
 						<a
-							className={buttonVariants({
-								variant: "outline",
-							})}
+							className={buttonVariants({ className: "place-self-center" })}
 							download="input-parameters-template.csv"
 							href={`${QE_TEMPLATE_BASE}/input-parameters-template.csv`}
 						>
